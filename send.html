@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Envíos P&J</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --gold: #C59D5F; --dark: #1a1a1a; --light: #f4f4f9; --whatsapp: #25D366; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* SIDEBAR (Panel de Mensaje) */
+        #sidebar { width: 350px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
+        h2 { color: var(--gold); margin-top: 0; }
+        
+        .template-box { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; resize: none; box-sizing: border-box;}
+        .variables { font-size: 0.8rem; color: #666; }
+        .variable-tag { background: #eee; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #ccc; }
+        
+        .stats { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; font-size: 0.9rem; }
+
+        /* LISTA DE ENVÍOS */
+        #main-area { flex: 1; padding: 20px; overflow-y: auto; }
+        
+        .group-card { 
+            background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #ddd; transition: 0.3s;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .group-card.sent { border-left-color: var(--whatsapp); opacity: 0.7; }
+        .group-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        .group-info h3 { margin: 0; font-size: 1.1rem; color: var(--dark); }
+        .group-members { font-size: 0.8rem; color: #666; margin-top: 5px; }
+        
+        .actions { display: flex; gap: 10px; }
+        .btn { border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        
+        .btn-wa { background: var(--whatsapp); color: white; text-decoration: none; }
+        .btn-wa:hover { background: #128C7E; }
+        .btn-copy { background: #eee; color: #333; }
+        .btn-copy:hover { background: #ddd; }
+        
+        .btn-mark { background: transparent; border: 1px solid #ccc; color: #999; }
+        .btn-mark.active { background: var(--gold); color: white; border-color: var(--gold); }
+
+        /* Search */
+        .search-bar { margin-bottom: 20px; }
+        .search-bar input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2>📢 Centro de Envíos</h2>
+        
+        <div class="template-box">
+            <label><strong>Plantilla de Mensaje:</strong></label>
+            <textarea id="msg-template">¡Hola {nombre}! 👋
+
+Nos encantaría que nos acompañaran en nuestra boda. 👰🤵
+
+Aquí les dejo su invitación digital y pase de acceso:
+{link}
+
+¡Esperamos contar con ustedes!</textarea>
+            
+            <div class="variables">
+                Variables: 
+                <span class="variable-tag" onclick="insertVar('{nombre}')">{nombre}</span>
+                <span class="variable-tag" onclick="insertVar('{link}')">{link}</span>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div>Total Grupos: <strong id="stat-total">0</strong></div>
+            <div>Enviados: <strong id="stat-sent" style="color:var(--whatsapp)">0</strong></div>
+            <div>Pendientes: <strong id="stat-pending">0</strong></div>
+            <button onclick="resetSentStatus()" style="margin-top:10px; font-size:0.7rem; color:red; border:none; background:none; cursor:pointer; text-decoration:underline;">Reiniciar estatus</button>
+        </div>
+    </div>
+
+    <div id="main-area">
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Buscar familia o invitado..." onkeyup="filterList()">
+        </div>
+        <div id="groups-list">
+            <p style="text-align:center; color:#999;">Cargando invitados...</p>
+        </div>
+    </div>
+
+<script>
+    // 👇 TU URL DE APPS SCRIPT
+    const API_URL = "https://script.google.com/macros/s/AKfycbxkWDPOJ4q4P81f9DDyVs8cWwV7wEz7_hk9YdNOZvYQYTwtetc-VNtqpqsANmMcbQE/exec"; 
+
+    let groups = [];
+    
+    window.onload = async () => {
+        loadSentStatus(); // Cargar de memoria local quiénes ya se enviaron
+        try {
+            const res = await fetch(`${API_URL}?action=getSendList`);
+            const data = await res.json();
+            
+            if(data.status === 'success') {
+                processGroups(data.guests);
+                renderList();
+                updateStats();
+            }
+        } catch(e) { alert("Error cargando datos"); }
+    };
+
+    // 1. AGRUPAR POR FAMILIA (Para enviar 1 solo mensaje)
+    function processGroups(guests) {
+        const grouped = {};
+        
+        guests.forEach(g => {
+            // Si no tiene grupo, usamos su ID personal como grupo
+            const gid = g.groupId || g.id;
+            
+            if(!grouped[gid]) {
+                grouped[gid] = {
+                    id: gid,
+                    mainName: g.nombreGrupo || g.nombre, // Nombre de la familia o del principal
+                    phone: g.telefono, // Teléfono del principal
+                    link: g.link,
+                    members: [],
+                    isSent: isMarkedSent(gid)
+                };
+            }
+            // Si el principal no tiene teléfono pero otro miembro sí, lo tomamos (opcional)
+            if(!grouped[gid].phone && g.telefono) grouped[gid].phone = g.telefono;
+            
+            grouped[gid].members.push(g.nombre.split(' ')[0]); // Solo primer nombre para que no sea eterno
+        });
+
+        groups = Object.values(grouped);
+    }
+
+    // 2. RENDERIZAR LISTA
+    function renderList() {
+        const container = document.getElementById('groups-list');
+        const filter = document.getElementById('search').value.toLowerCase();
+        container.innerHTML = '';
+
+        groups.forEach(g => {
+            if(g.mainName.toLowerCase().includes(filter)) {
+                const membersText = g.members.join(', ');
+                const phoneClean = g.phone ? g.phone.replace(/\D/g, '') : ''; // Solo números
+                
+                // Preparar mensaje
+                let msg = document.getElementById('msg-template').value;
+                msg = msg.replace('{nombre}', g.mainName).replace('{link}', g.link);
+                const waLink = `https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}`;
+
+                const card = document.createElement('div');
+                card.className = `group-card ${g.isSent ? 'sent' : ''}`;
+                card.id = `card-${g.id}`;
+                
+                card.innerHTML = `
+                    <div class="group-info">
+                        <h3>${g.mainName}</h3>
+                        <div class="group-members">${membersText}</div>
+                        ${!g.phone ? '<small style="color:red">Sin teléfono</small>' : `<small style="color:#666">📱 ${g.phone}</small>`}
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-copy" onclick="copyLink('${g.link}')" title="Copiar Link"><i class="fa-regular fa-copy"></i></button>
+                        
+                        ${g.phone ? 
+                                // 👇 AQUÍ ESTÁ EL CAMBIO: Usamos <button> y la nueva función confirmAndSend
+                                `<button class="btn btn-wa" onclick="confirmAndSend('${g.id}', '${waLink}')">
+                                    <i class="fa-brands fa-whatsapp"></i> Enviar
+                                </button>` : 
+                                `<button class="btn btn-wa" style="opacity:0.5; cursor:not-allowed">Sin Tel</button>`
+                            }
+                        
+                        <button class="btn btn-mark ${g.isSent ? 'active' : ''}" onclick="toggleSent('${g.id}')" title="Marcar como enviado">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+        });
+    }
+
+    // 3. UTILIDADES
+    function filterList() { renderList(); }
+
+    function insertVar(text) {
+        const textarea = document.getElementById('msg-template');
+        textarea.setRangeText(text, textarea.selectionStart, textarea.selectionEnd, 'end');
+    }
+
+    function copyLink(link) {
+        navigator.clipboard.writeText(link);
+        alert("Link copiado");
+    }
+
+    // 4. GESTIÓN DE ESTADO "ENVIADO" (LOCAL STORAGE)
+    function isMarkedSent(id) {
+        const sentList = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
+        return sentList.includes(id);
+    }
+
+    function markAsSent(id) {
+        let sentList = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
+        if(!sentList.includes(id)) {
+            sentList.push(id);
+            localStorage.setItem('pj_sent_list', JSON.stringify(sentList));
+            
+            // Actualizar memoria y UI
+            const group = groups.find(g => g.id === id);
+            if(group) group.isSent = true;
+            
+            const card = document.getElementById(`card-${id}`);
+            if(card) {
+                card.classList.add('sent');
+                card.querySelector('.btn-mark').classList.add('active');
+            }
+            updateStats();
+        }
+    }
+
+    function toggleSent(id) {
+        let sentList = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
+        const group = groups.find(g => g.id === id);
+        
+        if(sentList.includes(id)) {
+            // Desmarcar
+            sentList = sentList.filter(x => x !== id);
+            if(group) group.isSent = false;
+        } else {
+            // Marcar
+            sentList.push(id);
+            if(group) group.isSent = true;
+        }
+        
+        localStorage.setItem('pj_sent_list', JSON.stringify(sentList));
+        renderList(); // Re-renderizar es más fácil aquí para actualizar colores
+        updateStats();
+    }
+
+    function updateStats() {
+        const total = groups.length;
+        const sent = groups.filter(g => g.isSent).length;
+        document.getElementById('stat-total').innerText = total;
+        document.getElementById('stat-sent').innerText = sent;
+        document.getElementById('stat-pending').innerText = total - sent;
+    }
+    
+    function resetSentStatus() {
+        if(confirm("¿Borrar todo el historial de envíos de este dispositivo?")) {
+            localStorage.removeItem('pj_sent_list');
+            location.reload();
+        }
+    }
+
+    function confirmAndSend(id, link) {
+        // 1. Abrimos WhatsApp en una pestaña nueva
+        window.open(link, '_blank');
+
+        // 2. Esperamos 1 segundo y preguntamos al usuario
+        setTimeout(() => {
+            // Solo si el usuario dice "Aceptar", marcamos como enviado
+            if(confirm("¿Se abrió WhatsApp y lograste enviar el mensaje?")) {
+                markAsSent(id);
+            }
+        }, 1000);
+    }
+</script>
+
+</body>
+</html>
