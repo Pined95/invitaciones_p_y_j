@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
@@ -421,9 +420,7 @@
 
     </div>
 
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-    AOS.init();
     // 👇 URL DEL APPS SCRIPT
     const API_URL = "https://script.google.com/macros/s/AKfycbxkWDPOJ4q4P81f9DDyVs8cWwV7wEz7_hk9YdNOZvYQYTwtetc-VNtqpqsANmMcbQE/exec"; 
     const params = new URLSearchParams(window.location.search);
@@ -624,12 +621,15 @@
     }
 
     function showTicket() {
-        document.getElementById('ticket-section').style.display = 'flex';
+        const ticketSection = document.getElementById('ticket-section');
+        ticketSection.classList.remove('hidden');
+        ticketSection.style.display = 'flex';
         document.getElementById('ticket-name').innerText = document.getElementById('main-guest-name').innerText;
         
         // Generar QR
-        document.getElementById('qr-placeholder').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${userId}&color=000000&bgcolor=ffffff" style="width:100%;">`;
-        document.getElementById('group-id-display').innerText = userId;
+        const qrCodeData = userId || 'ERROR-NO-ID';
+        document.getElementById('qr-placeholder').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${qrCodeData}&color=000000&bgcolor=ffffff" style="width:100%;">`;
+        document.getElementById('group-id-display').innerText = qrCodeData;
         
         // Intentar mostrar mesa del primer miembro que tenga mesa
         const memberWithTable = currentMembersData.find(m => m.mesa && m.mesa !== "Por asignar");

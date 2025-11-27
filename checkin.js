@@ -32,7 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- 1. ESCANEAR ---
 function startScanner() {
-    document.getElementById('btn-cam').style.display = 'none';
+    const btn = document.getElementById('btn-cam');
+    btn.innerText = "Iniciando cámara...";
+    btn.disabled = true;
+
     html5QrcodeScanner = new Html5Qrcode("reader");
     html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
         (text) => {

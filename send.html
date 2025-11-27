@@ -100,7 +100,7 @@ Aquí les dejo su invitación digital y pase de acceso:
     let groups = [];
     
     window.onload = async () => {
-        loadSentStatus(); // Cargar de memoria local quiénes ya se enviaron
+        // loadSentStatus(); // Removed: function not defined and logic is handled in processGroups
         try {
             const res = await fetch(`${API_URL}?action=getSendList`);
             const data = await res.json();
