@@ -94,7 +94,7 @@
         .toggle-btn.selected { background: var(--gold); color: white; border-color: var(--gold); }
         .toggle-btn.reject.selected { background: #999; border-color: #999; }
 
-        .personal-note { font-family: var(--font-script); font-size: 2.2rem; color: var(--gold); margin-top: 20px; line-height: 1.2; padding: 0 10px; animation: fadeIn 2s ease; font-weight: normal; }
+        .personal-note { font-family: var(--font-display); font-size: 1.8rem; color: var(--gold); margin-top: 20px; line-height: 1.4; padding: 0 10px; animation: fadeIn 2s ease; font-weight: normal; }
         .personal-note::before { content: '“'; font-family: var(--font-display); font-size: 3rem; color: #ddd; vertical-align: -15px; margin-right: 5px; }
         .personal-note::after { content: '”'; font-family: var(--font-display); font-size: 3rem; color: #ddd; vertical-align: -15px; margin-left: 5px; }
 
@@ -401,7 +401,7 @@
                 <div class="bank-info" style="text-align:left; font-size:1rem; line-height:1.8;">
                     <p><strong>Banco:</strong> BBVA</p>
                     <p><strong>Titular:</strong> Ana Paola Buenfild Porras</p>
-                    <p><strong>CLABE:</strong> 012 345 67890123456 7 <span class="copy-btn" onclick="copyText('012345678901234567')">COPIAR</span></p>
+                    <p><strong>CLABE:</strong> 012 345 67890123456 7 <span class="copy-btn" onclick="copyText('012345678901234567', this)">COPIAR</span></p>
                     <p><strong>Concepto:</strong> Boda + Tu Apellido</p>
                 </div>
                 <button class="btn" style="margin-top:30px; width:100%;" onclick="closeModalForce()">CERRAR</button>
@@ -472,55 +472,79 @@
             try {
                 const res = await fetch(`${API_URL}?action=getInvite&id=${userId}`);
                 const data = await res.json();
-                if(data.status === 'success') {
-                    const greetingLabel = document.getElementById('greeting-label');
-                    const nameLabel = document.getElementById('main-guest-name');
-                    
-                    // Variables
-                    const grupo = data.nombreGrupo || "";
-                    const nombreIndividual = data.nombresInvitacion || data.mainName;
-                    const mensaje = data.mensaje || "";
-                    const esCivil = data.showCivil;
+                    if(data.status === 'success') {
+                        const greetingLabel = document.getElementById('greeting-label');
+                        const nameLabel = document.getElementById('main-guest-name');
+                        
+                        // Variables básicas
+                        const grupo = data.nombreGrupo || "";
+                        const nombreIndividual = data.nombresInvitacion || data.mainName;
+                        const mensaje = data.mensaje || "";
+                        const esCivil = data.showCivil;
 
-                    // Lógica de Saludo
-                    if (grupo && grupo.trim().length > 0) {
-                        nameLabel.textContent = grupo;
-                        greetingLabel.textContent = "HOLA FAMILIA";
-                    } else {
-                        nameLabel.textContent = nombreIndividual;
-                        greetingLabel.textContent = "HOLA";
-                    }
-                    
-                    // Mensaje Personalizado
-                    const msgBox = document.getElementById('personal-msg-box');
-                    if (msgBox) {
-                        if(mensaje) {
-                            msgBox.textContent = mensaje;
-                            msgBox.style.display = 'block';
+                        // 1. Configurar Textos de Saludo
+                        if (grupo && grupo.trim().length > 0) {
+                            nameLabel.textContent = grupo;
+                            greetingLabel.textContent = "HOLA FAMILIA";
                         } else {
-                            msgBox.style.display = 'none';
+                            nameLabel.textContent = nombreIndividual;
+                            greetingLabel.textContent = "HOLA";
                         }
-                    }
-                    
-                    // Mostrar tarjeta Civil si corresponde
-                    if (esCivil) {
-                        const civilCard = document.getElementById('civil-card');
-                        if(civilCard) civilCard.classList.remove('hidden'); 
-                    }
+                        
+                        // 2. Mensaje Personalizado
+                        const msgBox = document.getElementById('personal-msg-box');
+                        if (msgBox) {
+                            if(mensaje) {
+                                msgBox.textContent = mensaje;
+                                msgBox.style.display = 'block';
+                            } else {
+                                msgBox.style.display = 'none';
+                            }
+                        }
+                        
+                        // 3. Mostrar tarjeta Civil si corresponde
+                        if (esCivil) {
+                            const civilCard = document.getElementById('civil-card');
+                            if(civilCard) civilCard.classList.remove('hidden'); 
+                        }
 
-                    // Si es día B y ya confirmó, mostrar QR de acceso rápido
-                    if(isDayB && data.members.some(m => m.estado.includes('SI'))) {
-                        document.getElementById('day-b-qr').style.display = 'block';
-                        document.getElementById('day-b-qr-img').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${userId}" width="150">`;
-                    }
-                    
-                    groupData = data.members;
-                    renderList(data.members);
+                        // 4. LÓGICA DE CONFIRMACIÓN PREVIA (AQUÍ ESTÁ EL CAMBIO)
+                        
+                        // Guardamos los datos en la variable global primero
+                        currentMembersData = data.members; 
 
-                    // --- NUEVO: DATOS LISTOS, MOSTRAR BOTÓN ---
-                    document.getElementById('loading-msg').style.display = 'none'; // Ocultar "Cargando"
-                    document.getElementById('enter-btn').style.display = 'block';  // Mostrar botón "ENTRAR"
-                }
+                        // Verificamos si alguien del grupo ya tiene respuesta (SI o NO)
+                        const yaRespondieron = data.members.some(m => m.estado && m.estado !== 'PENDIENTE' && m.estado.trim() !== '');
+                        const asisten = data.members.some(m => m.estado && (m.estado.includes('SI') || m.estado.includes('CONFIRMADO')));
+
+                        if (yaRespondieron) {
+                            if (asisten) {
+                                // CASO A: Dijeron que SÍ -> Mostramos el boleto directamente
+                                // (La función showTicket se encarga de ocultar el formulario RSVP)
+                                setTimeout(() => { showTicket(); }, 500); // Pequeño retraso para asegurar que el DOM cargó
+                            } else {
+                                // CASO B: Dijeron que NO -> Ocultamos formulario y damos las gracias
+                                const rsvpSection = document.getElementById('rsvp-section');
+                                rsvpSection.innerHTML = `
+                                    <div style="padding:40px 20px;">
+                                        <h3 class="script-title">Gracias por avisar</h3>
+                                        <p style="font-size:1.1rem; margin-top:20px;">Entendemos que no podrán acompañarnos.</p>
+                                        <p style="color:#666;">¡Los extrañaremos!</p>
+                                        <button class="btn" onclick="window.location.reload()" style="margin-top:20px;">VOLVER A CARGAR</button>
+                                    </div>
+                                `;
+                            }
+                        } else {
+                            // CASO C: No han respondido -> Mostramos la lista para que confirmen
+                            renderList(data.members);
+                        }
+
+                        // --- FIN DE LA LÓGICA ---
+
+                        // Mostrar botón de entrada final
+                        document.getElementById('loading-msg').style.display = 'none';
+                        document.getElementById('enter-btn').style.display = 'block';
+                    }
             } catch(e) { 
                 console.error("Error cargando invitación", e);
                 // Si falla, mostramos el botón de todos modos para que no se queden atrapados
@@ -572,10 +596,13 @@
     async function sendRSVP() {
         const btn = document.querySelector('.btn-full');
         const originalText = btn.innerText;
-        btn.innerText = "ENVIANDO..."; 
+        btn.innerText = "GUARDANDO..."; 
         btn.disabled = true;
+
+        // Mostrar el boleto inmediatamente para mejorar la experiencia del usuario.
+        showTicket();
         
-        // 1. Preparamos los datos de los invitados
+        // Preparar y enviar los datos en segundo plano.
         const responses = currentMembersData.map((m, i) => ({
             id: m.id, 
             rsvp: m.estado || 'PENDIENTE', 
@@ -585,11 +612,9 @@
         const msg = document.getElementById('guest-message').value;
 
         try {
-            // 2. Enviamos los datos a Google Sheets
-            // NOTA: Aquí quitamos "mode: 'no-cors'" para poder leer la respuesta
             const response = await fetch(API_URL, {
                 method: 'POST',
-                redirect: 'follow', // Importante para seguir la redirección de Google
+                redirect: 'follow',
                 headers: {'Content-Type': 'text/plain;charset=utf-8'},
                 body: JSON.stringify({
                     action: 'RSVP_GROUP', 
@@ -599,46 +624,95 @@
                 })
             });
 
-            // 3. Verificamos si el servidor respondió "Éxito"
             if (response.ok) {
                 const result = await response.json();
                 if(result.status === 'success') {
-                    // Todo salió bien: mostramos el boleto
-                    setTimeout(() => { 
-                        showTicket(); 
-                        alert("¡Confirmación guardada exitosamente!"); 
-                    }, 500);
-                } else {
-                    throw new Error("El servidor respondió con un error.");
+                    // La confirmación se guardó exitosamente en segundo plano.
+                    console.log("Confirmación guardada exitosamente.");
+                    btn.innerText = "¡CONFIRMACIÓN GUARDADA!";
+                    // Opcional: Deshabilitar el botón permanentemente después de un éxito.
+                    // btn.disabled = true; 
+                    return; // Termina la función exitosamente.
                 }
-            } else {
-                throw new Error("No se pudo conectar con el servidor.");
             }
+            // Si la respuesta no es OK o el status no es success, se lanza un error.
+            throw new Error("La respuesta del servidor no fue la esperada.");
 
         } catch(e) { 
-            console.error("Error al enviar:", e);
-            alert("Hubo un problema al guardar tu confirmación. Por favor intenta de nuevo."); 
-            btn.disabled = false; 
+            console.error("Error al enviar la confirmación en segundo plano:", e);
+            // Informar al usuario que algo salió mal, aunque ya tenga su boleto.
+            alert("Tu boleto se ha generado, pero tuvimos un problema al guardar tu confirmación en el servidor. Por favor, avísale a los novios o inténtalo más tarde."); 
+            btn.disabled = false; // Permitir reintentar
             btn.innerText = originalText; 
         }
     }
 
     function showTicket() {
-        document.getElementById('ticket-section').style.display = 'flex';
-        document.getElementById('ticket-name').innerText = document.getElementById('main-guest-name').innerText;
+        // 1. Ocultar formulario RSVP
+        document.getElementById('rsvp-section').style.display = 'none';
+
+        // 2. Configurar contenedor principal
+        const ticketSection = document.getElementById('ticket-section');
+        ticketSection.classList.remove('hidden');
+        ticketSection.style.display = 'flex';
+        ticketSection.style.flexDirection = 'column';
+        ticketSection.style.alignItems = 'center';
+
+        // 3. OBTENER DATOS (Conteo de pases y Mesas múltiples)
         
-        // Generar QR
-        document.getElementById('qr-placeholder').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${userId}&color=000000&bgcolor=ffffff" style="width:100%;">`;
-        document.getElementById('group-id-display').innerText = userId;
+        // Contar solo los que confirmaron 'SI'
+        const confirmados = currentMembersData.filter(m => m.estado && (m.estado.includes('SI') || m.estado.includes('CONFIRMADO')));
+        // Si es una prueba o no hay confirmados (raro en este paso), mostramos al menos 1 o el total
+        const numPases = confirmados.length > 0 ? confirmados.length : currentMembersData.length;
+
+        // Obtener mesas únicas (evita repetir "Mesa 1, Mesa 1")
+        const mesasUnicas = [...new Set(confirmados.map(m => m.mesa).filter(m => m && m !== "Por asignar"))];
+        const textoMesas = mesasUnicas.length > 0 ? mesasUnicas.join(", ") : "Por asignar";
         
-        // Intentar mostrar mesa del primer miembro que tenga mesa
-        const memberWithTable = currentMembersData.find(m => m.mesa && m.mesa !== "Por asignar");
-        if(memberWithTable) {
-             document.getElementById('ticket-table').innerText = memberWithTable.mesa;
-        }
+        const ticketName = document.getElementById('main-guest-name').innerText;
+        const qrData = userId ? userId : "INVITADO_DEMO";
+        const displayId = userId ? userId : "DEMO";
+
+        // 4. GENERAR EL BOLETO CON EL NUEVO DISEÑO
+        // Inyectamos el HTML directamente para incluir los nuevos campos sin tocar tu index.html
+        const ticketCard = document.getElementById('digital-ticket-card');
         
-        const ticket = document.getElementById('ticket-section');
-        ticket.scrollIntoView({behavior: 'smooth'});
+        ticketCard.innerHTML = `
+            <div style="background:var(--text-dark); height:15px; width:100%; position:absolute; top:0; left:0;"></div>
+            <h3 style="font-family:var(--font-script); font-size:2.5rem; margin:25px 0 5px; color:var(--gold); font-weight:normal;">Pase de Acceso</h3>
+            <p style="font-family:var(--font-display); font-size:0.9rem; letter-spacing:2px; margin-bottom:15px;">BODA PAOLA & JORGE</p>
+            
+            <div id="qr-placeholder" style="margin: 10px auto; width:180px;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${qrData}&color=000000&bgcolor=ffffff" style="width:100%;">
+            </div>
+
+            <div style="border-top:2px dashed #ccc; margin:25px 0; position:relative; width:100%;">
+                <div style="background:#F4F1EA; width:24px; height:24px; border-radius:50%; position:absolute; top:-14px; left:-32px; box-shadow:inset -2px 0 5px rgba(0,0,0,0.05);"></div>
+                <div style="background:#F4F1EA; width:24px; height:24px; border-radius:50%; position:absolute; top:-14px; right:-32px; box-shadow:inset 2px 0 5px rgba(0,0,0,0.05);"></div>
+            </div>
+
+            <p style="font-size:1.3rem; font-weight:bold; margin:0 0 5px; line-height:1.2; color:#000;">${ticketName}</p>
+            
+            <div style="display:flex; justify-content:center; gap:20px; font-size:0.9rem; color:#666; margin-bottom:15px; padding:10px; background:#f9f9f9; border-radius:8px;">
+                <div style="text-align:center;">
+                    <span style="display:block; font-size:0.7rem; text-transform:uppercase;">ID Grupo</span>
+                    <strong style="color:var(--text-dark);">${displayId}</strong>
+                </div>
+                <div style="width:1px; background:#ddd;"></div>
+                <div style="text-align:center;">
+                    <span style="display:block; font-size:0.7rem; text-transform:uppercase;">Accesos</span>
+                    <strong style="color:var(--text-dark); font-size:1.1rem;">${numPases} Personas</strong>
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <p style="font-size:0.8rem; color:#999; margin-bottom:5px; text-transform:uppercase; letter-spacing:1px;">Mesa(s) Asignada(s)</p>
+                <p style="font-size:1.2rem; font-weight:bold; color:var(--gold); margin:0;">${textoMesas}</p>
+            </div>
+        `;
+
+        // Scroll suave
+        ticketSection.scrollIntoView({behavior: 'smooth'});
     }
 
     function downloadTicket() {
@@ -653,7 +727,13 @@
     function openModal() { document.getElementById('bank-modal').classList.add('flex'); document.body.style.overflow = 'hidden'; }
     function closeModalForce() { document.getElementById('bank-modal').classList.remove('flex'); document.body.style.overflow = 'auto'; }
     function closeModal(e) { if(e.target.id === 'bank-modal') closeModalForce(); }
-    function copyText(text) { navigator.clipboard.writeText(text).then(() => alert("Copiado")).catch(() => alert("Copia manual: "+text)); }
+    function copyText(text, el) {
+        navigator.clipboard.writeText(text).then(() => {
+            const originalText = el.innerText;
+            el.innerText = '¡COPIADO!';
+            setTimeout(() => { el.innerText = originalText; }, 2000);
+        }).catch(() => alert("Error al copiar. Puedes hacerlo manualmente: "+text)); 
+    }
     
     const targetDate = new Date("March 14, 2026 14:30:00").getTime();
     setInterval(() => {
