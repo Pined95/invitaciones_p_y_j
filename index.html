@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Boda Paola & Jorge</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <style>
-        @font-face { font-family: 'High Spirited'; src: url('fonts/High Spirited.ttf') format('truetype'); font-weight: normal; }
-        @font-face { font-family: 'Wasted Vindey'; src: url('fonts/Wasted-Vindey.ttf') format('truetype'); font-weight: normal; }
 
-        :root { --gold: #C59D5F; --text-dark: #1a1a1a; --text-gray: #555; --bg-cream: #FDFBF7; --white: #ffffff; 
+    <style>
+        @font-face { font-family: 'High Spirited'; src: url('fonts/High Spirited.ttf') format('truetype'); font-weight: normal; font-display: swap; }
+        @font-face { font-family: 'Wasted Vindey'; src: url('fonts/Wasted-Vindey.ttf') format('truetype'); font-weight: normal; font-display: swap; }
+
+        :root { --gold: #C59D5F; --text-dark: #1a1a1a; --text-gray: #555; --bg-cream: #FDFBF7; --white: #ffffff;
                 --font-script: 'High Spirited', cursive; --font-display: 'Wasted Vindey', serif; --font-body: 'Montserrat', sans-serif; }
-        
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background-color: #E8E4D9; font-family: var(--font-body); margin: 0; color: var(--text-dark); overflow-x: hidden; padding-bottom: 70px; }
         .app-container { max-width: 480px; margin: 0 auto; background: var(--bg-cream); min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative; padding-bottom: 80px; }
@@ -48,11 +48,11 @@
         .section { padding: 60px 25px; text-align: center; position: relative; }
         .gold-frame { border: 2px solid var(--gold); padding: 40px 20px; position: relative; margin: 20px 0; background: white; }
         .gold-frame::before { content: ''; position: absolute; top: -6px; bottom: -6px; left: 6px; right: 6px; border-top: 1px solid var(--gold); border-bottom: 1px solid var(--gold); pointer-events: none; }
-        
+
         h2.title { font-family: var(--font-display); color: var(--gold); font-size: 2.2rem; margin-bottom: 30px; letter-spacing: 1px; position: relative; display: inline-block; }
         h2.title::after { content: ''; display: block; width: 50px; height: 2px; background: var(--gold); margin: 10px auto 0; }
         h3.script-title { font-family: var(--font-script); font-size: 3.5rem; color: var(--text-dark); margin: 15px 0; line-height: 1.1; font-weight: normal; }
-        
+
         .parents-block { font-family: var(--font-display); font-size: 1.2rem; color: #000; line-height: 1.6; margin-bottom: 25px; font-weight: 500; }
         .cross { font-size: 0.8rem; vertical-align: super; color: #666; }
 
@@ -128,7 +128,7 @@
     <div id="welcome-overlay">
         <h1 style="font-family: var(--font-script); font-size: 5rem; color: var(--gold); margin-bottom: 0; line-height: 1; font-weight: normal;">P & J</h1>
         <p style="font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 3px; color: var(--text-dark);">14 . 03 . 2026</p>
-        
+
         <div id="loading-msg" style="margin-top: 30px; font-size: 0.9rem; color: #666; letter-spacing: 1px;">
             <i class="ph-light ph-spinner" style="animation: spin 1s linear infinite;"></i> CARGANDO INVITACIÓN...
         </div>
@@ -199,7 +199,7 @@
     </div>
 
     <div class="app-container" id="main-content">
-        
+
         <div class="hero">
             <div class="hero-logo"><img src="img/logo2.png" width="180"></div>
             <div class="hero-text">
@@ -207,7 +207,7 @@
                 <div class="hero-date">SÁBADO 14 DE MARZO, 2026</div>
             </div>
         </div>
-        
+
         <div class="countdown reveal">
             <div class="time-box"><span class="time-number" id="d">00</span><span class="time-label">Días</span></div>
             <div class="time-box"><span class="time-number" id="h">00</span><span class="time-label">Hrs</span></div>
@@ -234,7 +234,7 @@
         </div>
 
         <div class="carousel reveal">
-            <img src="img/foto1.jpg" class="active" style="object-position: center;"> 
+            <img src="img/foto1.jpg" class="active" style="object-position: center;">
             <img src="img/foto2.jpg" style="object-position: center 80%;" loading="lazy">
             <img src="img/foto3.jpg" style="object-position: center;" loading="lazy">
         </div>
@@ -248,8 +248,10 @@
                 <div class="event-place">Parroquia del Buen Pastor</div>
                 <div class="event-address">Baja California 729, Fracc. San José, Cd. Victoria.</div>
                 <div class="map-actions">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Parroquia+del+Buen+Pastor+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
-                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda+P%26J+(Misa)&dates=20260314T143000/20260314T153000&details=Ceremonia+Religiosa&location=Parroquia+del+Buen+Pastor,+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
+                    <!-- Google Maps: Query Universal -->
+                    <a href="https://www.google.com/maps/search/?api=1&query=Baja+California+729,+Fracc.+San+José,+Cd.+Victoria,+Tam." target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
+                    <!-- Apple Maps: daddr -->
+                    <a href="http://maps.apple.com/?daddr=Baja+California+729,Ciudad+Victoria,Tamaulipas&dirflg=d" target="_blank" class="btn-app"><i class="ph-bold ph-apple-logo"></i> Apple Maps</a>
                 </div>
             </div>
             <div id="civil-card" class="event-card watercolor-bg hidden">
@@ -259,8 +261,8 @@
                 <div class="event-place">Candilejas Eventos</div>
                 <div class="event-address">Gaspar de la Garza, Valle de Aguayo.<br><strong>(Solo Familia Cercana)</strong></div>
                 <div class="map-actions">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Candilejas+Eventos+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
-                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda+Civil+P%26J&dates=20260314T180000/20260314T190000&details=Ceremonia+Civil+Familiar&location=Candilejas+Eventos,+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Gaspar+de+la+Garza,+Valle+de+Aguayo,+Cd.+Victoria,+Tam." target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
+                    <a href="http://maps.apple.com/?daddr=Gaspar+de+la+Garza,Valle+de+Aguayo,Ciudad+Victoria,Tamaulipas&dirflg=d" target="_blank" class="btn-app"><i class="ph-bold ph-apple-logo"></i> Apple Maps</a>
                 </div>
             </div>
             <div class="event-card watercolor-bg">
@@ -270,10 +272,26 @@
                 <div class="event-place">Candilejas Eventos</div>
                 <div class="event-address">Gaspar de la Garza, Valle de Aguayo, Cd. Victoria.</div>
                 <div class="map-actions">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Candilejas+Eventos+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
-                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Fiesta+Boda+P%26J&dates=20260314T190000/20260315T020000&details=Recepción+Boda+Paola+y+Jorge&location=Candilejas+Eventos,+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
-                    <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[nickname]=Candilejas%20Eventos&dropoff[formatted_address]=Cd%20Victoria" class="btn-app uber hidden day-b-visible"><i class="ph-light ph-car"></i> Pedir Uber</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Gaspar+de+la+Garza,+Valle+de+Aguayo,+Cd.+Victoria,+Tam." target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
+                    <a href="http://maps.apple.com/?daddr=Gaspar+de+la+Garza,Valle+de+Aguayo,Ciudad+Victoria,Tamaulipas&dirflg=d" target="_blank" class="btn-app"><i class="ph-bold ph-apple-logo"></i> Apple Maps</a>
                 </div>
+
+                <!-- SAVE THE DATE / AGENDA -->
+                <div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px;">
+                    <p style="font-size:0.8rem; font-weight:bold; margin-bottom:10px;">📅 GUARDAR FECHA</p>
+                    <button onclick="addToGoogleCalendar()" class="btn-app" style="border-color:var(--gold); color:var(--gold);"><i class="ph-bold ph-google-logo"></i> Google Calendar</button>
+                    <button onclick="downloadICS()" class="btn-app" style="border-color:var(--text-dark); color:var(--text-dark);"><i class="ph-light ph-calendar-plus"></i> Outlook / iOS</button>
+                </div>
+            </div>
+
+            <!-- GALERIA ONE DRIVE -->
+            <div class="event-card watercolor-bg" style="text-align:center; border-left:none; border-top:4px solid var(--gold); border-radius:15px;">
+                <div class="event-icon"><i class="ph-light ph-camera"></i></div>
+                <div class="event-name" style="font-size:2rem;">Fotos Compartidas</div>
+                <p style="font-size:0.9rem; color:#666;">Ayúdanos a capturar cada momento. Sube tus fotos aquí:</p>
+                <a href="https://1drv.ms/f/c/60e7d9ff8c3acf62/IgAxqkaYEWSgRaNVC79l0eoIAZRGXKlWpU7MbBImxYaCVKY" target="_blank" class="btn" style="background:var(--text-dark); color:white; border:none; margin-top:10px;">
+                    <i class="ph-light ph-upload-simple"></i> SUBIR FOTOS
+                </a>
             </div>
         </div>
 
@@ -361,10 +379,17 @@
                 <p style="font-size:0.9rem; color:#d32f2f; margin:0; font-weight:bold;">🚫 NO NIÑOS</p>
             </div>
             <div id="guests-list"></div>
+
+            <div style="margin: 20px 0; text-align: center;">
+                <a id="whatsapp-btn" href="#" target="_blank" class="btn btn-full" style="background: #25D366; color: white; border:none; display:none; align-items:center; justify-content:center; gap:10px;">
+                    <i class="ph-bold ph-whatsapp-logo" style="font-size:1.2rem;"></i> Confirmar por WhatsApp
+                </a>
+            </div>
+
             <div style="text-align:left; margin-top:30px;">
                 <label style="font-family: var(--font-display); font-size:0.9rem;">SUGIERE UNA CANCIÓN</label>
                 <input type="text" id="song-suggestion" class="btn" style="width:100%; text-align:left; border-bottom:1px solid var(--text-dark); border-top:none; border-left:none; border-right:none; border-radius:0; margin-bottom:20px;" placeholder="Ej. Vivir mi vida - Marc Anthony">
-                
+
                 <label style="font-family: var(--font-display); font-size:0.9rem;">MENSAJE PARA LOS NOVIOS</label>
                 <textarea id="guest-message" class="btn" style="width:100%; text-align:left; border:1px solid #ccc; border-radius:4px; min-height:80px; margin-top:5px; background:white; font-family:'Montserrat';" placeholder="Escríbenos algo bonito..."></textarea>
             </div>
@@ -372,25 +397,47 @@
         </div>
 
         <div id="ticket-section" class="section hidden reveal">
-            <div class="gold-frame" id="digital-ticket-card" style="background:white; padding:20px; border-radius:15px; border:1px solid #ddd; position:relative; overflow:hidden; width:90%; max-width:350px; margin:auto;">
-                <div style="background:var(--text-dark); height:15px; width:100%; position:absolute; top:0; left:0;"></div>
-                <h3 style="font-family:var(--font-script); font-size:2.5rem; margin:20px 0 5px; color:var(--gold); font-weight:normal;">Pase de Acceso</h3>
-                <p style="font-family:var(--font-display); font-size:0.9rem; letter-spacing:2px; margin-bottom:20px;">BODA PAOLA & JORGE</p>
-                <div id="qr-placeholder" style="margin: 10px auto; width:200px;"></div>
-                <div style="border-top:2px dashed #ccc; margin:20px 0; position:relative;">
-                    <div style="background:rgba(0,0,0,0.9); width:20px; height:20px; border-radius:50%; position:absolute; top:-10px; left:-30px;"></div>
-                    <div style="background:rgba(0,0,0,0.9); width:20px; height:20px; border-radius:50%; position:absolute; top:-10px; right:-30px;"></div>
+            <!-- TICKET MEJORADO PARA WALLET/STORY -->
+            <div id="digital-ticket-card" style="background:var(--bg-cream); padding:30px 20px; border-radius:20px; box-shadow:0 10px 40px rgba(0,0,0,0.15); width:100%; max-width:340px; margin:auto; text-align:center; position:relative; border: 1px solid #e0e0e0;">
+
+                <!-- Encabezado Ticket -->
+                <div style="border-bottom: 2px dashed #C59D5F; padding-bottom: 20px; margin-bottom: 20px; position:relative;">
+                    <h3 style="font-family:var(--font-script); font-size:3rem; margin:0; color:var(--text-dark); line-height:1; font-weight:normal;">Paola & Jorge</h3>
+                    <p style="font-family:var(--font-display); font-size:0.9rem; letter-spacing:3px; margin-top:5px; color:#666;">14 . MARZO . 2026</p>
+
+                    <!-- Muescas laterales del ticket -->
+                    <div style="background:#F4F1EA; width:24px; height:24px; border-radius:50%; position:absolute; bottom:-12px; left:-32px;"></div>
+                    <div style="background:#F4F1EA; width:24px; height:24px; border-radius:50%; position:absolute; bottom:-12px; right:-32px;"></div>
                 </div>
-                <p style="font-size:1.2rem; font-weight:bold; margin:5px 0;" id="ticket-name">Familia Invitada</p>
-                <p style="font-size:0.8rem; color:#666;">ID: <span id="group-id-display">...</span></p>
-                <p style="font-size:0.8rem; color:#666;">Mesa: <strong id="ticket-table">Por asignar</strong></p>
+
+                <!-- Cuerpo Ticket -->
+                <p style="font-family:var(--font-display); font-size:0.8rem; text-transform:uppercase; color:#999; margin-bottom:5px;">INVITADO</p>
+                <p style="font-size:1.3rem; font-weight:bold; margin:0 0 20px 0; color:var(--gold);" id="ticket-name">Familia Invitada</p>
+
+                <!-- QR -->
+                <div style="background:white; padding:15px; display:inline-block; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                    <div id="qr-placeholder" style="width:180px; height:180px;"></div>
+                </div>
+
+                <p style="font-size:0.8rem; color:#666; margin-top:15px; letter-spacing:1px;">ACCESO AL EVENTO</p>
+                <p style="font-size:0.75rem; color:#aaa; margin-top:5px;">ID: <span id="group-id-display">...</span></p>
+
+                <div style="margin-top:20px; padding-top:15px; border-top:1px solid #eee;">
+                    <p style="font-size:0.9rem; margin:0;">Mesa: <strong id="ticket-table" style="color:var(--text-dark); font-size:1.2rem;">Por asignar</strong></p>
+                </div>
+
+                <!-- Footer Decorativo -->
+                <div style="margin-top:25px; opacity:0.6;">
+                    <img src="img/logo2.png" width="60" style="filter: grayscale(100%);">
+                </div>
             </div>
-            <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
-                <button onclick="downloadTicket()" class="btn" style="background:var(--text-dark); color:white; border:none;">
-                    <i class="ph-light ph-download"></i> Guardar Boleto
+
+            <div style="margin-top:30px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                <button onclick="downloadTicket()" class="btn" style="background:var(--text-dark); color:white; border:none; border-radius:50px; padding:12px 30px; box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+                    <i class="ph-bold ph-download-simple"></i> Guardar en Fotos
                 </button>
             </div>
-            <button onclick="window.location.reload()" class="btn" style="margin-top:10px;">VOLVER</button>
+            <button onclick="window.location.reload()" style="background:transparent; border:none; color:#666; text-decoration:underline; margin-top:20px; cursor:pointer;">Regresar al inicio</button>
         </div>
 
         <div id="bank-modal" class="modal" onclick="closeModal(event)">
@@ -422,12 +469,26 @@
 
 <script>
     // 👇 URL DEL APPS SCRIPT
-    const API_URL = "https://script.google.com/macros/s/AKfycbxkWDPOJ4q4P81f9DDyVs8cWwV7wEz7_hk9YdNOZvYQYTwtetc-VNtqpqsANmMcbQE/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbxkWDPOJ4q4P81f9DDyVs8cWwV7wEz7_hk9YdNOZvYQYTwtetc-VNtqpqsANmMcbQE/exec";
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
     const today = new Date();
-    const weddingDay = new Date("March 14, 2026"); 
-    const isDayB = today.toDateString() === weddingDay.toDateString();
+    const weddingDay = new Date("March 14, 2026");
+    const isDayB = (today.toDateString() === weddingDay.toDateString()) || (params.get('mode') === 'day-b');
+
+    // COORDENADAS / DIRECCIONES
+    const LOCATIONS = {
+        church: {
+            name: "Parroquia del Buen Pastor",
+            address: "Baja California 729, Fracc. San José, Cd. Victoria, Tam.",
+            geo: "23.754,-99.150"
+        },
+        salon: {
+            name: "Candilejas Eventos",
+            address: "Gaspar de la Garza, Valle de Aguayo, Cd. Victoria, Tam.",
+            geo: "23.766,-99.150"
+        }
+    };
 
     // AUDIO
     const audio = document.getElementById("bg-music");
@@ -472,12 +533,24 @@
                 if(data.status === 'success') {
                     const greetingLabel = document.getElementById('greeting-label');
                     const nameLabel = document.getElementById('main-guest-name');
-                    
+
                     // Variables
                     const grupo = data.nombreGrupo || "";
                     const nombreIndividual = data.nombresInvitacion || data.mainName;
                     const mensaje = data.mensaje || "";
                     const esCivil = data.showCivil;
+
+                    // Configurar WhatsApp RSVP
+                    const rsvpPhone = data.rsvpPhone; // Desde Apps Script
+                    if(rsvpPhone) {
+                        const guestName = grupo || nombreIndividual;
+                        const waText = encodeURIComponent(`Hola, confirmo asistencia para la boda de Paola y Jorge. Soy ${guestName}`);
+                        const waBtn = document.getElementById('whatsapp-btn');
+                        if(waBtn) {
+                            waBtn.href = `https://wa.me/${rsvpPhone}?text=${waText}`;
+                            waBtn.style.display = 'flex';
+                        }
+                    }
 
                     // Lógica de Saludo
                     if (grupo && grupo.trim().length > 0) {
@@ -487,7 +560,7 @@
                         nameLabel.textContent = nombreIndividual;
                         greetingLabel.textContent = "HOLA";
                     }
-                    
+
                     // Mensaje Personalizado
                     const msgBox = document.getElementById('personal-msg-box');
                     if (msgBox) {
@@ -498,11 +571,11 @@
                             msgBox.style.display = 'none';
                         }
                     }
-                    
+
                     // Mostrar tarjeta Civil si corresponde
                     if (esCivil) {
                         const civilCard = document.getElementById('civil-card');
-                        if(civilCard) civilCard.classList.remove('hidden'); 
+                        if(civilCard) civilCard.classList.remove('hidden');
                     }
 
                     // Si es día B y ya confirmó, mostrar QR de acceso rápido
@@ -510,7 +583,7 @@
                         document.getElementById('day-b-qr').style.display = 'block';
                         document.getElementById('day-b-qr-img').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${userId}" width="150">`;
                     }
-                    
+
                     groupData = data.members;
                     renderList(data.members);
 
@@ -518,7 +591,7 @@
                     document.getElementById('loading-msg').style.display = 'none'; // Ocultar "Cargando"
                     document.getElementById('enter-btn').style.display = 'block';  // Mostrar botón "ENTRAR"
                 }
-            } catch(e) { 
+            } catch(e) {
                 console.error("Error cargando invitación", e);
                 // Si falla, mostramos el botón de todos modos para que no se queden atrapados
                 document.getElementById('loading-msg').style.display = 'none';
@@ -543,7 +616,7 @@
             const isNo = m.estado && (m.estado.includes('NO') || m.estado.includes('DECLINADO'));
             // Si tiene mesa, la mostramos
             const tableBadge = (isYes && m.mesa && m.mesa !== "Por asignar") ? `<div style="font-size:0.8rem; color:var(--gold);">📍 MESA ${m.mesa}</div>` : '';
-            
+
             list.innerHTML += `
                 <div class="guest-row">
                     <div style="font-family: var(--font-display); font-weight:600; margin-bottom:5px; font-size:1.1rem;">${m.nombre}</div>
@@ -569,13 +642,13 @@
     async function sendRSVP() {
         const btn = document.querySelector('.btn-full');
         const originalText = btn.innerText;
-        btn.innerText = "ENVIANDO..."; 
+        btn.innerText = "ENVIANDO...";
         btn.disabled = true;
-        
+
         // 1. Preparamos los datos de los invitados
         const responses = currentMembersData.map((m, i) => ({
-            id: m.id, 
-            rsvp: m.estado || 'PENDIENTE', 
+            id: m.id,
+            rsvp: m.estado || 'PENDIENTE',
             alergias: document.getElementById(`al-${i}`) ? document.getElementById(`al-${i}`).value : ''
         }));
         const song = document.getElementById('song-suggestion').value;
@@ -589,8 +662,8 @@
                 redirect: 'follow', // Importante para seguir la redirección de Google
                 headers: {'Content-Type': 'text/plain;charset=utf-8'},
                 body: JSON.stringify({
-                    action: 'RSVP_GROUP', 
-                    responses: responses, 
+                    action: 'RSVP_GROUP',
+                    responses: responses,
                     song: song,
                     msg: msg
                 })
@@ -601,9 +674,9 @@
                 const result = await response.json();
                 if(result.status === 'success') {
                     // Todo salió bien: mostramos el boleto
-                    setTimeout(() => { 
-                        showTicket(); 
-                        alert("¡Confirmación guardada exitosamente!"); 
+                    setTimeout(() => {
+                        showTicket();
+                        alert("¡Confirmación guardada exitosamente!");
                     }, 500);
                 } else {
                     throw new Error("El servidor respondió con un error.");
@@ -612,11 +685,11 @@
                 throw new Error("No se pudo conectar con el servidor.");
             }
 
-        } catch(e) { 
+        } catch(e) {
             console.error("Error al enviar:", e);
-            alert("Hubo un problema al guardar tu confirmación. Por favor intenta de nuevo."); 
-            btn.disabled = false; 
-            btn.innerText = originalText; 
+            alert("Hubo un problema al guardar tu confirmación. Por favor intenta de nuevo.");
+            btn.disabled = false;
+            btn.innerText = originalText;
         }
     }
 
@@ -625,18 +698,22 @@
         ticketSection.classList.remove('hidden');
         ticketSection.style.display = 'flex';
         document.getElementById('ticket-name').innerText = document.getElementById('main-guest-name').innerText;
-        
+
+        // Ocultar boton WhatsApp si ya confirmo por web
+        const waBtn = document.getElementById('whatsapp-btn');
+        if(waBtn) waBtn.style.display = 'none';
+
         // Generar QR
         const qrCodeData = userId || 'ERROR-NO-ID';
         document.getElementById('qr-placeholder').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${qrCodeData}&color=000000&bgcolor=ffffff" style="width:100%;">`;
         document.getElementById('group-id-display').innerText = qrCodeData;
-        
+
         // Intentar mostrar mesa del primer miembro que tenga mesa
         const memberWithTable = currentMembersData.find(m => m.mesa && m.mesa !== "Por asignar");
         if(memberWithTable) {
              document.getElementById('ticket-table').innerText = memberWithTable.mesa;
         }
-        
+
         const ticket = document.getElementById('ticket-section');
         ticket.scrollIntoView({behavior: 'smooth'});
     }
@@ -650,11 +727,56 @@
         });
     }
 
+    // --- AGENDA & CALENDARIO ---
+    function addToGoogleCalendar() {
+        const text = encodeURIComponent("Boda Paola & Jorge");
+        const dates = "20260314T143000/20260315T020000"; // Misa + Fiesta
+        const details = encodeURIComponent("Ceremonia Religiosa (2:30 PM) en Parroquia del Buen Pastor.\nRecepción (7:00 PM) en Candilejas Eventos.");
+        const location = encodeURIComponent("Cd. Victoria, Tamps.");
+        window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${dates}&details=${details}&location=${location}`);
+    }
+
+    function downloadICS() {
+        // Generar contenido .ics dinámicamente
+        const now = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Boda Paola y Jorge//MX
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+DTSTART:20260314T143000
+DTEND:20260314T153000
+SUMMARY:Boda P&J - Misa 💒
+DESCRIPTION:Ceremonia Religiosa en Parroquia del Buen Pastor.
+LOCATION:Baja California 729, Fracc. San José, Cd. Victoria.
+DTSTAMP:${now}
+UID:boda-pj-misa-${now}
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260314T190000
+DTEND:20260315T020000
+SUMMARY:Boda P&J - Recepción 🥂
+DESCRIPTION:Celebración en Candilejas Eventos.
+LOCATION:Gaspar de la Garza, Valle de Aguayo, Cd. Victoria.
+DTSTAMP:${now}
+UID:boda-pj-fiesta-${now}
+END:VEVENT
+END:VCALENDAR`;
+
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute('download', 'Boda_Paola_Jorge.ics');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     function openModal() { document.getElementById('bank-modal').classList.add('flex'); document.body.style.overflow = 'hidden'; }
     function closeModalForce() { document.getElementById('bank-modal').classList.remove('flex'); document.body.style.overflow = 'auto'; }
     function closeModal(e) { if(e.target.id === 'bank-modal') closeModalForce(); }
     function copyText(text) { navigator.clipboard.writeText(text).then(() => alert("Copiado")).catch(() => alert("Copia manual: "+text)); }
-    
+
     const targetDate = new Date("March 14, 2026 14:30:00").getTime();
     setInterval(() => {
         const now = new Date().getTime();
@@ -679,5 +801,3 @@
     const observer = new IntersectionObserver((e) => { e.forEach(i => { if(i.isIntersecting) i.target.classList.add('active'); }); }, {threshold: 0.1});
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 </script>
-</body>
-</html>
