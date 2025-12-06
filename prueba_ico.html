@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selector Maestro de Iconos - Boda</title>
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        :root { --gold: #C59D5F; --dark: #1a1a1a; --bg: #f4f4f4; --white: #fff; --selected: #e8f5e9; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--dark); margin: 0; padding-bottom: 150px; }
+
+        .header { background: var(--dark); color: white; padding: 20px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); }
+        .header p { margin: 5px 0 0; font-size: 0.9rem; color: #aaa; }
+
+        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+
+        /* FILA DE COMPARACIÓN */
+        .comparison-row {
+            background: white; border-radius: 12px; margin-bottom: 30px; padding: 20px;
+            display: grid; grid-template-columns: 200px 1fr; gap: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #ddd; transition: 0.3s;
+        }
+        .comparison-row.active { border-left-color: var(--gold); }
+
+        /* COLUMNA IZQUIERDA (ACTUAL) */
+        .current-col { text-align: center; border-right: 1px solid #eee; padding-right: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .current-label { font-size: 0.8rem; text-transform: uppercase; color: #999; margin-bottom: 10px; font-weight: bold; }
+        .current-icon { font-size: 3rem; color: #ccc; margin-bottom: 10px; }
+        .current-name { font-family: monospace; font-size: 0.8rem; color: #666; background: #eee; padding: 2px 6px; border-radius: 4px; }
+
+        /* COLUMNA DERECHA (OPCIONES) */
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+        
+        .option-card {
+            border: 1px solid #eee; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer;
+            transition: 0.2s; position: relative; height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .option-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        .option-card.selected { border: 2px solid var(--gold); background: #fffbf0; }
+        .option-card.selected::after {
+            content: '✔'; position: absolute; top: -8px; right: -8px; background: var(--gold); color: white;
+            width: 20px; height: 20px; border-radius: 50%; font-size: 0.8rem; display: flex; align-items: center; justify-content: center;
+        }
+
+        .opt-icon { font-size: 2rem; color: #555; margin-bottom: 5px; height: 40px; display: flex; align-items: center; justify-content: center; width: 100%; }
+        .opt-lib { font-size: 0.6rem; color: #999; text-transform: uppercase; }
+
+        /* FOOTER FLOTANTE */
+        .sticky-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ccc;
+            padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 200;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .footer-info { font-size: 0.9rem; }
+        .btn-gen {
+            background: var(--gold); color: white; border: none; padding: 12px 30px; font-size: 1rem; border-radius: 50px;
+            cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+        .btn-gen:hover { background: #b08d55; transform: scale(1.05); }
+
+        /* MODAL RESULTADOS */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; }
+        .modal-content { background: white; width: 90%; max-width: 800px; padding: 30px; border-radius: 10px; max-height: 90vh; overflow-y: auto; position: relative; }
+        .close { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; }
+        textarea { width: 100%; height: 300px; margin-top: 15px; padding: 10px; font-family: monospace; font-size: 0.9rem; border: 1px solid #ddd; border-radius: 5px; }
+
+        /* SVG Styles */
+        .c-svg { width: 35px; height: 35px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+        .hd-svg { width: 38px; height: 38px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1000; stroke-dashoffset: 0; }
+        
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Selector de Sustitutos</h1>
+        <p>Selecciona tus favoritos y generaremos el código de cambio automáticamente.</p>
+    </div>
+
+    <div class="container" id="app">
+        </div>
+
+    <div class="sticky-footer">
+        <div class="footer-info">Has seleccionado <b id="count">0</b> cambios.</div>
+        <button class="btn-gen" onclick="generatePrompt()">GENERAR LISTA DE CAMBIOS</button>
+    </div>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 style="color:var(--gold); margin-top:0;">Tu Lista de Cambios</h2>
+            <p>Copia esto y envíalo para actualizar tu web:</p>
+            <textarea id="finalPrompt"></textarea>
+            <button class="btn-gen" style="width:100%; margin-top:10px;" onclick="copyToClip()">COPIAR AL PORTAPAPELES</button>
+        </div>
+    </div>
+
+    <script>
+        // === BASE DE DATOS DE ICONOS ===
+        // Aquí definimos qué usa tu web hoy y qué opciones te doy.
+        
+        const SVGs = {
+            esmoquin: `<svg class="c-svg" viewBox="0 0 24 24"><path d="M12 3L4 9v12h16V9l-8-6z"/><path d="M12 14l4-3V9l-4 2l-4-2v2l4 3z"/><path d="M12 14v7"/></svg>`,
+            vestido: `<svg class="c-svg" viewBox="0 0 24 24"><path d="M9 10v-2a3 3 0 0 1 6 0v2"/><path d="M9 10l-4 11h14l-4-11H9z"/><path d="M12 10v4"/></svg>`,
+            anillos: `<svg class="c-svg" viewBox="0 0 24 24"><circle cx="8" cy="12" r="5"/><circle cx="16" cy="12" r="5"/></svg>`,
+            iglesia: `<svg class="c-svg" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M12 4v16"/><path d="M12 4L4 12h16L12 4z"/><circle cx="12" cy="14" r="2"/></svg>`,
+            copa: `<svg class="c-svg" viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M12 15v6"/><path d="M8 5a4 4 0 0 0 8 0s-1-4-4-4-4 4-4 4z"/><line x1="12" y1="1" x2="12" y2="15"/></svg>`,
+            noninos: `<svg class="c-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="5" y1="5" x2="19" y2="19"/></svg>`,
+            sketchHeart: `<svg class="hd-svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke-dasharray="3 2"/></svg>`,
+            guayabera: `<svg class="c-svg" viewBox="0 0 24 24"><path d="M16 3h-8a2 2 0 0 0-2 2v16h12V5a2 2 0 0 0-2-2z"/><path d="M12 3v18"/><path d="M8 15h2v2H8z"/><path d="M14 15h2v2h-2z"/></svg>`
+        };
+
+        const categories = [
+            {
+                id: 'nav_home',
+                section: 'Barra de Navegación',
+                label: 'Botón Inicio',
+                current: '<i class="ph-light ph-house"></i>',
+                currentName: 'ph-house',
+                options: [
+                    { code: '<i class="ti ti-home-2"></i>', lib: 'Tabler', icon: '<i class="ti ti-home-2"></i>' },
+                    { code: '<i class="ri-home-heart-line"></i>', lib: 'Remix', icon: '<i class="ri-home-heart-line"></i>' },
+                    { code: '<i class="bi bi-house-heart"></i>', lib: 'Bootstrap', icon: '<i class="bi bi-house-heart"></i>' },
+                    { code: '<i class="fa-solid fa-heart"></i>', lib: 'FontAwesome', icon: '<i class="fa-solid fa-heart"></i>' },
+                    { code: SVGs.anillos, lib: 'SVG Premium', icon: SVGs.anillos },
+                    { code: SVGs.sketchHeart, lib: 'Hand Drawn', icon: SVGs.sketchHeart },
+                    { code: '<i class="ti ti-smart-home"></i>', lib: 'Tabler', icon: '<i class="ti ti-smart-home"></i>' },
+                    { code: '<i class="ri-door-open-line"></i>', lib: 'Remix', icon: '<i class="ri-door-open-line"></i>' },
+                    { code: '<i class="ti ti-castle"></i>', lib: 'Tabler', icon: '<i class="ti ti-castle"></i>' },
+                    { code: '<i class="ph-light ph-sparkle"></i>', lib: 'Phosphor', icon: '<i class="ph-light ph-sparkle"></i>' }
+                ]
+            },
+            {
+                id: 'nav_map',
+                section: 'Barra de Navegación',
+                label: 'Botón Mapa',
+                current: '<i class="ph-light ph-map-pin"></i>',
+                currentName: 'ph-map-pin',
+                options: [
+                    { code: '<i class="ti ti-map-pin-heart"></i>', lib: 'Tabler', icon: '<i class="ti ti-map-pin-heart"></i>' },
+                    { code: '<i class="ri-map-2-line"></i>', lib: 'Remix', icon: '<i class="ri-map-2-line"></i>' },
+                    { code: '<i class="bi bi-geo-alt"></i>', lib: 'Bootstrap', icon: '<i class="bi bi-geo-alt"></i>' },
+                    { code: '<i class="fa-regular fa-compass"></i>', lib: 'FontAwesome', icon: '<i class="fa-regular fa-compass"></i>' },
+                    { code: '<i class="ti ti-location"></i>', lib: 'Tabler', icon: '<i class="ti ti-location"></i>' },
+                    { code: '<i class="ri-guide-line"></i>', lib: 'Remix', icon: '<i class="ri-guide-line"></i>' },
+                    { code: '<i class="io ion-map-outline"></i>', lib: 'Ionicons', icon: '<ion-icon name="map-outline"></ion-icon>' },
+                    { code: '<i class="ti ti-world"></i>', lib: 'Tabler', icon: '<i class="ti ti-world"></i>' },
+                    { code: '<i class="ri-road-map-line"></i>', lib: 'Remix', icon: '<i class="ri-road-map-line"></i>' },
+                    { code: '<i class="ti ti-direction-sign"></i>', lib: 'Tabler', icon: '<i class="ti ti-direction-sign"></i>' }
+                ]
+            },
+            {
+                id: 'nav_rsvp',
+                section: 'Barra de Navegación',
+                label: 'Botón Confirmar',
+                current: '<i class="ph-light ph-envelope-open"></i>',
+                currentName: 'ph-envelope-open',
+                options: [
+                    { code: '<i class="ti ti-mail-check"></i>', lib: 'Tabler', icon: '<i class="ti ti-mail-check"></i>' },
+                    { code: '<i class="ri-mail-send-line"></i>', lib: 'Remix', icon: '<i class="ri-mail-send-line"></i>' },
+                    { code: '<i class="bi bi-envelope-check"></i>', lib: 'Bootstrap', icon: '<i class="bi bi-envelope-check"></i>' },
+                    { code: '<i class="fa-regular fa-paper-plane"></i>', lib: 'FontAwesome', icon: '<i class="fa-regular fa-paper-plane"></i>' },
+                    { code: '<i class="ti ti-calendar-check"></i>', lib: 'Tabler', icon: '<i class="ti ti-calendar-check"></i>' },
+                    { code: '<i class="ri-checkbox-circle-line"></i>', lib: 'Remix', icon: '<i class="ri-checkbox-circle-line"></i>' },
+                    { code: '<i class="ti ti-circle-check"></i>', lib: 'Tabler', icon: '<i class="ti ti-circle-check"></i>' },
+                    { code: '<i class="io ion-checkmark-done-circle-outline"></i>', lib: 'Ionicons', icon: '<ion-icon name="checkmark-done-circle-outline"></ion-icon>' },
+                    { code: '<i class="ti ti-message-check"></i>', lib: 'Tabler', icon: '<i class="ti ti-message-check"></i>' },
+                    { code: '<i class="ph-light ph-ticket"></i>', lib: 'Phosphor', icon: '<i class="ph-light ph-ticket"></i>' }
+                ]
+            },
+            {
+                id: 'btn_music',
+                section: 'Botón Flotante',
+                label: 'Música de Fondo',
+                current: '<i class="ph-light ph-music-note"></i>',
+                currentName: 'ph-music-note',
+                options: [
+                    { code: '<i class="ti ti-music"></i>', lib: 'Tabler', icon: '<i class="ti ti-music"></i>' },
+                    { code: '<i class="ri-music-2-line"></i>', lib: 'Remix', icon: '<i class="ri-music-2-line"></i>' },
+                    { code: '<i class="bi bi-music-note-beamed"></i>', lib: 'Bootstrap', icon: '<i class="bi bi-music-note-beamed"></i>' },
+                    { code: '<i class="fa-solid fa-play"></i>', lib: 'FontAwesome', icon: '<i class="fa-solid fa-play"></i>' },
+                    { code: '<i class="ti ti-playlist"></i>', lib: 'Tabler', icon: '<i class="ti ti-playlist"></i>' },
+                    { code: '<i class="ri-disc-line"></i>', lib: 'Remix', icon: '<i class="ri-disc-line"></i>' },
+                    { code: '<i class="ti ti-volume"></i>', lib: 'Tabler', icon: '<i class="ti ti-volume"></i>' },
+                    { code: '<i class="io ion-musical-notes-outline"></i>', lib: 'Ionicons', icon: '<ion-icon name="musical-notes-outline"></ion-icon>' },
+                    { code: '<i class="ti ti-headphones"></i>', lib: 'Tabler', icon: '<i class="ti ti-headphones"></i>' },
+                    { code: '<i class="ph-light ph-speaker-high"></i>', lib: 'Phosphor', icon: '<i class="ph-light ph-speaker-high"></i>' }
+                ]
+            },
+            {
+                id: 'card_iglesia',
+                section: 'Itinerario',
+                label: 'Iglesia / Misa',
+                current: '<i class="ph-light ph-church"></i>',
+                currentName: 'ph-church',
+                options: [
+                    { code: SVGs.iglesia, lib: 'SVG Premium', icon: SVGs.iglesia },
+                    { code: '<i class="ti ti-building-church"></i>', lib: 'Tabler', icon: '<i class="ti ti-building-church"></i>' },
+                    { code: '<i class="fa-solid fa-church"></i>', lib: 'FontAwesome', icon: '<i class="fa-solid fa-church"></i>' },
+                    { code: '<i class="bi bi-bell"></i>', lib: 'Bootstrap', icon: '<i class="bi bi-bell"></i>' },
+                    { code: '<i class="ti ti-cross"></i>', lib: 'Tabler', icon: '<i class="ti ti-cross"></i>' },
+                    { code: '<i class="ri-ancient-pavilion-line"></i>', lib: 'Remix', icon: '<i class="ri-ancient-pavilion-line"></i>' },
+                    { code: '<i class="ti ti-candle"></i>', lib: 'Tabler', icon: '<i class="ti ti-candle"></i>' },
+                    { code: '<i class="fa-solid fa-hands-praying"></i>', lib: 'FontAwesome', icon: '<i class="fa-solid fa-hands-praying"></i>' },
+                    { code: '<i class="ti ti-book"></i>', lib: 'Tabler', icon: '<i class="ti ti-book"></i>' },
+                    { code: '<i class="ph-light ph-bell-ringing"></i>', lib: 'Phosphor', icon: '<i class="ph-light ph-bell-ringing"></i>' }
+                ]
+            },
+            {
+                id: 'card_recepcion',
+                section: 'Itinerario',
+                label: 'Recepción / Fiesta',
+                current: '<i class="ph-light ph-wine"></i>',
+                currentName: 'ph-wine',
+                options: [
+                    { code: SVGs.copa, lib: 'SVG Premium', icon: SVGs.copa },
+                    { code: '<i class="ti ti-glass-full"></i>', lib: 'Tabler', icon: '<i class="ti ti-glass-full"></i>' },
+                    { code: '<i class="ri-goblet-line"></i>', lib: 'Remix', icon: '<i class="ri-goblet-line"></i>' },
+                    { code: '<i class="fa-solid fa-champagne-glasses"></i>', lib: 'FontAwesome', icon: '<i class="fa-solid fa-champagne-glasses"></i>' },
+                    { code: '<i class="ti ti-confetti"></i>', lib: 'Tabler', icon: '<i class="ti ti-confetti"></i>' },
+                    { code: '<i class="ri-cake-3-line"></i>', lib: 'Remix', icon: '<i class="ri-cake-3-line"></i>' },
+                    { code: '<i class="ti ti-balloon"></i>', lib: 'Tabler', icon: '<i class="ti ti-balloon"></i>' },
+                    { code: '<i class="io ion-wine-outline"></i>', lib: 'Ionicons', icon: '<ion-icon name="wine-outline"></ion-icon>' },
+                    { code: '<i class="ti ti-music-disco"></i>', lib: 'Tabler', icon: '<i class="ti ti-music-disco"></i>' },
+                    { code: '<i class="ph-light ph-martini"></i>', lib: 'Phosphor', icon: '<i class="ph-light ph-martini"></i>' }
+                ]
+            },
+            {
+                id: 'transport_uber',
+                section: 'Mapa y Transporte',
+                label: 'Pedir Uber',
+                current: '<i class="ph-light ph-car"></i>',
+                currentName: 'ph-car',
+                options: [
+                    { code: '<i class="fa-brands fa-uber"></i>', lib: 'FA Brand', icon: '<i class="fa-brands fa-uber"></i>' },
+                    { code: '<i class="ri-taxi-line"></i>', lib: 'Remix', icon: '<i class="ri-taxi-line"></i>' },
+                    { code: '<i class="ti ti-car"></i>', lib: 'Tabler', icon: '<i class="ti ti-car"></i>' },
+                    { code: '<i class="bi bi-car-front-fill"></i>', lib: 'Bootstrap', icon: '<i class="bi bi-car-front-fill"></i>' },
+                    { code: '<i class="ti ti-brand-uber"></i>', lib: 'Tabler', icon: '<i class="ti ti-brand-uber"></i>' },
+                    { code: '<i class="ri-roadster-line"></i>', lib: 'Remix', icon: '<i class="ri-roadster-line"></i>' },
+                    { code: '<i class="io ion-car-sport-outline"></i>', lib: 'Ionicons', icon: '<ion-icon name="car-sport-outline"></ion-icon>' },
+                    { code: '<i class="ti ti-steering-wheel"></i>', lib: 'Tabler', icon: '<i class="ti ti-steering-wheel"></i>' },
+                    { code: '<i class="ri-map-pin-car-line"></i>', lib: 'Remix', icon: '<i class="ri-map-pin-car-line"></i>' },
+                    { code: '<i class="ph-light ph-taxi"></i>', lib: 'Phosphor', icon: '<i class="ph-light ph-taxi"></i>' }
+                ]
+            },
+            {
+                id: 'dress_women',
+                section: 'Código de Vestimenta',
+                label: 'Mujeres (Vestido)',
+                current: '<i class="ph-light ph-dress"></i>',
+                currentName: 'ph-dress',
+                options: [
+                    { code: SVGs.vestido, lib: 'SVG Premium', icon: SVGs.vestido },
+                    { code: '<i class="ti ti-hanger"></i>', lib: 'Tabler', icon: '<i class="ti ti-hanger"></i>' },
+                    { code: '<i class="ri-t-shirt-air-line"></i>', lib: 'Remix', icon: '<i class="ri-t-shirt-air-line"></i>' },
+                    { code: '<i class="fa-solid fa-person-dress"></i>', lib: 'FontAwesome', icon: '<i class="fa-solid fa-person-dress"></i>' },
+                    { code: '<i class="ti ti-shoe"></i>', lib: 'Tabler', icon: '<i class="ti ti-shoe"></i>' },
+                    { code: '<i class="bi bi-gender-female"></i>', lib: 'Bootstrap', icon: '<i class="bi bi-gender-female"></i>' },
+                    { code: '<i class="ti ti-woman"></i>', lib: 'Tabler', icon: '<i class="ti ti-woman"></i>' },
+                    { code: '<i class="io ion-woman-outline"></i>', lib: 'Ionicons', icon: '<ion-icon name="woman-outline"></ion-icon>' },
+                    { code: '<i class="ti ti-diamond"></i>', lib: 'Tabler', icon: '<i class="ti ti-diamond"></i>' },
+                    { code: '<i class="ph-light ph-high-heel"></i>', lib: 'Phosphor', icon: '<i class="ph-light ph-high-heel"></i>' }
+                ]
+            },
+            {
+                id: 'dress_men',
+                section: 'Código de Vestimenta',
+                label: 'Hombres (Traje)',
+                current: '<i class="ph-light ph-user"></i>',
+                currentName: 'ph-user',
+                options: [
+                    { code: SVGs.esmoquin, lib: 'SVG Premium', icon: SVGs.esmoquin },
+                    { code: SVGs.guayabera, lib: 'SVG Guayabera', icon: SVGs.guayabera },
+                    { code: '<i class="ti ti-tie"></i>', lib: 'Tabler', icon: '<i class="ti ti-tie"></i>' },
+                    { code: '<i class="fa-solid fa-user-tie"></i>', lib: 'FontAwesome', icon: '<i class="fa-solid fa-user-tie"></i>' },
+                    { code: '<i class="ri-shirt-line"></i>', lib: 'Remix', icon: '<i class="ri-shirt-line"></i>' },
+                    { code: '<i class="ti ti-bow"></i>', lib: 'Tabler', icon: '<i class="ti ti-bow"></i>' },
+                    { code: '<i class="io ion-shirt-outline"></i>', lib: 'Ionicons', icon: '<ion-icon name="shirt-outline"></ion-icon>' },
+                    { code: '<i class="ti ti-briefcase"></i>', lib: 'Tabler', icon: '<i class="ti ti-briefcase"></i>' },
+                    { code: '<i class="bi bi-gender-male"></i>', lib: 'Bootstrap', icon: '<i class="bi bi-gender-male"></i>' },
+                    { code: '<i class="ph-light ph-suit-case"></i>', lib: 'Phosphor', icon: '<i class="ph-light ph-suit-case"></i>' }
+                ]
+            },
+            {
+                id: 'gift_liverpool',
+                section: 'Regalos',
+                label: 'Liverpool',
+                current: '<i class="ph-light ph-shopping-bag"></i>',
+                currentName: 'ph-shopping-bag',
+                options: [
+                    { code: '<i class="ti ti-shopping-bag"></i>', lib: 'Tabler', icon: '<i class="ti ti-shopping-bag"></i>' },
+                    { code: '<i class="ri-shopping-bag-3-line"></i>', lib: 'Remix', icon: '<i class="ri-shopping-bag-3-line"></i>' },
+                    { code: '<i class="fa-solid fa-bag-shopping"></i>', lib: 'FontAwesome', icon: '<i class="fa-solid fa-bag-shopping"></i>' },
+                    { code: '<i class="bi bi-bag-heart"></i>', lib: 'Bootstrap', icon: '<i class="bi bi-bag-heart"></i>' },
+                    { code: '<i class="ti ti-gift"></i>', lib: 'Tabler', icon: '<i class="ti ti-gift"></i>' },
+                    { code: '<i class="ri-store-2-line"></i>', lib: 'Remix', icon: '<i class="ri-store-2-line"></i>' },
+                    { code: '<i class="ti ti-brand-shopee"></i>', lib: 'Tabler', icon: '<i class="ti ti-brand-shopee"></i>' },
+                    { code: '<i class="io ion-bag-handle-outline"></i>', lib: 'Ionicons', icon: '<ion-icon name="bag-handle-outline"></ion-icon>' },
+                    { code: '<i class="ti ti-package"></i>', lib: 'Tabler', icon: '<i class="ti ti-package"></i>' },
+                    { code: '<i class="ph-light ph-storefront"></i>', lib: 'Phosphor', icon: '<i class="ph-light ph-storefront"></i>' }
+                ]
+            },
+            {
+                id: 'gift_amazon',
+                section: 'Regalos',
+                label: 'Amazon',
+                current: '<i class="ph-bold ph-amazon-logo"></i>',
+                currentName: 'ph-amazon-logo',
+                options: [
+                    { code: '<i class="fa-brands fa-amazon"></i>', lib: 'FontAwesome', icon: '<i class="fa-brands fa-amazon"></i>' },
+                    { code: '<i class="ri-amazon-line"></i>', lib: 'Remix', icon: '<i class="ri-amazon-line"></i>' },
+                    { code: '<i class="ti ti-brand-amazon"></i>', lib: 'Tabler', icon: '<i class="ti ti-brand-amazon"></i>' },
+                    { code: '<i class="bi bi-box-seam"></i>', lib: 'Bootstrap', icon: '<i class="bi bi-box-seam"></i>' },
+                    { code: '<i class="ti ti-truck-delivery"></i>', lib: 'Tabler', icon: '<i class="ti ti-truck-delivery"></i>' },
+                    { code: '<i class="ri-shopping-cart-2-line"></i>', lib: 'Remix', icon: '<i class="ri-shopping-cart-2-line"></i>' },
+                    { code: '<i class="ti ti-box"></i>', lib: 'Tabler', icon: '<i class="ti ti-box"></i>' },
+                    { code: '<i class="io ion-cart-outline"></i>', lib: 'Ionicons', icon: '<ion-icon name="cart-outline"></ion-icon>' },
+                    { code: '<i class="ti ti-world-www"></i>', lib: 'Tabler', icon: '<i class="ti ti-world-www"></i>' },
+                    { code: '<i class="ph-light ph-package"></i>', lib: 'Phosphor', icon: '<i class="ph-light ph-package"></i>' }
+                ]
+            },
+             {
+                id: 'rules_kids',
+                section: 'Reglas y UI',
+                label: 'No Niños',
+                current: '(Texto solo)',
+                currentName: 'Sin Icono',
+                options: [
+                    { code: SVGs.noninos, lib: 'SVG Premium', icon: SVGs.noninos },
+                    { code: '<i class="ti ti-mood-kid"></i>', lib: 'Tabler', icon: '<i class="ti ti-mood-kid"></i>' },
+                    { code: '<i class="ri-parent-line"></i>', lib: 'Remix', icon: '<i class="ri-parent-line"></i>' },
+                    { code: '<i class="fa-solid fa-child-reaching"></i>', lib: 'FontAwesome', icon: '<i class="fa-solid fa-child-reaching"></i>' },
+                    { code: '<i class="ti ti-ban"></i>', lib: 'Tabler', icon: '<i class="ti ti-ban"></i>' },
+                    { code: '<i class="bi bi-person-x"></i>', lib: 'Bootstrap', icon: '<i class="bi bi-person-x"></i>' },
+                    { code: '<i class="ti ti-friends-off"></i>', lib: 'Tabler', icon: '<i class="ti ti-friends-off"></i>' },
+                    { code: '<i class="io ion-alert-circle-outline"></i>', lib: 'Ionicons', icon: '<ion-icon name="alert-circle-outline"></ion-icon>' },
+                    { code: '<i class="ti ti-user-off"></i>', lib: 'Tabler', icon: '<i class="ti ti-user-off"></i>' },
+                    { code: '<i class="ph-light ph-baby"></i>', lib: 'Phosphor', icon: '<i class="ph-light ph-baby"></i>' }
+                ]
+            }
+        ];
+
+        const selections = {};
+
+        function renderApp() {
+            const app = document.getElementById('app');
+            app.innerHTML = '';
+
+            categories.forEach(cat => {
+                const row = document.createElement('div');
+                row.className = 'comparison-row';
+                row.id = `row-${cat.id}`;
+                
+                // Columna Actual
+                row.innerHTML = `
+                    <div class="current-col">
+                        <div class="current-label">${cat.label}</div>
+                        <div class="current-icon">${cat.current}</div>
+                        <div class="current-name">${cat.currentName}</div>
+                    </div>
+                `;
+
+                // Columna Opciones
+                const grid = document.createElement('div');
+                grid.className = 'options-grid';
+
+                cat.options.forEach((opt, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'option-card';
+                    card.onclick = () => selectOption(cat.id, opt.code, card, idx);
+                    card.innerHTML = `
+                        <div class="opt-icon">${opt.icon}</div>
+                        <div class="opt-lib">${opt.lib}</div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+                row.appendChild(grid);
+                app.appendChild(row);
+            });
+        }
+
+        function selectOption(id, code, cardElement, idx) {
+            // Deseleccionar anteriores en la fila
+            const row = document.getElementById(`row-${id}`);
+            const cards = row.querySelectorAll('.option-card');
+            cards.forEach(c => c.classList.remove('selected'));
+            
+            // Si ya estaba seleccionado, lo quitamos (toggle off)
+            if (selections[id] && selections[id].idx === idx) {
+                delete selections[id];
+                row.classList.remove('active');
+            } else {
+                // Seleccionar nuevo
+                cardElement.classList.add('selected');
+                row.classList.add('active');
+                selections[id] = { code: code, label: categories.find(c => c.id === id).label, idx: idx };
+            }
+
+            updateCount();
+        }
+
+        function updateCount() {
+            document.getElementById('count').innerText = Object.keys(selections).length;
+        }
+
+        function generatePrompt() {
+            const keys = Object.keys(selections);
+            if (keys.length === 0) {
+                alert("Por favor selecciona al menos un icono para cambiar.");
+                return;
+            }
+
+            let promptText = "Hola, por favor actualiza los iconos de la invitación con las siguientes selecciones:\n\n";
+            
+            // Agregamos librerías necesarias
+            promptText += "\n";
+            promptText += `<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">\n`;
+            promptText += `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">\n`;
+            promptText += `<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"><\/script>\n\n`;
+
+            promptText += "--- LISTA DE CAMBIOS ---\n";
+
+            keys.forEach(key => {
+                const item = selections[key];
+                promptText += `\n📌 PARA: ${item.label}\n`;
+                promptText += `   Reemplazar el icono actual por:\n`;
+                promptText += `   ${item.code}\n`;
+            });
+
+            document.getElementById('finalPrompt').value = promptText;
+            document.getElementById('resultModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('resultModal').style.display = 'none';
+        }
+
+        function copyToClip() {
+            const copyText = document.getElementById("finalPrompt");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
+            alert("Instrucciones copiadas. ¡Pégalas en el chat o envíalas a tu desarrollador!");
+        }
+
+        // Iniciar
+        renderApp();
+    </script>
+</body>
+</html>

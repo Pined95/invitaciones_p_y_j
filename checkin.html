@@ -3,338 +3,425 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Check-in P&J</title>
+    <title>Check-in | P&J</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        :root {
-            --gold: #C59D5F;       
-            --text-dark: #1a1a1a;  
-            --bg-cream: #FDFBF7;   
-            --bg-outer: #E8E4D9;
-            --success: #2e7d32;
-            --error: #c62828;
+        /* VARIABLES DE DISEÑO (Congruencia Visual) */
+        :root { 
+            --gold: #C59D5F; 
+            --dark: #1a1a1a; 
+            --cream: #FDFBF7; 
+            --success: #2e7d32; 
+            --error: #c62828; 
+            --warning: #f57c00; 
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body { 
             font-family: 'Montserrat', sans-serif; 
-            background: var(--bg-outer); 
-            color: var(--text-dark); 
+            background: var(--dark); 
+            color: var(--cream); 
             margin: 0; 
             display: flex; 
             flex-direction: column; 
-            align-items: center; 
-            min-height: 100vh; 
+            height: 100vh; 
+            overflow: hidden; 
         }
 
-        .container { 
-            width: 100%; 
-            max-width: 500px; 
+        /* BARRA SUPERIOR */
+        .top-bar { 
+            background: #000; 
             padding: 15px; 
-            box-sizing: border-box; 
-            background: var(--bg-cream);
-            min-height: 100vh;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            position: relative;
-            padding-bottom: 80px; /* Espacio para notificación */
-        }
-        
-        /* HEADER */
-        .header-bar { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            margin-bottom: 15px; 
-            background: #fff; 
-            padding: 10px; 
-            border-radius: 8px; 
-            border: 1px solid #eee; 
+            border-bottom: 2px solid var(--gold); 
+            z-index: 10;
         }
-        .title-logo { 
-            font-family: 'Cinzel', serif; 
-            color: var(--gold); 
-            font-weight: bold; 
-            font-size: 1.2rem; 
-            margin: 0; 
-        }
-        
-        .mode-select { 
-            background: var(--text-dark); 
-            color: #fff; 
-            border: none; 
-            padding: 8px 12px; 
-            border-radius: 6px; 
-            font-weight: bold; 
-            font-size: 0.9rem; 
-            cursor: pointer;
-        }
+        .logo { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.2rem; margin: 0; }
+        .sync-status { font-size: 0.75rem; color: #888; display: flex; align-items: center; gap: 5px; }
+        .sync-status.online { color: var(--success); }
+        .sync-status.offline { color: var(--error); animation: pulse 2s infinite; }
 
-        /* TABS */
-        .tabs { 
-            display: flex; 
-            margin-bottom: 15px; 
-            background: #fff; 
-            border-radius: 30px; 
-            padding: 4px; 
-            border: 1px solid #ddd; 
-        }
-        .tab { 
+        /* CÁMARA / ESCÁNER */
+        .scanner-wrapper { 
             flex: 1; 
-            padding: 10px; 
-            text-align: center; 
-            cursor: pointer; 
-            border-radius: 25px; 
-            color: #666; 
-            font-weight: 600; 
-            font-size: 0.9rem; 
-            transition: 0.3s; 
-        }
-        .tab.active { 
-            background: var(--gold); 
-            color: white; 
-            box-shadow: 0 2px 5px rgba(197, 157, 95, 0.3); 
-        }
-        
-        .view { display: none; animation: fadeIn 0.3s; }
-        .view.active { display: block; }
-
-        /* SCANNER */
-        #reader { 
-            width: 100%; 
-            border-radius: 12px; 
-            overflow: hidden; 
+            position: relative; 
             background: #000; 
-            border: 2px solid var(--gold); 
-            min-height: 300px; 
-            margin-bottom: 20px;
+            overflow: hidden; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
+        #reader { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* GUIAS VISUALES DE ESCANEO */
+        .scan-overlay { 
+            position: absolute; width: 260px; height: 260px; 
+            border: 2px solid rgba(197, 157, 95, 0.5); 
+            border-radius: 20px; 
+            box-shadow: 0 0 0 1000px rgba(0,0,0,0.7); 
+            pointer-events: none;
+        }
+        .scan-overlay::after {
+            content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border: 3px solid var(--gold); border-radius: 20px;
+            clip-path: polygon(0% 20%, 0% 0%, 20% 0%, 80% 0%, 100% 0%, 100% 20%, 100% 80%, 100% 100%, 80% 100%, 20% 100%, 0% 100%, 0% 80%);
+        }
+
+        /* CONTROLES INFERIORES */
+        .controls { 
+            background: var(--cream); 
+            color: var(--dark); 
+            padding: 20px; 
+            border-radius: 20px 20px 0 0; 
+            z-index: 20; 
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
         
-        .btn-main { 
-            width: 100%; 
-            padding: 15px; 
-            background: var(--gold); 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            font-size: 1rem; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 10px; 
+        .stats-row { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .stat-box { text-align: center; }
+        .stat-num { display: block; font-size: 1.5rem; font-weight: 700; color: var(--gold); font-family: 'Cinzel', serif; }
+        .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #666; }
+
+        .btn-group { display: flex; gap: 10px; }
+        .btn { 
+            flex: 1; padding: 15px; border: none; border-radius: 8px; 
+            font-weight: bold; font-size: 0.9rem; cursor: pointer; 
+            display: flex; justify-content: center; align-items: center; gap: 8px; 
             transition: 0.2s; 
         }
-        .btn-main:active { transform: scale(0.98); }
-        
-        /* SEARCH */
-        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-        input[type="text"] { 
-            flex: 1; 
-            padding: 12px; 
-            border-radius: 8px; 
-            border: 1px solid #ccc; 
-            font-size: 1rem; 
-            outline: none; 
-            font-family: 'Montserrat', sans-serif;
-        }
-        
-        /* LISTA HISTORIAL */
-        .log-item { 
-            background: white; 
-            padding: 15px; 
-            margin-bottom: 10px; 
-            border-radius: 8px; 
-            border-left: 4px solid var(--gold); 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .log-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .log-name { font-weight: bold; }
-        .log-time { color: #999; font-size: 0.8rem; }
-        .log-details { font-size: 0.85rem; color: #555; display: flex; gap: 10px; }
-        .tag { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; }
+        .btn-primary { background: var(--gold); color: white; }
+        .btn-primary:active { transform: scale(0.98); background: #b08d55; }
+        .btn-secondary { background: #e0e0e0; color: var(--dark); }
 
-        /* MODAL DE SELECCIÓN */
-        #selection-modal {
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); 
-            z-index: 1000; 
-            justify-content: center; 
-            align-items: center;
+        /* MODAL DE RESULTADOS */
+        .result-modal { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.92); z-index: 100; 
+            display: none; flex-direction: column; justify-content: center; align-items: center; 
+            padding: 20px; text-align: center; 
         }
-        .modal-card {
-            background: white; 
-            width: 90%; 
-            max-width: 400px; 
-            border-radius: 12px; 
-            padding: 25px;
-            border-top: 5px solid var(--gold); 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        .modal-title { 
-            font-family: 'Cinzel', serif; 
-            color: var(--gold); 
-            font-size: 1.3rem; 
-            margin-top: 0; 
-            text-align: center;
+        .result-card { 
+            background: white; width: 100%; max-width: 350px; 
+            border-radius: 15px; padding: 40px 20px; 
+            border-top: 8px solid #ccc; color: var(--dark); 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
-        .guest-check-item {
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between;
-            padding: 12px 0; 
-            border-bottom: 1px solid #eee;
-        }
-        .guest-check-item label { flex: 1; margin-left: 10px; font-weight: 500; }
-        .status-badge { 
-            font-size: 0.7rem; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            font-weight: bold; 
-            text-transform: uppercase;
-        }
-        .badge-in { background: #e8f5e9; color: var(--success); border: 1px solid var(--success); }
-        
-        input[type=checkbox] { transform: scale(1.3); accent-color: var(--gold); cursor: pointer; }
-        .btn-cancel { background: transparent; color: #999; border: 1px solid #ddd; margin-top: 10px; }
+        .status-icon { font-size: 4rem; margin-bottom: 15px; }
+        .guest-name { font-family: 'Cinzel', serif; font-size: 1.5rem; margin: 10px 0; line-height: 1.2; }
+        .guest-table { font-size: 1.2rem; color: var(--gold); font-weight: bold; margin-bottom: 5px; display: block;}
+        .guest-info { font-size: 0.85rem; color: #666; margin-bottom: 25px; background: #f5f5f5; padding: 10px; border-radius: 8px; }
 
-        /* NOTIFICACIÓN FLOTANTE */
-        #scan-notification {
-            position: fixed; 
-            bottom: 0; left: 0; width: 100%; 
-            background: white; 
-            border-radius: 20px 20px 0 0;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
-            z-index: 2000; 
-            transform: translateY(100%); 
-            transition: transform 0.3s ease;
-            padding: 20px; 
-            box-sizing: border-box; 
-            text-align: center;
-        }
-        #scan-notification.active { transform: translateY(0); }
+        /* Variantes de Modal */
+        .res-success .result-card { border-top-color: var(--success); } 
+        .res-success .status-icon { color: var(--success); }
         
-        .notify-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; color: var(--text-dark); }
-        .notify-table { font-size: 2.5rem; color: var(--gold); font-family: 'Cinzel', serif; margin: 10px 0; font-weight: bold;}
-        .notify-list { text-align: left; max-height: 150px; overflow-y: auto; background: #f5f5f5; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
-        .notify-item { border-bottom: 1px solid #ddd; padding: 5px 0; font-size: 0.9rem; }
-        .btn-close-notify { width: 100%; padding: 15px; background: var(--text-dark); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; }
+        .res-error .result-card { border-top-color: var(--error); } 
+        .res-error .status-icon { color: var(--error); }
+        
+        .res-warning .result-card { border-top-color: var(--warning); } 
+        .res-warning .status-icon { color: var(--warning); }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* MODAL MANUAL */
+        #manual-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--cream); color:var(--dark); z-index:50; display:none; flex-direction:column; padding:20px; }
+        .manual-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .search-input { padding: 15px; border: 1px solid var(--gold); width: 100%; border-radius: 8px; font-size: 1rem; font-family: inherit; margin-bottom: 15px; }
+        .manual-list { flex: 1; overflow-y: auto; border-top: 1px solid #eee; }
+        .manual-item { 
+            background: white; padding: 15px; border-bottom: 1px solid #f0f0f0; 
+            display: flex; justify-content: space-between; align-items: center; cursor: pointer; 
+        }
+        .manual-item.checked { background: #e8f5e9; opacity: 0.7; }
+        .manual-item strong { display: block; font-size: 0.95rem; }
+        .manual-item small { color: #888; }
+
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header-bar">
-        <h1 class="title-logo">P & J</h1>
-        <select id="checkin-mode" class="mode-select">
-            <option value="est">🚗 Parking</option>
-            <option value="rec">🥂 Recepción</option>
-        </select>
+    <div class="top-bar">
+        <div class="logo">Check-in</div>
+        <div class="sync-status" id="sync-status"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando...</div>
     </div>
-
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab('scan')"><i class="fa-solid fa-qrcode"></i> Escáner</div>
-        <div class="tab" onclick="switchTab('list')"><i class="fa-solid fa-list"></i> Historial</div>
-    </div>
-
-    <div id="scan-view" class="view active">
+    
+    <div class="scanner-wrapper">
         <div id="reader"></div>
-        <button class="btn-main" onclick="startScanner()" id="btn-cam">
-            <i class="fa-solid fa-camera"></i> ACTIVAR CÁMARA
-        </button>
-        
-        <div style="margin-top:30px; text-align:center;">
-            <p style="color:#999; font-size:0.9rem;">— O buscar manual —</p>
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="Apellido...">
-                <button onclick="manualSearch()" style="background:var(--text-dark); color:white; border:none; padding:0 15px; border-radius:8px;"><i class="fa-solid fa-arrow-right"></i></button>
+        <div class="scan-overlay"></div>
+    </div>
+    
+    <div class="controls">
+        <div class="stats-row">
+            <div class="stat-box">
+                <span class="stat-num" id="stat-in">0</span>
+                <span class="stat-label">Ingresados</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-num" id="stat-total">0</span>
+                <span class="stat-label">Total Lista</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-num" id="stat-queue" style="color:var(--warning)">0</span>
+                <span class="stat-label">Cola Offline</span>
             </div>
         </div>
         
-        <p id="status-text" style="text-align:center; color:var(--gold); margin-top:20px; font-weight:bold;"></p>
-    </div>
-
-    <div id="list-view" class="view">
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
-            <h3 style="margin:0; font-size:1rem;">Últimos Ingresos</h3>
-            <button onclick="resetStats()" style="background:none; border:none; color:#999;"><i class="fa-solid fa-trash"></i></button>
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="startCamera()"><i class="fa-solid fa-qrcode"></i> ESCANEAR</button>
+            <button class="btn btn-secondary" onclick="openManual()"><i class="fa-solid fa-magnifying-glass"></i> BUSCAR</button>
         </div>
-        <div id="history-log"></div>
     </div>
-</div>
 
-<div id="selection-modal">
-    <div class="modal-card">
-        <h3 id="modal-group-name" class="modal-title">Familia</h3>
-        <p style="font-size:0.85rem; color:#666; margin-bottom:20px; text-align:center;">Selecciona quiénes ingresan:</p>
-        
-        <div id="modal-list">
-            </div>
-
-        <button class="btn-main" onclick="confirmEntry()">✅ CONFIRMAR ACCESO</button>
-        <button class="btn-main btn-cancel" onclick="closeModal()">Cancelar</button>
+    <div id="result-modal" class="result-modal">
+        <div class="result-card">
+            <i class="fa-solid fa-circle-check status-icon" id="res-icon"></i>
+            <h2 class="guest-name" id="res-name">Nombre Invitado</h2>
+            <span class="guest-table" id="res-table">MESA 1</span>
+            <div class="guest-info" id="res-info">Detalles...</div>
+            <button class="btn btn-dark" style="background:var(--dark); color:white;" onclick="closeResult()">ACEPTAR & CONTINUAR</button>
+        </div>
     </div>
-</div>
 
-<div id="scan-notification">
-    <div class="notify-header" id="notif-title">Familia Pérez</div>
-    <div class="notify-table" id="notif-table">MESA 5</div>
-    
-    <p style="margin:0 0 5px; font-size:0.8rem; color:#666; text-align:left;">Integrantes:</p>
-    <div class="notify-list" id="notif-members"></div>
-    
-    <button class="btn-close-notify" onclick="closeNotification()">CERRAR / SIGUIENTE</button>
-</div>
+    <div id="manual-modal">
+        <div class="manual-header">
+            <h2 style="margin:0; font-family:'Cinzel'; color:var(--gold);">Búsqueda Manual</h2>
+            <button onclick="document.getElementById('manual-modal').style.display='none'" style="border:none; background:none; font-size:1.5rem;">&times;</button>
+        </div>
+        <input type="text" class="search-input" id="search-box" placeholder="Escribe el apellido..." onkeyup="filterManual()">
+        <div class="manual-list" id="manual-list"></div>
+    </div>
 
-<script src="html5-qrcode.min.js"></script>
-<script src="checkin.js"></script>
+    <audio id="beep-ok" src="https://assets.mixkit.co/active_storage/sfx/2578/2578-preview.m3u8"></audio>
+    <audio id="beep-err" src="https://assets.mixkit.co/active_storage/sfx/950/950-preview.m3u8"></audio>
 
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
-    // Funciones UI Globales que usa checkin.js o el HTML
-    function switchTab(t) {
-        // 1. Quitar clase 'active' de todo
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-        
-        if(t === 'scan') { 
-            // 2. Si vamos a ESCANEAR
-            document.getElementById('scan-view').classList.add('active'); 
-            document.querySelector('.tab:nth-child(1)').classList.add('active'); 
-            // (La cámara no se prende sola, el usuario debe darle al botón, lo cual es bueno)
-        } else { 
-            // 3. Si vamos al HISTORIAL (Apagar cámara para ahorrar batería)
-            if(typeof html5QrcodeScanner !== 'undefined' && html5QrcodeScanner) {
-                try { 
-                    html5QrcodeScanner.pause(); // Pausar escaneo
-                    console.log("Cámara pausada para ahorrar energía");
-                } catch(e) { 
-                    console.log("El escáner no estaba activo"); 
-                }
+    // --- PEGAR TU URL DE APPS SCRIPT AQUÍ ---
+    const API_URL = "https://script.google.com/macros/s/AKfycbyKWw1ST_THRFt9joUGpKDLVxM1goT_PxZ6nmXw1-9luzRPi7JX_MZmQ5k4GY2dVUw/exec"; 
+    
+    // Contraseña codificada (PYJ310524)
+    const PASS_HASH = "UFlKMzEwNTI0"; 
+    
+    let guestList = [];     // Base de datos local
+    let offlineQueue = [];  // Cola de IDs escaneados sin internet
+    let scanner = null;
+    let isProcessing = false;
+
+    // --- INICIALIZACIÓN ---
+    window.onload = async () => {
+        // 1. Auth Simple
+        if(!localStorage.getItem('pj_chk_auth')) {
+            const pass = prompt("🔐 Contraseña de Recepción:");
+            if(btoa(pass) !== PASS_HASH) { 
+                document.body.innerHTML="<div style='color:white;text-align:center;margin-top:50px'>⛔ Acceso Denegado</div>"; 
+                return; 
             }
+            localStorage.setItem('pj_chk_auth', 'true');
+        }
+
+        // 2. Cargar datos locales
+        loadLocal();
+        
+        // 3. Sincronizar primera vez
+        await sync();
+
+        // 4. Iniciar cámara
+        startCamera();
+
+        // 5. Ciclos automáticos
+        setInterval(sync, 60000);       // Bajar datos cada minuto
+        setInterval(flushQueue, 15000); // Subir cola cada 15 seg
+    };
+
+    // --- GESTIÓN DE DATOS ---
+    function loadLocal() {
+        if(localStorage.getItem('pj_db')) guestList = JSON.parse(localStorage.getItem('pj_db'));
+        if(localStorage.getItem('pj_q')) offlineQueue = JSON.parse(localStorage.getItem('pj_q'));
+        updateStats();
+    }
+
+    async function sync() {
+        const statusEl = document.getElementById('sync-status');
+        statusEl.innerHTML = '<i class="fa-solid fa-rotate fa-spin"></i> Sync...';
+        
+        try {
+            const res = await fetch(`${API_URL}?action=getAllGuestsForCheckin`);
+            const data = await res.json();
             
-            document.getElementById('list-view').classList.add('active'); 
-            document.querySelector('.tab:nth-child(2)').classList.add('active'); 
-            renderHistory(); 
+            if(data.status === 'success') {
+                // Actualizamos la lista local, pero preservamos los check-ins offline que aun no se suben
+                guestList = data.guests; 
+                localStorage.setItem('pj_db', JSON.stringify(guestList));
+                
+                statusEl.innerHTML = '<i class="fa-solid fa-wifi"></i> Online';
+                statusEl.className = 'sync-status online';
+                updateStats();
+            }
+        } catch(e) { 
+            statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Offline';
+            statusEl.className = 'sync-status offline';
         }
     }
 
-    // Función para cerrar notificación
-    function closeNotification() {
-        document.getElementById('scan-notification').classList.remove('active');
-        if(typeof html5QrcodeScanner !== 'undefined' && html5QrcodeScanner) html5QrcodeScanner.resume();
+    // --- CÁMARA ---
+    function startCamera() {
+        if(scanner) return; // Ya está corriendo
+        
+        scanner = new Html5Qrcode("reader");
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        
+        scanner.start({ facingMode: "environment" }, config, onScanSuccess)
+        .catch(err => {
+            console.error(err);
+            alert("No se pudo iniciar la cámara. Usa la búsqueda manual.");
+        });
+    }
+
+    function onScanSuccess(decodedText) {
+        if(isProcessing) return; // Evitar doble lectura
+        isProcessing = true;
+        scanner.pause(); // Congelar cámara
+        
+        const id = decodedText.trim();
+        processCheckin(id);
+    }
+
+    // --- LÓGICA DE CHECK-IN ---
+    function processCheckin(id) {
+        const guest = guestList.find(g => g.id === id);
+        
+        // 1. Error: No existe
+        if(!guest) { 
+            showModal('error', 'Desconocido', '', 'El código QR no pertenece a la lista.'); 
+            play('err'); 
+            return; 
+        }
+        
+        // 2. Warning: Ya entró
+        // (Verificamos si tiene fecha en DB o si está en nuestra cola local)
+        if(guest.checkinTime || offlineQueue.includes(id)) {
+            showModal('warning', guest.nombre, guest.mesa || "Sin Mesa", '⚠️ Este invitado ya fue registrado previamente.'); 
+            play('err');
+        } 
+        // 3. Éxito: Registrar
+        else {
+            // Marcamos localmente
+            guest.checkinTime = new Date().toISOString();
+            
+            // Agregamos a la cola para subir
+            if(!offlineQueue.includes(id)) {
+                offlineQueue.push(id);
+                localStorage.setItem('pj_q', JSON.stringify(offlineQueue));
+            }
+            
+            showModal('success', guest.nombre, guest.mesa ? "MESA " + guest.mesa : "Sin Asignar", '✅ Acceso Autorizado');
+            play('ok');
+            updateStats();
+        }
+    }
+
+    // --- COLA OFFLINE ---
+    async function flushQueue() {
+        if(offlineQueue.length === 0 || !navigator.onLine) return;
+
+        try {
+            // Enviamos el lote al servidor
+            await fetch(API_URL, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: JSON.stringify({ action: 'BATCH_CHECKIN', ids: offlineQueue }) 
+            });
+            
+            // Limpiamos cola solo si no hubo error de red (asumimos éxito con no-cors)
+            offlineQueue = [];
+            localStorage.setItem('pj_q', '[]');
+            
+            // Forzamos sync para traer la hora real del servidor
+            sync();
+            updateStats();
+            
+        } catch(e) {
+            console.log("Fallo al subir cola, reintentando luego...");
+        }
+    }
+
+    // --- INTERFAZ ---
+    function showModal(type, name, table, info) {
+        const m = document.getElementById('result-modal');
+        m.className = `result-modal res-${type}`;
+        m.style.display = 'flex';
+        
+        // Icono
+        const icon = document.getElementById('res-icon');
+        if(type==='success') icon.className="fa-solid fa-circle-check status-icon";
+        else if(type==='warning') icon.className="fa-solid fa-triangle-exclamation status-icon";
+        else icon.className="fa-solid fa-circle-xmark status-icon";
+
+        document.getElementById('res-name').innerText = name;
+        document.getElementById('res-table').innerText = table;
+        document.getElementById('res-info').innerText = info;
+    }
+
+    function closeResult() {
+        document.getElementById('result-modal').style.display = 'none';
+        isProcessing = false;
+        if(scanner) scanner.resume(); // Reactivar cámara
+    }
+
+    function updateStats() {
+        document.getElementById('stat-total').innerText = guestList.length;
+        // Contamos los que tienen checkinTime (server) O están en cola (local)
+        const count = guestList.filter(g => g.checkinTime || offlineQueue.includes(g.id)).length;
+        document.getElementById('stat-in').innerText = count;
+        document.getElementById('stat-queue').innerText = offlineQueue.length;
+    }
+
+    function play(type) {
+        const audio = document.getElementById(type==='ok'?'beep-ok':'beep-err');
+        if(audio) { audio.currentTime=0; audio.play().catch(e=>{}); }
+    }
+
+    // --- BÚSQUEDA MANUAL ---
+    function openManual() {
+        if(scanner) scanner.pause(); // Pausar para ahorrar batería
+        document.getElementById('manual-modal').style.display = 'flex';
+        document.getElementById('search-box').value = '';
+        filterManual(); // Mostrar todos o vacio
+    }
+
+    function filterManual() {
+        const q = document.getElementById('search-box').value.toLowerCase();
+        const list = document.getElementById('manual-list');
+        list.innerHTML = '';
+        
+        // Filtrar
+        const matches = guestList.filter(g => g.nombre.toLowerCase().includes(q));
+        
+        matches.forEach(g => {
+            const isChecked = g.checkinTime || offlineQueue.includes(g.id);
+            list.innerHTML += `
+                <div class="manual-item ${isChecked?'checked':''}" onclick="manualSelect('${g.id}')">
+                    <div>
+                        <strong>${g.nombre}</strong>
+                        <small>${g.mesa || 'Sin Mesa'}</small>
+                    </div>
+                    ${isChecked ? '<i class="fa-solid fa-check" style="color:var(--success)"></i>' : '<i class="fa-solid fa-chevron-right" style="color:#ccc"></i>'}
+                </div>`;
+        });
+    }
+
+    function manualSelect(id) {
+        document.getElementById('manual-modal').style.display = 'none';
+        processCheckin(id);
     }
 </script>
-
 </body>
 </html>
