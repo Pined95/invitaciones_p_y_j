@@ -61,7 +61,7 @@
         .gold-foil { 
             background: linear-gradient(110deg, #aa771c 0%, #fcf6ba 25%, #bf953f 50%, #fcf6ba 75%, #aa771c 100%); 
             background-size: 200% 200%; 
-            background-position: 50% 50%; /* Centro inicial */
+            background-position: 50% 50%;
             color: #C59D5F; 
             -webkit-background-clip: text; background-clip: text; 
             -webkit-text-fill-color: transparent; 
@@ -86,11 +86,11 @@
         .hero-date { font-family: var(--font-display); letter-spacing: 3px; font-size: 1.3rem; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.8); padding-top: 15px; display: inline-block; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
 
         .countdown { display: flex; justify-content: center; gap: 15px; margin-top: 20px; margin-bottom: 20px; z-index: 10; width: 100%; }
-        .time-box { background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.4); padding: 10px; border-radius: 4px; min-width: 60px; }
-        .time-number { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; color: white; display: block; }
+        .time-box { background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.4); padding: 10px; border-radius: 4px; min-width: 65px; }
+        .time-number { font-family: var(--font-display); font-size: 1.8rem; font-weight: 600; color: white; display: block; }
         .time-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; color: #eee; }
 
-        .section { padding: 50px 20px; text-align: center; position: relative; z-index: 5; }
+        .section { padding: 60px 25px; text-align: center; position: relative; z-index: 5; }
         .gold-frame { border: 2px solid var(--gold); padding: 40px 20px; position: relative; margin: 20px 0; background: rgba(255,255,255,0.85); z-index: 5; }
         .gold-frame::before { content: ''; position: absolute; top: -6px; bottom: -6px; left: 6px; right: 6px; border-top: 1px solid var(--gold); border-bottom: 1px solid var(--gold); pointer-events: none; }
         
@@ -99,15 +99,23 @@
         h3.script-title { font-family: var(--font-script); font-size: 3rem; color: var(--text-dark); margin: 15px 0; line-height: 1.1; font-weight: normal; }
         .parents-block { font-family: var(--font-display); font-size: 1.1rem; color: #000; line-height: 1.6; margin-bottom: 25px; font-weight: 500; }
 
-        .carousel { position: relative; width: 100%; height: 400px; overflow: hidden; margin: 40px 0; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        /* CARRUSEL CON EFECTO DESVANECIDO */
+        .carousel { 
+            position: relative; width: 100%; height: 450px; overflow: hidden; margin: 40px 0; 
+            z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+            /* MÁSCARA PARA EL EFECTO DIFUMINADO EN BORDES */
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+        }
         .carousel img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 1.5s ease-in-out; }
         .carousel img.active { opacity: 1; }
 
         .event-card { border-left: 4px solid var(--gold); text-align: left; padding: 25px; margin-bottom: 40px; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.05); position: relative; border-radius: 0 15px 15px 0; z-index: 5;}
         .event-icon { font-size: 2.5rem; margin-bottom: 15px; color: var(--gold); }
-        .event-name { font-family: var(--font-script); font-size: 2.5rem; color: var(--text-dark); margin: 5px 0; line-height: 1; font-weight: normal;}
-        .event-time { font-family: var(--font-display); font-weight: bold; color: var(--gold); font-size: 1.2rem; letter-spacing: 1px; }
+        .event-name { font-family: var(--font-script); font-size: 2.8rem; color: var(--text-dark); margin: 5px 0; line-height: 1; font-weight: normal;}
+        .event-time { font-family: var(--font-display); font-weight: bold; color: var(--gold); font-size: 1.3rem; letter-spacing: 1px; }
         .btn-app { font-size: 0.8rem; padding: 10px 18px; border-radius: 25px; text-decoration: none; font-weight: 600; border: 1px solid #ddd; display: inline-flex; align-items: center; gap: 8px; background: white; color: #333; margin-right: 10px; margin-bottom: 10px; transition: all 0.2s; }
+        .btn-app:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
         
         .hotel-card { background: white; padding: 20px; border-radius: 10px; border: 1px solid #eee; text-align: left; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .hotel-name { font-weight: bold; color: var(--gold); margin-bottom: 5px; font-family: var(--font-display); font-size: 1.1rem;}
@@ -120,6 +128,7 @@
         .faq-question { font-weight: 600; font-family: var(--font-display); font-size: 1.1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center;}
         .faq-answer { display: none; font-size: 0.9rem; color: #555; margin-top: 15px; line-height: 1.6; }
         .faq-item.active .faq-answer { display: block; animation: fadeIn 0.5s; }
+        .faq-item.active .faq-question { color: var(--gold); }
 
         .guest-row { background: white; padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
         .toggle-group { display: flex; gap: 5px; margin-top: 10px; }
@@ -127,14 +136,17 @@
         .toggle-btn.selected { background: var(--gold); color: white; border-color: var(--gold); }
         .toggle-btn.reject.selected { background: #999; border-color: #999; }
         
-        .personal-note { font-family: var(--font-display); font-size: 1.5rem; color: var(--gold); margin-top: 20px; line-height: 1.4; padding: 0 10px; animation: fadeIn 2s ease; font-weight: normal; }
+        .personal-note { font-family: var(--font-display); font-size: 1.8rem; color: var(--gold); margin-top: 20px; line-height: 1.4; padding: 0 10px; animation: fadeIn 2s ease; font-weight: normal; }
+        .personal-note::before { content: '“'; font-family: var(--font-display); font-size: 3rem; color: #ddd; vertical-align: -15px; margin-right: 5px; }
+        .personal-note::after { content: '”'; font-family: var(--font-display); font-size: 3rem; color: #ddd; vertical-align: -15px; margin-left: 5px; }
+
         .btn { display: inline-block; padding: 15px 40px; border: 1px solid var(--gold); background: transparent; color: var(--text-dark); font-family: var(--font-display); font-size: 1rem; letter-spacing: 2px; cursor: pointer; text-decoration: none; margin-top: 15px; transition: 0.3s; }
         .btn:hover { background: var(--gold); color: white; }
         .btn-full { width: 100%; background: var(--text-dark); color: var(--gold); border-color: var(--text-dark); }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding: 10px 0; z-index: 2000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); padding-bottom: max(10px, env(safe-area-inset-bottom)); }
-        .nav-item { text-decoration: none; color: #999; font-size: 0.65rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 25%; cursor: pointer; }
-        .nav-item i { font-size: 1.4rem; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding: 10px 0; z-index: 2000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-item { text-decoration: none; color: #999; font-size: 0.7rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 25%; cursor: pointer; }
+        .nav-item i { font-size: 1.2rem; margin-bottom: 2px; }
         .nav-item.highlight { color: var(--gold); font-weight: 600; }
 
         .hidden { display: none !important; }
@@ -150,6 +162,7 @@
         #day-b-mode { display: none; background: var(--text-dark); color: white; padding: 40px 20px; text-align: center; position: absolute; top:0; left:0; width:100%; min-height:100vh; z-index: 9999; }
         .day-b-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px; }
         .day-b-card { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .day-b-card:active { background: rgba(255,255,255,0.3); }
         .day-b-card i { font-size: 2rem; color: var(--gold); margin-bottom: 10px; display: block; }
     </style>
 </head>
@@ -436,6 +449,7 @@
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
     AOS.init();
+    // 👇 PEGA TU URL DE APPS SCRIPT AQUÍ
     const API_URL = "https://script.google.com/macros/s/AKfycbxkWDPOJ4q4P81f9DDyVs8cWwV7wEz7_hk9YdNOZvYQYTwtetc-VNtqpqsANmMcbQE/exec"; 
     
     const params = new URLSearchParams(window.location.search);
@@ -446,7 +460,7 @@
     // --- LÓGICA AUTOMÁTICA DÍA B ---
     function checkIsDayB(manualOverride = false) {
         const now = new Date();
-        const weddingDate = new Date(2026, 2, 14); 
+        const weddingDate = new Date(2026, 2, 14); // Mes 2 = Marzo (0-index)
         now.setHours(0,0,0,0); weddingDate.setHours(0,0,0,0);
         return manualOverride || (now.getTime() >= weddingDate.getTime());
     }
@@ -463,6 +477,7 @@
                 const data = await res.json();
                 
                 if(data.status === 'success') {
+                    // Check de "Día B" desde servidor (switch manual)
                     if (data.isDayB && !isDayB) { isDayB = true; enableDayBMode(); }
 
                     const nameLabel = document.getElementById('main-guest-name');
@@ -545,8 +560,8 @@
                     </div>
                     <input id="al-${i}" placeholder="¿Alguna alergia?" style="width:100%; margin-top:10px; padding:10px; border:1px solid #eee; border-radius:4px; display:${isYes?'block':'none'}; font-size:0.9rem;" value="${m.alergias||''}">
                 </div>`;
-            // Aseguramos que el input de alergia esté oculto inicialmente
-            document.getElementById(`al-${i}`).style.display = 'none';
+            // Aseguramos que el input de alergia esté oculto inicialmente si no se ha renderizado
+            if(document.getElementById(`al-${i}`)) document.getElementById(`al-${i}`).style.display = 'none';
         });
     }
 
@@ -658,38 +673,38 @@
     const observer = new IntersectionObserver((e) => { e.forEach(i => { if(i.isIntersecting) i.target.classList.add('active'); }); }, {threshold: 0.1});
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     
-    // --- EFECTOS SIN GIROSCOPIO (SCROLL & MOUSE) ---
+    // --- EFECTOS SIN PERMISOS (SCROLL OSCILANTE) ---
     let tx=0, ty=0, cx=0, cy=0;
     
-    // Movimiento por Scroll (Móvil)
+    // Movimiento oscilante basado en el scroll
     window.addEventListener('scroll', () => {
         const scrolled = window.scrollY;
-        // Factor pequeño para movimiento sutil
-        tx = scrolled * 0.01; 
-        ty = scrolled * 0.01;
+        // La oscilación (sin) hace que vaya y vuelva suavemente
+        tx = Math.sin(scrolled * 0.002) * 5; 
+        ty = Math.cos(scrolled * 0.002) * 5;
     });
 
-    // Movimiento por Mouse (PC)
+    // Movimiento por Mouse (PC) - Para mantener interactividad en escritorio
     document.addEventListener('mousemove', e => { 
         if (window.matchMedia("(pointer: fine)").matches) {
-            tx = ((e.clientX/window.innerWidth)*2-1) / 5; 
-            ty = ((e.clientY/window.innerHeight)*2-1) / 5; 
+            tx = ((e.clientX/window.innerWidth)*2-1) * 2; 
+            ty = ((e.clientY/window.innerHeight)*2-1) * 2; 
         }
     });
 
     function anim() {
-        cx += (tx-cx)*0.03; 
-        cy += (ty-cy)*0.03;
+        cx += (tx-cx)*0.05; 
+        cy += (ty-cy)*0.05;
         
-        // Manchas
+        // Manchas: Se mueven un poco más
         document.querySelectorAll('.wc-spot').forEach(s => { 
             const sp = s.getAttribute('data-speed') || 1; 
-            s.style.transform = `translate3d(${cx*sp*6}px, ${cy*sp*6}px, 0)`; 
+            s.style.transform = `translate3d(${cx*sp*3}px, ${cy*sp*3}px, 0)`; 
         });
         
-        // Foil
+        // Foil: Se mueve sutilmente el brillo
         document.querySelectorAll('.gold-foil').forEach(f => { 
-            f.style.backgroundPosition = `${50+(cx*8)}% ${50+(cy*8)}%`; 
+            f.style.backgroundPosition = `${50+(cx*5)}% ${50+(cy*5)}%`; 
         });
         
         requestAnimationFrame(anim);
