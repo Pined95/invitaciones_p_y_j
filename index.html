@@ -7,11 +7,17 @@
     
     <meta property="og:title" content="Boda Paola & Jorge | 14.03.2026">
     <meta property="og:description" content="Estás invitado a celebrar nuestra unión. Toca para ver los detalles y tu pase de acceso.">
-    <meta property="og:image" content="img/portada_whatsapp.jpg"> <meta property="og:type" content="website">
+    <meta property="og:image" content="img/portada_whatsapp.jpg">
+    <meta property="og:type" content="website">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -43,14 +49,15 @@
             color: var(--text-dark); 
             overflow-x: hidden; 
             padding-bottom: 70px; /* Espacio para el nav */
-            user-select: none; -webkit-user-select: none; /* App feel */
+            user-select: none; -webkit-user-select: none; 
+            -webkit-font-smoothing: antialiased;
         }
         input, textarea { user-select: text; -webkit-user-select: text; }
 
         .app-container { 
             max-width: 480px; margin: 0 auto; background: var(--bg-cream); 
             min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.1); 
-            position: relative; padding-bottom: 80px; 
+            position: relative; padding-bottom: 80px; overflow-x: hidden;
         }
 
         /* --- EFECTOS VISUALES --- */
@@ -61,9 +68,19 @@
         }
 
         .gold-foil { 
-            background: linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%); 
-            background-size: 250% 250%; 
-            color: transparent; 
+            background: linear-gradient(
+                135deg, 
+                #aa771c 0%, 
+                #fcf6ba 25%, 
+                #bf953f 50%, 
+                #fcf6ba 75%, 
+                #aa771c 100%
+            ); 
+            background-size: 200% 200%; 
+            /* Posición inicial para que se vea dorado desde el principio */
+            background-position: 0% 50%;
+            
+            color: #C59D5F; /* Fallback */
             -webkit-background-clip: text; background-clip: text; 
             -webkit-text-fill-color: transparent; 
             will-change: background-position; 
@@ -71,8 +88,17 @@
             padding: 0.1em 0.2em; display: inline-block; line-height: 1.4; 
         }
 
-        .wc-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; z-index: 2; }
-        .wc-spot { position: absolute; mix-blend-mode: multiply; opacity: 0.85; transition: transform 0.2s cubic-bezier(0.1, 0.5, 0.5, 1); will-change: transform; }
+        /* CONTENEDOR DE ACUARELAS */
+        .wc-container { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            overflow: hidden; pointer-events: none; z-index: 0; 
+        }
+        .wc-spot { 
+            position: absolute; mix-blend-mode: multiply; opacity: 0.8; 
+            transition: transform 0.5s ease-out; /* Suavizado para el scroll */
+            will-change: transform; 
+            max-width: 100%;
+        }
 
         /* --- OVERLAY BIENVENIDA --- */
         #welcome-overlay { 
@@ -139,10 +165,9 @@
         .event-address { font-size: 0.9rem; color: var(--text-gray); margin-top: 5px; margin-bottom: 20px; line-height: 1.5; }
         .btn-app { font-size: 0.8rem; padding: 10px 18px; border-radius: 25px; text-decoration: none; font-weight: 600; border: 1px solid #ddd; display: inline-flex; align-items: center; gap: 8px; background: white; color: #333; margin-right: 10px; margin-bottom: 10px; transition: all 0.2s; }
         .btn-app:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
-
+        
         /* HOTELES */
-        .hotel-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
-        .hotel-card { background: white; padding: 20px; border-radius: 10px; border: 1px solid #eee; text-align: left; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .hotel-card { background: white; padding: 20px; border-radius: 10px; border: 1px solid #eee; text-align: left; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .hotel-name { font-weight: bold; color: var(--gold); margin-bottom: 5px; font-family: var(--font-display); font-size: 1.1rem;}
         
         /* REGALOS */
@@ -205,10 +230,10 @@
             <img src="img/watercolor-2.png" class="wc-spot" style="top: -10%; left: -10%; width: 300px; transform: rotate(180deg);" data-speed="2">
             <img src="img/watercolor-3.png" class="wc-spot" style="bottom: 10%; right: -10%; width: 250px;" data-speed="1.5">
         </div>
-        <h1 class="gold-foil" style="font-family: var(--font-script); font-size: 5rem; margin-bottom: 0; line-height: 1.3; font-weight: normal; position: relative; z-index: 10;">P & J</h1>
-        <p style="font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 3px; color: var(--text-dark); position: relative; z-index: 10;">14 . 03 . 2026</p>
+        <h1 class="gold-foil" style="font-family: var(--font-script); font-size: 5rem; margin-bottom: 0; line-height: 1.3; font-weight: normal;">P & J</h1>
+        <p style="font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 3px; color: var(--text-dark);">14 . 03 . 2026</p>
         
-        <div id="loading-msg" style="margin-top: 30px; font-size: 0.9rem; color: #666; letter-spacing: 1px; position: relative; z-index: 10;">
+        <div id="loading-msg" style="margin-top: 30px; font-size: 0.9rem; color: #666; letter-spacing: 1px;">
             <i class="ph-light ph-spinner" style="animation: spin 1s linear infinite;"></i> CARGANDO INVITACIÓN...
         </div>
 
@@ -219,10 +244,18 @@
     <div class="music-btn" onclick="toggleMusic()"><i class="ph-light ph-music-note"></i></div>
 
     <nav class="bottom-nav" id="main-nav">
-        <a href="javascript:void(0)" onclick="window.scrollTo(0,0)" class="nav-item"><i class="ph-light ph-house"></i>Inicio</a>
-        <a href="javascript:void(0)" onclick="document.querySelector('.event-card').scrollIntoView({behavior: 'smooth'})" class="nav-item"><i class="ph-light ph-map-pin"></i>Mapa</a>
-        <a href="javascript:void(0)" onclick="document.getElementById('rsvp-section').scrollIntoView({behavior: 'smooth'})" class="nav-item highlight"><i class="ph-light ph-envelope-open"></i>Confirmar</a>
-        <a href="javascript:void(0)" onclick="document.querySelector('.gift-section').scrollIntoView({behavior: 'smooth'})" class="nav-item"><i class="ph-light ph-gift"></i>Regalo</a>
+        <a href="javascript:void(0)" onclick="window.scrollTo(0,0)" class="nav-item">
+            <i class="ph-light ph-house"></i> Inicio
+        </a>
+        <a href="javascript:void(0)" onclick="document.querySelector('.event-card').scrollIntoView({behavior: 'smooth'})" class="nav-item">
+            <i class="ri-map-2-line"></i> Mapa
+        </a>
+        <a href="javascript:void(0)" onclick="document.getElementById('rsvp-section').scrollIntoView({behavior: 'smooth'})" class="nav-item highlight">
+            <i class="bi bi-envelope-check"></i> Confirmar
+        </a>
+        <a href="javascript:void(0)" onclick="document.querySelector('.gift-section').scrollIntoView({behavior: 'smooth'})" class="nav-item">
+            <i class="ph-light ph-gift"></i> Regalo
+        </a>
     </nav>
 
     <div id="day-b-mode">
@@ -250,6 +283,8 @@
         <div class="wc-container">
             <img src="img/watercolor-1.png" class="wc-spot" style="top: 800px; right: -50px; width: 300px; transform: rotate(-20deg);" data-speed="2">
             <img src="img/watercolor-4.png" class="wc-spot" style="top: 1500px; left: -80px; width: 350px;" data-speed="1.5">
+            <img src="img/watercolor-2.png" class="wc-spot" style="top: 2500px; right: -60px; width: 280px; transform: rotate(45deg);" data-speed="1.2">
+            <img src="img/watercolor-3.png" class="wc-spot" style="top: 3200px; left: -40px; width: 300px;" data-speed="1.8">
         </div>
 
         <div class="hero">
@@ -299,8 +334,8 @@
                 <div class="event-place">Parroquia del Buen Pastor</div>
                 <div class="event-address">Baja California 729, Fracc. San José, Cd. Victoria.</div>
                 <div class="map-actions">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Parroquia+del+Buen+Pastor+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
-                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda+P%26J+(Misa)&dates=20260314T143000/20260314T153000&details=Ceremonia+Religiosa" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Parroquia+del+Buen+Pastor+Cd+Victoria" target="_blank" class="btn-app"><i class="ri-map-2-line"></i> Ver Mapa</a>
+                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda+P%26J+(Misa)&dates=20260314T143000/20260314T153000&details=Ceremonia+Religiosa&location=Parroquia+del+Buen+Pastor,+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
                 </div>
             </div>
             
@@ -311,7 +346,7 @@
                 <div class="event-place">Candilejas Eventos</div>
                 <div class="event-address">Gaspar de la Garza, Valle de Aguayo.</div>
                 <div class="map-actions">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Candilejas+Eventos+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Candilejas+Eventos+Cd+Victoria" target="_blank" class="btn-app"><i class="ri-map-2-line"></i> Ver Mapa</a>
                 </div>
             </div>
 
@@ -322,9 +357,8 @@
                 <div class="event-place">Candilejas Eventos</div>
                 <div class="event-address">Gaspar de la Garza, Valle de Aguayo, Cd. Victoria.</div>
                 <div class="map-actions">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Candilejas+Eventos+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
-                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Fiesta+Boda+P%26J&dates=20260314T190000/20260315T020000&details=Recepción+Boda+Paola+y+Jorge" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
-                    <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[nickname]=Candilejas%20Eventos" class="btn-app" style="color:black;"><i class="ph-light ph-car"></i> Uber</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Candilejas+Eventos+Cd+Victoria" target="_blank" class="btn-app"><i class="ri-map-2-line"></i> Ver Mapa</a>
+                    <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[nickname]=Candilejas%20Eventos" class="btn-app" style="color:black;"><i class="ri-taxi-line"></i> Uber</a>
                 </div>
             </div>
         </div>
@@ -343,21 +377,11 @@
                     <a href="#" style="color:var(--gold); font-size:0.8rem;">Reservar</a>
                 </div>
             </div>
-            <div style="margin-top:40px; background: white; padding:25px; border:1px dashed var(--gold); border-radius:8px;">
-                <h3 style="font-family: var(--font-script); font-size:2.5rem; margin:0; font-weight: normal;">Tiempo Libre</h3>
-                <p style="font-size:0.9rem; margin-top:5px; color:#888;">¿Qué hacer entre la Misa y la Fiesta?</p>
-                <ul style="text-align:left; font-size:0.9rem; color:#555; margin-top:20px; line-height:1.8; list-style:none; padding-left:0;">
-                    <li><i class="ph-light ph-coffee icon-gold"></i> Café en <strong>Starbucks Campestre</strong>.</li>
-                    <li><i class="ph-light ph-wine icon-gold"></i> Drinks en <strong>La Mentira</strong>.</li>
-                    <li><i class="ph-light ph-bed icon-gold"></i> Descanso en el hotel.</li>
-                </ul>
-            </div>
         </div>
 
         <div class="gift-section reveal">
             <h2 class="title gold-foil">Mesa de Regalos</h2>
-            <p style="font-size:1rem; color:#666; margin-bottom:30px; max-width: 80%;">Su presencia es nuestro mejor regalo. Si desean tener un detalle con nosotros:</p>
-            <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51644125" class="gift-btn"><i class="ph-light ph-shopping-bag"></i> Liverpool (Evento: 51644125)</a>
+            <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51644125" class="gift-btn"><i class="ph-light ph-shopping-bag"></i> Liverpool</a>
             <a href="https://www.amazon.com.mx/wedding/share/PaolayJorge_140326" class="gift-btn"><i class="ph-bold ph-amazon-logo"></i> Amazon Wishlist</a>
             <button onclick="document.getElementById('bank-modal').style.display='flex'" class="gift-btn bank-btn"><i class="ph-light ph-credit-card"></i> Datos Bancarios</button>
             <div class="envelope-box">
@@ -376,7 +400,7 @@
                     <p style="font-size:0.9rem; margin-top:10px;">Mujeres<br>Vestido Largo</p>
                 </div>
                 <div style="text-align:center;">
-                    <div style="font-size:3rem; color:var(--gold);"><i class="ph-light ph-user"></i></div>
+                    <div style="font-size:3rem; color:var(--gold);"><i class="ti ti-tie"></i></div>
                     <p style="font-size:0.9rem; margin-top:10px;">Hombres<br>Traje Oscuro</p>
                 </div>
             </div>
@@ -392,10 +416,6 @@
                 <div class="faq-question">¿Hasta cuándo puedo confirmar? <span style="color:var(--gold)">+</span></div>
                 <div class="faq-answer">Por favor confirma tu asistencia antes del <strong>1 de Febrero</strong>.</div>
             </div>
-            <div class="faq-item" onclick="this.classList.toggle('active')">
-                <div class="faq-question">¿Hay estacionamiento? <span style="color:var(--gold)">+</span></div>
-                <div class="faq-answer">Sí, el salón Candilejas cuenta con estacionamiento privado y vigilancia.</div>
-            </div>
         </div>
 
         <div id="rsvp-section" class="section reveal">
@@ -409,6 +429,7 @@
                 <p style="font-size:0.9rem; color:#d32f2f; margin:0; font-weight:bold;">🚫 NO NIÑOS</p>
             </div>
             <div id="guests-list"></div>
+            
             <div style="text-align:left; margin-top:30px;">
                 <label style="font-family: var(--font-display); font-size:0.9rem;">SUGIERE UNA CANCIÓN</label>
                 <input type="text" id="song-suggestion" class="btn" style="width:100%; text-align:left; border-bottom:1px solid var(--text-dark); border-top:none; border-left:none; border-right:none; border-radius:0; margin-bottom:20px;" placeholder="Ej. Vivir mi vida - Marc Anthony">
@@ -487,156 +508,76 @@
     AOS.init();
     // 👇 PEGA TU URL DE APPS SCRIPT AQUÍ
     const API_URL = "https://script.google.com/macros/s/AKfycbyKWw1ST_THRFt9joUGpKDLVxM1goT_PxZ6nmXw1-9luzRPi7JX_MZmQ5k4GY2dVUw/exec"; 
+    
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
-    const today = new Date();
-    const weddingDay = new Date(2026, 2, 14); // Marzo = 2 (0-index)
-
-    // Lógica Automática "Día B" (Fecha local)
-    function checkIsDayB(manualOverride = false) {
-        const now = new Date();
-        now.setHours(0,0,0,0); weddingDay.setHours(0,0,0,0);
-        return manualOverride || (now.getTime() >= weddingDay.getTime());
-    }
-    let isDayB = checkIsDayB(false);
-
-    // Audio
     const audio = document.getElementById("bg-music");
     const musicBtn = document.querySelector('.music-btn');
-    let isPlaying = false;
 
-    // --- ANIMACIÓN PARALLAX ---
-    let targetX = 0, targetY = 0;
-    let currentX = 0, currentY = 0;
-    
-    function updateParallax() {
-        currentX += (targetX - currentX) * 0.1;
-        currentY += (targetY - currentY) * 0.1;
-
-        const spots = document.querySelectorAll('.wc-spot');
-        spots.forEach(spot => {
-            const speed = spot.getAttribute('data-speed') || 1;
-            const rotateMatch = spot.style.transform.match(/rotate\([^)]+\)/);
-            const rotate = rotateMatch ? rotateMatch[0] : 'rotate(0deg)';
-            spot.style.transform = `translate(${currentX * speed * 20}px, ${currentY * speed * 20}px) ${rotate}`;
-        });
-
-        const foils = document.querySelectorAll('.gold-foil');
-        foils.forEach(foil => {
-            foil.style.backgroundPosition = `${50 + (currentX * 60)}% ${50 + (currentY * 60)}%`;
-        });
-
-        requestAnimationFrame(updateParallax);
+    // --- LÓGICA AUTOMÁTICA DÍA B ---
+    function checkIsDayB(manualOverride = false) {
+        const now = new Date();
+        const weddingDate = new Date(2026, 2, 14); // Mes 2 = Marzo (0-index)
+        now.setHours(0,0,0,0); weddingDate.setHours(0,0,0,0);
+        return manualOverride || (now.getTime() >= weddingDate.getTime());
     }
-    updateParallax();
-
-    document.addEventListener('mousemove', (e) => {
-        targetX = (e.clientX / window.innerWidth) * 2 - 1;
-        targetY = (e.clientY / window.innerHeight) * 2 - 1;
-    });
-
-    window.addEventListener('deviceorientation', (e) => {
-        if (e.beta !== null && e.gamma !== null) {
-            targetX = Math.max(-1, Math.min(1, e.gamma / 30)); 
-            targetY = Math.max(-1, Math.min(1, e.beta / 30));
-        }
-    });
-
-    function enterSite() {
-        const overlay = document.getElementById('welcome-overlay');
-        overlay.classList.add('fade-out');
-        setTimeout(() => overlay.style.display = 'none', 800);
-        toggleMusic();
-    }
-
-    function toggleMusic() {
-        if (audio.paused) {
-            audio.play().then(() => {
-                isPlaying = true;
-                musicBtn.style.animationPlayState = 'running';
-                musicBtn.style.opacity = '1';
-            }).catch(e => console.log("Audio espera interacción"));
-        } else {
-            audio.pause();
-            isPlaying = false;
-            musicBtn.style.animationPlayState = 'paused';
-            musicBtn.style.opacity = '0.5';
-        }
-    }
+    let isDayB = checkIsDayB(false);
 
     window.onload = async () => {
         document.getElementById('ticket-section').style.display = 'none';
 
-        if (isDayB) enableDayBMode(); 
+        if(isDayB) enableDayBMode(); 
 
         if(userId) {
             try {
                 const res = await fetch(`${API_URL}?action=getInvite&id=${userId}`);
                 const data = await res.json();
-                    if(data.status === 'success') {
-                        // Check de "Día B" desde servidor (switch manual)
-                        if (data.isDayB && !isDayB) { isDayB = true; enableDayBMode(); }
+                
+                if(data.status === 'success') {
+                    // Check de "Día B" desde servidor (switch manual)
+                    if (data.isDayB && !isDayB) { isDayB = true; enableDayBMode(); }
 
-                        const greetingLabel = document.getElementById('greeting-label');
-                        const nameLabel = document.getElementById('main-guest-name');
-                        
-                        const grupo = data.nombreGrupo || "";
-                        const nombreIndividual = data.nombresInvitacion || data.mainName;
-                        const mensaje = data.mensaje || "";
-                        const esCivil = data.showCivil;
-
-                        if (grupo && grupo.trim().length > 0) {
-                            nameLabel.textContent = grupo;
-                            greetingLabel.textContent = "HOLA FAMILIA";
-                        } else {
-                            nameLabel.textContent = nombreIndividual;
-                            greetingLabel.textContent = "HOLA";
-                        }
-                        
-                        const msgBox = document.getElementById('personal-msg-box');
-                        if (msgBox) {
-                            if(mensaje) {
-                                msgBox.textContent = mensaje;
-                                msgBox.style.display = 'block';
-                            } else {
-                                msgBox.style.display = 'none';
-                            }
-                        }
-                        
-                        if (esCivil) {
-                            const civilCard = document.getElementById('civil-card');
-                            if(civilCard) civilCard.classList.remove('hidden'); 
-                        }
-
-                        currentMembersData = data.members; 
-                        const yaRespondieron = data.members.some(m => m.estado && m.estado !== 'PENDIENTE' && m.estado.trim() !== '');
-                        const asisten = data.members.some(m => m.estado && (m.estado.includes('SI') || m.estado.includes('CONFIRMADO')));
-
-                        if (yaRespondieron) {
-                            if (asisten) {
-                                showTicket();
-                            } else {
-                                const rsvpSection = document.getElementById('rsvp-section');
-                                rsvpSection.innerHTML = `
-                                    <div style="padding:40px 20px;">
-                                        <h3 class="script-title gold-foil">Gracias por avisar</h3>
-                                        <p style="font-size:1.1rem; margin-top:20px;">Entendemos que no podrán acompañarnos.</p>
-                                        <button class="btn" onclick="window.location.reload()" style="margin-top:20px;">VOLVER A CARGAR</button>
-                                    </div>
-                                `;
-                            }
-                        } else {
-                            renderList(data.members);
-                        }
-
-                        // QR Día B
-                        if(isDayB) {
-                             document.getElementById('day-b-qr-img').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${userId}" style="width:100%">`;
-                        }
-
-                        document.getElementById('loading-msg').style.display = 'none';
-                        document.getElementById('enter-btn').style.display = 'block';
+                    const nameLabel = document.getElementById('main-guest-name');
+                    const group = data.nombreGrupo || "";
+                    
+                    if (group && group.trim().length > 0) {
+                        nameLabel.textContent = group;
+                        document.getElementById('greeting-label').textContent = "HOLA FAMILIA";
+                    } else {
+                        nameLabel.textContent = data.nombresInvitacion || data.mainName;
+                        document.getElementById('greeting-label').textContent = "HOLA";
                     }
+                    
+                    if(data.mensaje) document.getElementById('personal-msg-box').innerText = data.mensaje;
+                    if(data.showCivil) document.getElementById('civil-card').classList.remove('hidden');
+
+                    currentMembersData = data.members; 
+                    const responded = data.members.some(m => m.estado && m.estado !== 'PENDIENTE');
+                    
+                    if(responded) {
+                        const anyYes = data.members.some(m => m.estado.includes('SI') || m.estado.includes('CONFIRMADO'));
+                        if(anyYes) {
+                            showTicket();
+                        } else {
+                            document.getElementById('rsvp-section').innerHTML = `
+                                <div style="padding:40px 20px;">
+                                    <h3 class="script-title gold-foil">Gracias por avisar</h3>
+                                    <p style="font-size:1.1rem; margin-top:20px;">Entendemos que no podrán acompañarnos.</p>
+                                    <button class="btn" onclick="window.location.reload()" style="margin-top:20px;">VOLVER A CARGAR</button>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        renderList(data.members);
+                    }
+
+                    if(isDayB) {
+                         document.getElementById('day-b-qr-img').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${userId}" style="width:100%">`;
+                    }
+
+                    document.getElementById('loading-msg').style.display = 'none';
+                    document.getElementById('enter-btn').style.display = 'block';
+                }
             } catch(e) { 
                 console.error("Error cargando invitación", e);
                 document.getElementById('loading-msg').style.display = 'none';
@@ -665,18 +606,14 @@
 
     function renderList(members) {
         const list = document.getElementById('guests-list');
-        if(!list) return;
         list.innerHTML = '';
         members.forEach((m, i) => {
-            const isYes = m.estado && (m.estado.includes('SI') || m.estado.includes('CONFIRMADO'));
-            const isNo = m.estado && (m.estado.includes('NO') || m.estado.includes('DECLINADO'));
-            
             list.innerHTML += `
                 <div class="guest-row">
-                    <div style="font-family: var(--font-display); font-weight:600; margin-bottom:5px; font-size:1.1rem;">${m.nombre}</div>
+                    <div style="font-weight:600; margin-bottom:5px;">${m.nombre}</div>
                     <div class="toggle-group">
-                        <div class="toggle-btn ${isYes?'selected':''}" onclick="setStatus(${i}, 'SI', this)">ASISTIRÉ</div>
-                        <div class="toggle-btn reject ${isNo?'selected':''}" onclick="setStatus(${i}, 'NO', this)">NO PODRÉ</div>
+                        <div class="toggle-btn" onclick="setStatus(${i}, 'SI', this)">ASISTIRÉ</div>
+                        <div class="toggle-btn reject" onclick="setStatus(${i}, 'NO', this)">NO PODRÉ</div>
                     </div>
                     <input id="al-${i}" placeholder="¿Alguna alergia?" style="width:100%; margin-top:10px; padding:10px; border:1px solid #eee; border-radius:4px; display:${isYes?'block':'none'}; font-size:0.9rem;" value="${m.alergias||''}">
                 </div>`;
@@ -688,13 +625,13 @@
         const parent = btn.parentElement;
         parent.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
-        const allergyInput = document.getElementById(`al-${index}`);
-        if(allergyInput) allergyInput.style.display = status === 'SI' ? 'block' : 'none';
+        const inp = document.getElementById(`al-${index}`);
+        if(inp) inp.style.display = status === 'SI' ? 'block' : 'none';
     }
 
     async function sendRSVP() {
         const btn = document.querySelector('.btn-full');
-        btn.innerText = "GUARDANDO..."; 
+        btn.innerText = "ENVIANDO..."; 
         btn.disabled = true;
 
         const responses = currentMembersData.map((m, i) => ({
@@ -745,10 +682,9 @@
         
         const ticketName = document.getElementById('main-guest-name').innerText;
         
-        // Renderizar datos del boleto
         document.getElementById('ticket-name').innerText = ticketName;
         document.getElementById('ticket-id').innerText = userId || "DEMO";
-        document.getElementById('ticket-pax').innerText = numPases + " PAX";
+        document.getElementById('ticket-pax').innerText = numPases + " Personas";
         document.getElementById('ticket-table').innerText = textoMesas;
         
         document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${userId || 'DEMO'}`;
@@ -791,6 +727,67 @@
     // Scroll Reveal
     const observer = new IntersectionObserver((e) => { e.forEach(i => { if(i.isIntersecting) i.target.classList.add('active'); }); }, {threshold: 0.1});
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    
+    // Efectos por Scroll (Móvil y PC)
+    let tx=0, ty=0, cx=0, cy=0;
+    
+    // 1. Efecto Scroll (Mejor para móviles)
+    window.addEventListener('scroll', () => {
+        // Mapeamos el scroll vertical a un movimiento diagonal suave
+        const scrolled = window.scrollY;
+        // Factor 0.05 para que no sea muy rápido
+        tx = scrolled * 0.05; 
+        ty = scrolled * 0.05;
+    });
+
+    // 2. Efecto Mouse (Solo PC)
+    document.addEventListener('mousemove', e => { 
+        // Solo si no es táctil para no interferir
+        if (window.matchMedia("(pointer: fine)").matches) {
+            tx = (e.clientX/window.innerWidth)*2-1; 
+            ty = (e.clientY/window.innerHeight)*2-1; 
+        }
+    });
+
+    function anim() {
+        cx += (tx-cx)*0.1; 
+        cy += (ty-cy)*0.1;
+        
+        // Mover Manchas
+        document.querySelectorAll('.wc-spot').forEach(s => { 
+            const sp = s.getAttribute('data-speed') || 1; 
+            // Usamos translate3d para mejor rendimiento en GPU móvil
+            s.style.transform = `translate3d(${cx*sp*20}px, ${cy*sp*20}px, 0)`; 
+        });
+        
+        // Mover Brillo (Foil)
+        document.querySelectorAll('.gold-foil').forEach(f => { 
+            // Ajustamos el porcentaje del gradiente
+            f.style.backgroundPosition = `${50+(cx*40)}% ${50+(cy*40)}%`; 
+        });
+        
+        requestAnimationFrame(anim);
+    }
+    anim();
+
+    function enterSite() {
+        const ov = document.getElementById('welcome-overlay');
+        ov.classList.add('fade-out');
+        setTimeout(() => ov.style.display = 'none', 800);
+        toggleMusic();
+    }
+
+    function toggleMusic() {
+        if(audio.paused) { 
+            audio.play(); 
+            musicBtn.style.animationPlayState = 'running'; 
+            musicBtn.style.opacity = '1';
+        } else { 
+            audio.pause(); 
+            musicBtn.style.animationPlayState = 'paused'; 
+            musicBtn.style.opacity = '0.5';
+        }
+    }
 </script>
 </body>
 </html>
