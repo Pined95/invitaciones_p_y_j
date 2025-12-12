@@ -3,199 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planner de Mesas | P&J</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+    <title>Smart Planner P&J</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 
     <style>
-        /* --- PALETA MONOCROMÁTICA & GOLD --- */
         :root {
-            --gold: #C59D5F; 
-            --dark: #222222; 
-            --gray: #666666;
-            --light-gray: #e0e0e0;
-            --white: #ffffff;
-            
-            /* Alertas sutiles pero visibles */
-            --alert-red: #d32f2f;
-            --alert-bg: #ffebee;
+            --novio: #2196f3; --novia: #e91e63;
+            --nino: #ffc107; --adolescente: #9c27b0;
+            --joven: #ff5722; --adulto: #607d8b;
+            --ex: #795548; --vegano: #4caf50;
         }
+        body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow: hidden; display: flex; background: #e0e0e0; }
         
-        body { 
-            font-family: 'Montserrat', sans-serif; 
-            margin: 0; 
-            height: 100vh; 
-            overflow: hidden; 
-            display: flex; 
-            background: #333; /* Fondo oscuro fuera del lienzo para contraste */
-        }
+        /* SIDEBAR */
+        #sidebar { width: 340px; background: white; border-right: 1px solid #999; display: flex; flex-direction: column; z-index: 20; box-shadow: 2px 0 15px rgba(0,0,0,0.2); }
+        .sidebar-header { padding: 15px; background: #1a1a1a; color: #C59D5F; text-align: center; }
+        .search-box { padding: 10px; background: #f4f4f4; border-bottom: 1px solid #ddd; display: flex; gap:5px;}
+        .search-box input { flex:1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        #guest-pool { flex: 1; overflow-y: auto; padding: 10px; background: #f9f9f9; }
+
+        /* CHIPS */
+        .guest-chip { background: white; padding: 8px; margin-bottom: 5px; border-radius: 4px; border: 1px solid #ccc; cursor: grab; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; border-left-width: 5px; transition: all 0.2s; position: relative; }
+        .guest-chip:hover { transform: translateX(5px); box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+        .guest-chip.assigned { opacity: 0.5; background: #e0e0e0; color: #888; filter: grayscale(1); pointer-events: none; } /* Deshabilitado si ya tiene mesa */
         
-        /* --- SIDEBAR --- */
-        #sidebar { 
-            width: 320px; 
-            background: var(--white); 
-            border-right: 1px solid #999; 
-            display: flex; 
-            flex-direction: column; 
-            z-index: 20; 
-            box-shadow: 4px 0 15px rgba(0,0,0,0.3); flex-shrink: 0;
-        }
+        .type-nino { border-left-color: var(--nino); background: #fffde7; }
+        .type-adolescente { border-left-color: var(--adolescente); }
+        .type-joven { border-left-color: var(--joven); }
+        .type-adulto { border-left-color: var(--adulto); }
+        .type-ex { border-left-color: var(--ex); }
+
+        .family-tag { font-size: 0.65rem; color: #888; display: block; margin-top: 2px;}
+        .icon-container { display: flex; gap: 3px; font-size: 0.9rem; }
+
+        /* CANVAS */
+        #canvas-area { flex: 1; position: relative; overflow: hidden; background-image: radial-gradient(#aaa 1px, transparent 1px); background-size: 20px 20px; touch-action: none; user-select: none; }
+
+        /* OBJETOS MAPA */
+        .map-obj { position: absolute; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.15); cursor: grab; touch-action: none; border: 3px solid white; font-weight: bold; font-size: 0.8rem; color: #333; transition: border-color 0.3s, box-shadow 0.2s; }
         
-        .sidebar-header { 
-            padding: 15px; 
-            background: var(--dark); 
-            color: var(--white); 
-            text-align: center; 
-            border-bottom: 2px solid var(--gold); 
-        }
-        .sidebar-header h3 { margin: 0; font-family: 'Cinzel', serif; letter-spacing: 1px; }
-
-        .search-box { padding: 10px; background: #f4f4f4; border-bottom: 1px solid #ddd; display: flex; gap:5px; }
-        .search-box input { flex:1; padding: 8px; border: 1px solid #ccc; border-radius: 2px; }
-        .t-btn-icon { padding: 0 10px; cursor: pointer; border: 1px solid #ccc; background: white; border-radius: 2px; }
-
-        .filters { padding: 5px 10px; font-size: 0.7rem; background: #eee; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; }
-
-        #guest-pool { flex: 1; overflow-y: auto; padding: 10px; background: #fafafa; }
-
-        /* CHIPS (INVITADOS) */
-        .guest-chip { 
-            background: white; padding: 8px; margin-bottom: 4px; border-radius: 3px; 
-            border: 1px solid #ddd; cursor: grab; font-size: 0.75rem; 
-            display: flex; justify-content: space-between; align-items: center; 
-            border-left: 3px solid #999; /* Default neutro */
-            user-select: none;
-        }
-        .guest-chip:hover { border-color: var(--gold); background: #fffcf5; }
-        .guest-chip.assigned { display: none; }
-        
-        /* Tags minimalistas */
-        .tag-nino { border-left-color: #ffd54f; }
-        .tag-ex { border-left-color: #8d6e63; }
-        .tag-vegano { border-left-color: #81c784; }
-        .tag-confirmed { border-left-color: var(--dark); } /* Confirmados en negro sólido */
-
-        /* --- VIEWPORT --- */
-        #viewport { 
-            flex: 1; position: relative; overflow: hidden; 
-            background-color: #555; 
-            cursor: grab; 
-        }
-        #viewport:active { cursor: grabbing; }
-
-        /* SALÓN (LIENZO) */
-        #room-container {
-            position: absolute;
-            top: 0; left: 0;
-            width: 3000px; height: 3000px;
-            background-color: #f0f0f0;
-            /* Cuadrícula arquitectónica sutil */
-            background-image: 
-                linear-gradient(#dcdcdc 1px, transparent 1px),
-                linear-gradient(90deg, #dcdcdc 1px, transparent 1px);
-            background-size: 50px 50px;
-            transform-origin: 0 0;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-        }
-
-        /* OBJETOS (ESTILO MONOCROMO) */
-        .map-obj { 
-            position: absolute; display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            text-align: center; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); cursor: default; touch-action: none; 
-            border: 1px solid #333; /* Borde fino negro */
-            font-weight: 600; font-size: 0.75rem; color: #333; 
-            background: white; overflow: hidden; user-select: none;
-        }
-        
+        /* Estilos Base de Formas */
         .shape-round { border-radius: 50%; }
-        .shape-rect { border-radius: 2px; }
+        .shape-square { border-radius: 4px; }
+        .shape-rect { border-radius: 4px; }
 
-        /* ESTILOS ESPECÍFICOS LIMPIOS */
-        /* Mesas */
-        .obj-table { background: white; }
-        
-        /* Fijos (Sin colores chillantes) */
-        .fixed-obj { z-index: 5; border: 1px solid #666; background: #e8e8e8; color: #444; }
-        
-        .obj-novios { 
-            background: white; color: var(--gold); 
-            border: 2px solid var(--gold); /* Solo novios llevan dorado */
-            z-index: 10; font-family: 'Cinzel', serif;
-        }
-        
-        .obj-dance { 
-            background: repeating-linear-gradient(
-                45deg,
-                #f0f0f0,
-                #f0f0f0 10px,
-                #e0e0e0 10px,
-                #e0e0e0 20px
-            );
-            border: 1px dashed #999; color: #666; z-index: 1; 
-        }
-        
-        .obj-dj { background: #333; color: white; border: none; }
-        .obj-wc, .obj-exit { background: white; border: 1px solid #999; color: #666; }
+        .fixed-obj { color: white; z-index: 5; border: none !important; }
+        .obj-novios { background: #C59D5F; border-radius: 30px; }
+        .obj-dj { background: #333; border: 2px solid gold; border-radius: 4px; }
+        .obj-dance { background: rgba(0,0,0,0.1); border: 2px dashed #666; z-index: 1; color: #666; }
+        .obj-wc { background: #009688; border-radius: 8px; }
+        .obj-exit { background: #4caf50; }
 
-        /* Estados */
-        .table-full { background-color: #f5f5f5; color: #999; border-color: #ccc; } /* Mesa llena se apaga */
-        .drag-hover { border-color: var(--gold) !important; box-shadow: 0 0 0 2px var(--gold); }
+        .table-alert { position: absolute; top: -10px; right: -10px; width: 24px; height: 24px; background: red; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; animation: pulse 1.5s infinite; display: none; z-index: 15; cursor: help; font-size: 1rem; }
+        .map-obj.drag-hover { border-color: #C59D5F; transform: scale(1.05); z-index: 100; }
+        .map-obj.table-full { background-color: #ffebee; }
         
-        /* Alertas (Pequeño punto rojo) */
-        .table-alert { 
-            position: absolute; top: 0; right: 0; width: 16px; height: 16px; 
-            background: var(--alert-red); color: white; border-radius: 50%; 
-            display: none; justify-content: center; align-items: center; 
-            font-size: 0.6rem; z-index: 15;
-        }
-        .vegan-badge { 
-            position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); 
-            background: #fff; border: 1px solid #81c784; color: #2e7d32; font-size: 0.6rem; 
-            padding: 1px 4px; border-radius: 4px; display: none; white-space: nowrap; 
-        }
-        
-        .alert-tooltip { 
-            position: absolute; bottom: 105%; left: 50%; transform: translateX(-50%); 
-            background: var(--dark); color: var(--gold); padding: 5px 10px; border-radius: 2px; 
-            font-size: 0.7rem; width: 140px; display: none; z-index: 200; pointer-events: none; text-align: center;
-        }
-        .map-obj:hover .alert-tooltip { display: block; }
+        .vegan-indicator { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: #4caf50; color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; display: none; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .alert-tooltip { position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px; border-radius: 6px; font-size: 0.7rem; width: 180px; display: none; z-index: 20; pointer-events: none; text-align: left; }
+        .table-alert:hover .alert-tooltip { display: block; }
 
         /* TOOLBAR */
-        #toolbar { 
-            position: absolute; top: 15px; left: 340px; right: 20px; height: 50px; 
-            background: var(--white); border-radius: 4px; display: flex; align-items: center; 
-            padding: 0 10px; gap: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 100; overflow-x: auto;
-        }
-        .t-btn { 
-            padding: 6px 12px; border: 1px solid #ddd; background: white; border-radius: 2px; 
-            cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; gap: 5px; min-width: max-content;
-            color: #444; font-weight: 600;
-        }
-        .t-btn:hover { background: #f5f5f5; border-color: #999; }
-        .t-btn i { color: #555; }
-        
-        /* ZOOM CONTROLS */
-        .zoom-controls { 
-            position: absolute; bottom: 30px; right: 30px; 
-            display: flex; flex-direction: column; gap: 5px; z-index: 100; 
-        }
-        .zoom-btn { 
-            width: 40px; height: 40px; background: white; border: 1px solid #ccc; border-radius: 4px; 
-            font-size: 1rem; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-            display: grid; place-items: center; color: var(--dark);
-        }
-        .zoom-btn:hover { background: #f0f0f0; }
+        #toolbar { position: absolute; top: 10px; left: 360px; right: 20px; height: 60px; background: white; border-radius: 8px; display: flex; align-items: center; padding: 0 15px; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 100; overflow-x: auto; }
+        .tool-group { border-right: 1px solid #eee; padding-right: 10px; display: flex; gap: 5px; align-items: center; }
+        .t-btn { border: 1px solid #ddd; background: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+        .t-btn:hover { background: #f0f0f0; }
+        .btn-save { background: #222; color: #C59D5F; border: none; font-weight: bold; margin-left: auto;}
 
-        /* MODAL */
-        #edit-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center; }
-        .edit-card { background:white; padding:25px; border-radius:4px; width:350px; max-height: 80vh; display: flex; flex-direction: column; border-top: 4px solid var(--gold); }
-        
-        .guest-list-edit { flex: 1; overflow-y: auto; border: 1px solid #eee; margin: 10px 0; padding: 5px; background: #fafafa; }
-        .gl-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; background: white; font-size: 0.8rem; align-items: center;}
-        .btn-kick { color: #d32f2f; cursor: pointer; font-weight: bold; font-size: 0.9rem;}
+        /* MODAL EDICIÓN */
+        #edit-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; justify-content:center; align-items:center; }
+        .edit-card { background:white; padding:20px; border-radius:8px; width:320px; box-shadow:0 5px 20px rgba(0,0,0,0.3); }
+        .edit-form label { display:block; margin:10px 0 5px; font-weight:bold; font-size:0.9rem; }
+        .edit-form input, .edit-form select { width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; }
+        .edit-row { display: flex; gap: 10px; }
+        .edit-actions { margin-top:20px; display:flex; justify-content:space-between; }
 
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
     </style>
@@ -203,430 +85,511 @@
 <body>
 
     <div id="sidebar">
-        <div class="sidebar-header">
-            <h3>PLANNER P&J</h3>
-            <small id="stats-display">Cargando...</small>
-            <button onclick="logout()" style="background:none; border:none; color:#aaa; cursor:pointer; margin-top:5px; font-size:0.7rem; text-decoration:underline;">Cerrar Sesión</button>
-        </div>
+        <div class="sidebar-header"><h3 style="margin:0">INVITADOS</h3><small id="stats-display">Cargando...</small></div>
         <div class="search-box">
             <input type="text" id="search" placeholder="Buscar..." onkeyup="filterGuests()">
-            <button class="t-btn-icon" onclick="toggleFamilyGroup()"><i class="fa-solid fa-users"></i></button>
+            <button class="t-btn" onclick="groupByFamily()" title="Agrupar"><i class="fa-solid fa-users"></i></button>
         </div>
-        <div class="filters">
-            <div><span style="color:#ffd54f">● Niño</span> <span style="color:#8d6e63">● EX</span></div>
-            <label style="display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" id="show-pending" onchange="renderSidebar()"> Ver Pendientes</label>
+        <div style="padding:5px 10px; font-size:0.7rem; display:flex; gap:5px; flex-wrap:wrap; background:#eee;">
+            <span style="color:var(--nino)">● Niño</span> <span style="color:var(--ex)">● EX</span> <span style="color:var(--vegano)">● Vegano</span>
         </div>
         <div id="guest-pool"></div>
     </div>
 
     <div id="toolbar">
-        <button class="t-btn" onclick="addObj('table', 'round')"><i class="fa-regular fa-circle"></i> Redonda</button>
-        <button class="t-btn" onclick="addObj('table', 'rect')"><i class="fa-solid fa-vector-square"></i> Rectangular</button>
-        <div style="width:1px; height:20px; background:#ddd;"></div>
-        <button class="t-btn" onclick="addObj('fixed', 'dance')"><i class="fa-solid fa-music"></i> Pista</button>
-        <button class="t-btn" onclick="addObj('fixed', 'dj')"><i class="fa-solid fa-headphones"></i> DJ</button>
-        <button class="t-btn" onclick="addObj('fixed', 'novios')"><i class="fa-solid fa-heart" style="color:var(--gold)"></i> Novios</button>
-        <button class="t-btn" onclick="addObj('fixed', 'wc')"><i class="fa-solid fa-restroom"></i> Baños</button>
-        <button class="t-btn" onclick="addObj('fixed', 'exit')"><i class="fa-solid fa-door-open"></i> Entrada</button>
-        <button class="t-btn" onclick="saveData()" style="margin-left:auto; background:var(--dark); color:white; border:none;">GUARDAR</button>
-        <button class="t-btn" onclick="clearLocalLayout()" style="color:#d32f2f; border:none;"><i class="fa-solid fa-trash"></i></button>
+        <div class="tool-group">
+            <span style="font-size:0.7rem; color:#999;">MESAS:</span>
+            <button class="t-btn" onclick="addObj('table', 'round')"><i class="fa-regular fa-circle"></i></button>
+            <button class="t-btn" onclick="addObj('table', 'square')"><i class="fa-regular fa-square"></i></button>
+            <button class="t-btn" onclick="addObj('table', 'rect')"><i class="fa-solid fa-vector-square"></i></button>
+        </div>
+        <div class="tool-group">
+            <span style="font-size:0.7rem; color:#999;">FIJOS:</span>
+            <button class="t-btn" onclick="addObj('fixed', 'dj')" title="DJ">🎧</button>
+            <button class="t-btn" onclick="addObj('fixed', 'dance')" title="Pista">💃</button>
+            <button class="t-btn" onclick="addObj('fixed', 'wc')" title="Baños">🚻</button>
+            <button class="t-btn" onclick="addObj('fixed', 'novios')" title="Novios">💑</button>
+            <button class="t-btn" onclick="addObj('fixed', 'exit')" title="Entrada">🚪</button>
+        </div>
+        <button class="t-btn btn-save" onclick="saveData()"><i class="fa-solid fa-floppy-disk"></i> GUARDAR</button>
+        <button class="t-btn" onclick="clearLocalLayout()" style="color:red; border:none; margin-left:10px;" title="Reiniciar Mapa"><i class="fa-solid fa-trash"></i></button>
     </div>
 
-    <div id="viewport">
-        <div id="room-container"></div>
-    </div>
-
-    <div class="zoom-controls">
-        <button class="zoom-btn" onclick="zoomIn()"><i class="fa-solid fa-plus"></i></button>
-        <button class="zoom-btn" onclick="resetZoom()"><i class="fa-solid fa-compress"></i></button>
-        <button class="zoom-btn" onclick="zoomOut()"><i class="fa-solid fa-minus"></i></button>
-    </div>
+    <div id="canvas-area"></div>
 
     <div id="edit-modal">
         <div class="edit-card">
-            <h3 style="margin:0 0 15px 0; font-family:'Cinzel',serif; color:var(--dark); border-bottom:1px solid #eee; padding-bottom:10px;">Configurar</h3>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                <div><label style="font-size:0.7rem; font-weight:bold; color:#999;">NOMBRE</label><input type="text" id="edit-name" style="width:100%; padding:5px;"></div>
-                <div><label style="font-size:0.7rem; font-weight:bold; color:#999;">CAPACIDAD</label><input type="number" id="edit-capacity" style="width:100%; padding:5px;"></div>
-                <div><label style="font-size:0.7rem; font-weight:bold; color:#999;">ANCHO</label><input type="number" id="edit-w" style="width:100%; padding:5px;"></div>
-                <div><label style="font-size:0.7rem; font-weight:bold; color:#999;">ALTO</label><input type="number" id="edit-h" style="width:100%; padding:5px;"></div>
-                <div><label style="font-size:0.7rem; font-weight:bold; color:#999;">ROTACIÓN</label><input type="number" id="edit-rot" step="15" style="width:100%; padding:5px;"></div>
-            </div>
-            
-            <h4 style="margin:5px 0; font-size:0.8rem; color:#666;">Invitados (<span id="count-seated">0</span>)</h4>
-            <div class="guest-list-edit" id="table-guest-list"></div>
-
-            <div style="display:flex; justify-content:space-between; margin-top:20px;">
-                <button style="color:red; background:none; border:1px solid #ffcdd2; padding:8px 12px; border-radius:4px; cursor:pointer;" onclick="deleteSelectedElement()">Eliminar</button>
-                <div style="display:flex; gap:10px;">
-                    <button style="background:none; border:1px solid #ccc; padding:8px 12px; border-radius:4px; cursor:pointer;" onclick="document.getElementById('edit-modal').style.display='none'">Cancelar</button>
-                    <button style="background:var(--gold); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold;" onclick="saveElementEdits()">Aplicar</button>
+            <h3 style="margin-top:0">Editar Mesa</h3>
+            <div class="edit-form">
+                <label>Nombre / Número:</label>
+                <input type="text" id="edit-name">
+                
+                <div class="edit-row">
+                    <div style="flex:1">
+                         <label>Forma:</label>
+                        <select id="edit-shape">
+                            <option value="round">Redonda</option>
+                            <option value="square">Cuadrada</option>
+                            <option value="rect">Rectangular</option>
+                        </select>
+                    </div>
+                    <div style="flex:1">
+                         <label>Capacidad:</label>
+                        <input type="number" id="edit-capacity" min="1" max="50">
+                    </div>
                 </div>
+
+                <div class="edit-row">
+                    <div style="flex:1">
+                        <label>Ancho (px):</label>
+                        <input type="number" id="edit-width" step="10">
+                    </div>
+                    <div style="flex:1">
+                        <label>Alto (px):</label>
+                        <input type="number" id="edit-height" step="10">
+                    </div>
+                </div>
+                
+                <div class="edit-row">
+                     <div style="flex:1">
+                        <label>Rotación (°):</label>
+                        <input type="number" id="edit-rotation" step="15" value="0">
+                    </div>
+                </div>
+
+            </div>
+            <div class="edit-actions">
+                <button class="t-btn" style="color:red; border-color:red;" onclick="deleteSelectedTable()">Borrar</button>
+                <button class="t-btn" onclick="document.getElementById('edit-modal').style.display='none'">Cancelar</button>
+                <button class="t-btn" style="background:var(--novio); color:white; border:none;" onclick="saveTableEdits()">Aplicar</button>
             </div>
         </div>
     </div>
 
 <script>
-    // URL APPS SCRIPT
-    const API_URL = "https://script.google.com/macros/s/AKfycbyKWw1ST_THRFt9joUGpKDLVxM1goT_PxZ6nmXw1-9luzRPi7JX_MZmQ5k4GY2dVUw/exec"; 
-    const PASS_HASH = "UFlKMzEwNTI0"; 
-
-    // Variables Zoom/Pan
-    let scale = 1;
-    let panX = 0; let panY = 0;
+    // 👇 URL DEL APPS SCRIPT (ACTUALIZADA)
+    const API_URL = "https://script.google.com/macros/s/AKfycbymKVluAzH8VNN7IRsiPGZhVQVMeMvim4ICQRaG-4GroFu873x1g1zji1WtD-DWwUY/exec"; 
     
-    // Estado
-    let guests = [];
-    let mapElements = [];
-    let isGroupedByFamily = false;
-    let editingElementId = null;
+    let guests = [], mapElements = [], isGroupedByFamily = false;
+    let editingTableId = null;
 
     window.onload = async () => {
-        // Auth
-        if(!localStorage.getItem('pj_planner_auth')) {
-            if(btoa(prompt("🔐 Password Admin:")) !== PASS_HASH) { 
-                document.body.innerHTML = "<div style='height:100vh;display:flex;justify-content:center;align-items:center;'><h1>⛔ Acceso Denegado</h1></div>"; 
-                return; 
-            }
-            localStorage.setItem('pj_planner_auth', 'true');
+        // --- SEGURIDAD ---
+        if(prompt("🔐 Contraseña de Administrador:") !== "PYJ310524") { 
+            document.body.innerHTML = "<div style='display:flex;height:100vh;justify-content:center;align-items:center;'><h1>⛔ Acceso Restringido</h1></div>"; 
+            return; 
         }
+        // -----------------
 
-        loadLocalLayout();
-        initPanZoom(); 
-
+        loadLocalLayout(); 
         try {
             const res = await fetch(`${API_URL}?action=getAllConfirmed`);
             const data = await res.json();
             if(data.status === 'success') { 
-                guests = data.guests;
-                syncDataState(); 
+                guests = data.guests; 
+                syncGuestsWithLayout(); 
+                syncTablesFromExcel();
+                renderSidebar(); 
+                
                 if(mapElements.length === 0) autoCreateTablesFromExcel();
-                renderSidebar();
             }
-        } catch(e) { alert("Modo Offline"); }
+        } catch(e) { alert("Error cargando datos: " + e); }
     };
-
-    function logout() { localStorage.removeItem('pj_planner_auth'); location.reload(); }
-
-    // --- ZOOM & PAN ---
-    function initPanZoom() {
-        const viewport = document.getElementById('viewport');
-        const room = document.getElementById('room-container');
-        let isPanning = false, startX = 0, startY = 0;
-
-        viewport.addEventListener('mousedown', (e) => {
-            if (e.target === viewport || e.target === room) {
-                isPanning = true; startX = e.clientX - panX; startY = e.clientY - panY;
-                viewport.style.cursor = 'grabbing';
-            }
-        });
-        window.addEventListener('mouseup', () => { isPanning = false; viewport.style.cursor = 'grab'; });
-        window.addEventListener('mousemove', (e) => {
-            if (!isPanning) return;
-            e.preventDefault(); panX = e.clientX - startX; panY = e.clientY - startY;
-            updateTransform();
-        });
-        viewport.addEventListener('wheel', (e) => {
-            e.preventDefault(); const delta = e.deltaY > 0 ? 0.9 : 1.1; zoom(delta);
-        }, { passive: false });
-    }
-
-    function zoom(factor) {
-        if (typeof factor === 'number') { const newScale = scale * factor; if (newScale >= 0.2 && newScale <= 4) scale = newScale; } 
-        else { if (factor === 'in') scale = Math.min(scale + 0.2, 4); if (factor === 'out') scale = Math.max(scale - 0.2, 0.2); }
-        updateTransform();
-    }
-    function zoomIn() { zoom('in'); } function zoomOut() { zoom('out'); }
-    function resetZoom() { scale = 1; panX = 0; panY = 0; updateTransform(); }
-    function updateTransform() { document.getElementById('room-container').style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`; }
-
-    // --- DATOS ---
+    
     function loadLocalLayout() {
-        const saved = localStorage.getItem('pj_floorplan_v8');
-        if(saved) { mapElements = JSON.parse(saved); mapElements.forEach(el => renderElement(el, true)); }
-    }
-    function saveLocalLayout() { localStorage.setItem('pj_floorplan_v8', JSON.stringify(mapElements)); }
-
-    function syncDataState() {
-        mapElements.forEach(t => {
-            if(t.type === 'table') {
-                t.guests = t.guests.map(gLocal => guests.find(gRemote => gRemote.id === gLocal.id)).filter(g => g);
-                analyzeTableRules(t);
-                const div = document.getElementById(t.id);
-                if(div) updateDivContent(div, t);
-            }
-        });
-        const mesasExcel = [...new Set(guests.map(g => g.mesa).filter(m => m && m !== "Por asignar"))];
-        const mesasMapa = mapElements.filter(e => e.type === 'table').map(e => e.name);
-        mesasExcel.forEach((mName, i) => { if(!mesasMapa.includes(mName)) addObj('table', 'round', mName, true, i); });
-    }
-    function autoCreateTablesFromExcel() { syncDataState(); }
-
-    // --- SIDEBAR ---
-    function renderSidebar() {
-        const container = document.getElementById('guest-pool'); container.innerHTML = '';
-        const showPending = document.getElementById('show-pending').checked;
-        
-        let list = guests.filter(g => (g.rsvp||"").toUpperCase().includes('SI') || showPending);
-        
-        const q = document.getElementById('search').value.toLowerCase();
-        if(q) list = list.filter(g => g.nombre.toLowerCase().includes(q) || (g.groupId||'').toLowerCase().includes(q));
-
-        if(isGroupedByFamily) list.sort((a,b) => (a.groupId||'').localeCompare(b.groupId||''));
-        else list.sort((a,b) => a.nombre.localeCompare(b.nombre));
-
-        const assignedIds = mapElements.flatMap(t => t.guests ? t.guests.map(g=>g.id) : []);
-
-        list.forEach(g => {
-            if(assignedIds.includes(g.id)) return;
-
-            const div = document.createElement('div');
-            let tagClass = 'tag-default';
-            const tags = (g.tags || "").toUpperCase();
-            if((g.rsvp||'').includes('SI')) tagClass = 'tag-confirmed';
-            if(tags.includes('NIÑO')) tagClass = 'tag-nino';
-            if(tags.includes('EX')) tagClass = 'tag-ex';
-            if(tags.includes('VEGAN')) tagClass = 'tag-vegano';
-
-            div.className = `guest-chip draggable-guest ${tagClass}`;
-            div.dataset.id = g.id;
-            div.innerHTML = `<div><span class="guest-name">${g.nombre}</span><span class="guest-group">${g.groupId || 'Individual'}</span></div>`;
-            container.appendChild(div);
-        });
-        document.getElementById('stats-display').innerText = `Lista: ${list.length} | Faltan: ${list.length - assignedIds.length}`;
-    }
-
-    function filterGuests() { renderSidebar(); }
-    function toggleFamilyGroup() { isGroupedByFamily = !isGroupedByFamily; renderSidebar(); }
-
-    // --- ELEMENTOS ---
-    function addObj(type, subtype, forceName=null, autoPosition=false, idx=0) {
-        const id = 'el_' + Date.now() + Math.floor(Math.random()*1000);
-        let w=120, h=120, name = forceName || subtype.toUpperCase();
-        let x=200, y=200;
-
-        if(subtype === 'round') { w=120; h=120; if(!forceName) name=`Mesa ${countTables()+1}`; }
-        if(subtype === 'rect') { w=160; h=90; if(!forceName) name=`Mesa ${countTables()+1}`; }
-        if(subtype === 'dance') { w=300; h=250; name="PISTA"; }
-        if(subtype === 'dj') { w=150; h=80; name="DJ"; }
-        
-        if(autoPosition) { x = 100 + (idx % 6) * 160; y = 100 + Math.floor(idx / 6) * 160; }
-        else { x = 200 - panX; y = 200 - panY; }
-
-        const el = { id, type, subtype, x, y, w, h, name, rotation: 0, capacity: 10, guests: [] };
-        
-        if(forceName && type==='table') {
-            el.guests = guests.filter(g => g.mesa === forceName && (g.rsvp.includes('SI') || g.rsvp.includes('CONFIRMADO')));
+        const saved = localStorage.getItem('pj_floorplan');
+        if(saved) {
+            mapElements = JSON.parse(saved);
+            mapElements.forEach(el => renderElement(el, true)); 
         }
-        
-        mapElements.push(el); renderElement(el); saveLocalLayout();
     }
     
+    function autoCreateTablesFromExcel() {
+        const mesas = [...new Set(guests.map(g => g.mesa).filter(m => m && m !== "Por asignar"))];
+        mesas.forEach((m, i) => {
+            const cols = 5;
+            const x = 100 + (i % cols) * 180;
+            const y = 100 + Math.floor(i / cols) * 180;
+            
+            const el = {
+                id: 'tbl_auto_' + m, type: 'table', subtype: 'round', x: x, y: y, 
+                guests: [], name: m, capacity: 10, width: 130, height: 130, rotation: 0
+            };
+            mapElements.push(el);
+            renderElement(el, true);
+        });
+        
+        guests.forEach(g => {
+            if(g.mesa && g.mesa !== "Por asignar") {
+                const tbl = mapElements.find(t => t.name === g.mesa);
+                if(tbl) tbl.guests.push(g);
+            }
+        });
+        mapElements.forEach(t => analyzeTableRules(t));
+        saveLocalLayout();
+    }
+
+    function syncGuestsWithLayout() {
+        mapElements.forEach(t => {
+            if(t.type === 'table') {
+                t.guests = t.guests.filter(gLoc => guests.find(gRem => gRem.id === gLoc.id));
+                t.guests = t.guests.map(gLoc => guests.find(gRem => gRem.id === gLoc.id));
+                analyzeTableRules(t);
+            }
+        });
+    }
+
+    function renderSidebar() {
+        const list = document.getElementById('guest-pool');
+        list.innerHTML = '';
+        let displayGuests = [...guests];
+        if(isGroupedByFamily) displayGuests.sort((a, b) => (a.groupId || "").localeCompare(b.groupId || ""));
+
+        displayGuests.forEach(g => {
+            const isAssigned = mapElements.some(t => t.type==='table' && t.guests.some(tg => tg.id === g.id));
+
+            let typeClass = 'type-adulto', icons = '';
+            const vibra = (g.vibra || "").toUpperCase(), tags = (g.tags || "").toUpperCase();
+
+            if (tags.includes('NIÑO') || vibra === 'NIÑOS') typeClass = 'type-nino';
+            else if (vibra === 'ADOLESCENTES') typeClass = 'type-adolescente';
+            else if (tags.includes('EX') || vibra === 'EX') typeClass = 'type-ex';
+
+            if (tags.includes('NIÑO')) icons += '<i class="fa-solid fa-baby" title="Niño"></i> ';
+            if (tags.includes('EX')) icons += '<i class="fa-solid fa-heart-crack" style="color:brown"></i> ';
+            if (tags.includes('VEGANO') || tags.includes('VEGETARIANO')) icons += '<i class="fa-solid fa-leaf" style="color:green"></i> ';
+            if (g.movilidad === 'SILLA_RUEDAS') icons += '<i class="fa-solid fa-wheelchair"></i> ';
+
+            const div = document.createElement('div');
+            div.className = `guest-chip ${typeClass} draggable-guest`;
+            if (isAssigned) div.classList.add('assigned'); 
+            
+            div.dataset.id = g.id;
+            div.innerHTML = `<div><div style="font-weight:600">${g.nombre}</div><span class="family-tag">${g.groupId ? 'Fam. '+g.groupId : 'Indiv.'}</span></div><div class="icon-container">${icons}</div>`;
+            list.appendChild(div);
+        });
+        document.getElementById('stats-display').innerText = `${guests.length} Confirmados`;
+    }
+
+    function groupByFamily() { isGroupedByFamily = !isGroupedByFamily; renderSidebar(); }
+    function filterGuests() {
+        const q = document.getElementById('search').value.toLowerCase();
+        document.querySelectorAll('.guest-chip').forEach(el => {
+            el.style.display = el.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
+        });
+    }
+
+    function addObj(type, subtype) {
+        const id = 'el_' + Date.now();
+        let w=100, h=100;
+        if(subtype==='round') { w=130; h=130; }
+        if(subtype==='rect') { w=180; h=100; }
+        if(subtype==='novios') { w=180; h=60; }
+        if(subtype==='dance') { w=250; h=200; }
+
+        const elData = {
+            id: id, type: type, subtype: subtype, x: 200, y: 200, guests: [],
+            name: type === 'table' ? `Mesa ${countTables()+1}` : subtype.toUpperCase(),
+            capacity: 10, width: w, height: h, rotation: 0
+        };
+        mapElements.push(elData);
+        renderElement(elData);
+        saveLocalLayout();
+    }
+
     function countTables() { return mapElements.filter(e => e.type === 'table').length; }
 
-    function renderElement(data, init=false) {
+    function renderElement(data, isLoading=false) {
         const div = document.createElement('div');
-        div.id = data.id; div.dataset.id = data.id;
-        div.className = `map-obj shape-${data.subtype}`;
-        if(data.type === 'fixed') div.classList.add('fixed-obj', `obj-${data.subtype}`);
-        else div.classList.add('obj-table');
-
-        updateDivGeometry(div, data);
-        updateDivContent(div, data);
-
-        div.addEventListener('dblclick', (e) => { e.stopPropagation(); openEditModal(data.id); });
-
-        document.getElementById('room-container').appendChild(div);
-        initInteract(div, data);
-        if(data.type === 'table') setupDropzone(div);
-        if(!init && data.type === 'table') analyzeTableRules(data);
-    }
-
-    function updateDivGeometry(div, data) {
-        div.style.width = `${data.w}px`; div.style.height = `${data.h}px`;
-        div.style.transform = `translate(${data.x}px, ${data.y}px) rotate(${data.rotation}deg)`;
-    }
-
-    function updateDivContent(div, data) {
-        const counterRot = `rotate(-${data.rotation}deg)`;
-        if(data.type === 'table') {
-             div.innerHTML = `<div style="transform:${counterRot}; width:100%;">
-                <div style="font-weight:700">${data.name}</div>
-                <small style="color:#666">${data.guests.length}/${data.capacity}</small>
-                <div class="table-alert">!</div><div class="alert-tooltip"></div><div class="vegan-badge"></div>
-             </div>`;
-             div.className = `map-obj shape-${data.subtype} ${data.guests.length>=data.capacity ? 'table-full':''}`;
-        } else {
-             div.innerHTML = `<div style="transform:${counterRot}">${data.name}</div>`;
-        }
-    }
-
-    // --- INTERACT ---
-    function initInteract(div, data) {
-        const interactable = interact(div).draggable({
-            listeners: {
-                move(e) {
-                    const t = e.target, id = t.dataset.id, obj = mapElements.find(o=>o.id===id);
-                    obj.x += e.dx / scale; obj.y += e.dy / scale;
-                    updateDivGeometry(t, obj);
-                },
-                end() { saveLocalLayout(); }
-            },
-            modifiers: [ interact.modifiers.restrictRect({ restriction: 'parent', endOnly: true }) ]
-        });
-
-        if(data.subtype === 'rect' || data.type === 'fixed') {
-            interactable.resizable({
-                edges: { left: true, right: true, bottom: true, top: true },
-                listeners: {
-                    move(e) {
-                        const t = e.target, id = t.dataset.id, obj = mapElements.find(o=>o.id===id);
-                        obj.w = e.rect.width / scale; obj.h = e.rect.height / scale;
-                        obj.x += e.deltaRect.left / scale; obj.y += e.deltaRect.top / scale;
-                        updateDivGeometry(t, obj);
-                    },
-                    end() { saveLocalLayout(); }
-                }
-            });
-        }
-    }
-
-    interact('.draggable-guest').draggable({
-        autoScroll: true,
-        listeners: {
-            move(e) {
-                const t = e.target;
-                const x = (parseFloat(t.getAttribute('data-x'))||0) + e.dx;
-                const y = (parseFloat(t.getAttribute('data-y'))||0) + e.dy;
-                t.style.transform = `translate(${x}px, ${y}px)`;
-                t.setAttribute('data-x', x); t.setAttribute('data-y', y);
-                t.style.zIndex = 9999; t.style.position = 'fixed';
-            },
-            end(e) {
-                e.target.style.transform = 'none'; e.target.setAttribute('data-x', 0); e.target.setAttribute('data-y', 0); e.target.style.position = ''; e.target.style.zIndex = '';
-            }
-        }
-    });
-
-    function setupDropzone(div) {
-        interact(div).dropzone({
-            accept: '.draggable-guest', overlap: 0.50,
-            ondragenter: (e) => e.target.classList.add('drag-hover'),
-            ondragleave: (e) => e.target.classList.remove('drag-hover'),
-            ondrop: (e) => {
-                e.target.classList.remove('drag-hover');
-                assignGuestToTable(e.relatedTarget.dataset.id, e.target.dataset.id);
-            }
-        });
-    }
-
-    function assignGuestToTable(guestId, tableId) {
-        const table = mapElements.find(e => e.id === tableId);
-        const guest = guests.find(g => g.id === guestId);
-        if(!table || !guest) return;
-        if(table.guests.length >= table.capacity) { alert("¡Mesa llena!"); return; }
+        div.id = data.id;
+        div.className = `map-obj shape-${data.subtype} obj-${data.subtype}`;
+        if(data.type === 'fixed') div.classList.add('fixed-obj');
         
-        mapElements.forEach(m => { if(m.guests) m.guests = m.guests.filter(x => x.id !== guestId); });
-        table.guests.push(guest);
+        div.style.width = `${data.width}px`;
+        div.style.height = `${data.height}px`;
+        div.style.transform = `translate(${data.x}px, ${data.y}px) rotate(${data.rotation||0}deg)`;
+        div.dataset.id = data.id;
         
-        analyzeTableRules(table);
-        updateDivContent(document.getElementById(table.id), table);
-        renderSidebar(); 
-        saveLocalLayout();
-    }
-
-    function analyzeTableRules(table) {
-        const div = document.getElementById(table.id);
-        if(!div) return;
-        let warnings = [], veganCount = 0;
-        table.guests.forEach(g => { if((g.tags||"").includes('VEGAN')) veganCount++; });
-        const badge = div.querySelector('.vegan-badge');
-        if(badge) { badge.style.display = veganCount > 0 ? 'block' : 'none'; badge.innerText = `🥗 ${veganCount}`; }
-        if(table.guests.some(g => (g.tags||"").includes('EX'))) warnings.push("💔 Alerta: EX");
-        const kids = table.guests.filter(g => (g.tags||"").includes('NIÑO'));
-        kids.forEach(k => { if(!table.guests.some(a => a.groupId === k.groupId && !a.tags.includes('NIÑO'))) warnings.push("👶 Niño solo"); });
-        const alertIcon = div.querySelector('.table-alert');
-        const tooltip = div.querySelector('.alert-tooltip');
-        if(warnings.length > 0) {
-            alertIcon.style.display = 'flex'; tooltip.innerHTML = warnings.join('<br>'); div.style.borderColor = 'red';
+        if (data.type === 'table') {
+            div.innerHTML = `
+                <div class="table-name" style="transform: rotate(-${data.rotation||0}deg)">${data.name}</div>
+                <div class="table-count" style="font-size:1.1rem; color:#666; transform: rotate(-${data.rotation||0}deg)">${data.guests.length}/${data.capacity}</div>
+                <div class="table-alert" style="transform: rotate(-${data.rotation||0}deg)">! <div class="alert-tooltip"></div></div>
+                <div class="vegan-indicator" style="transform: rotate(-${data.rotation||0}deg)"></div>
+            `;
+            setupDropzone(div);
         } else {
-            alertIcon.style.display = 'none'; div.style.borderColor = 'white';
+            let icon = '';
+            if(data.subtype==='dj') icon = '🎵 '; if(data.subtype==='wc') icon = '🚻 ';
+            div.innerHTML = `<span style="transform: rotate(-${data.rotation||0}deg)">${icon}${data.name}</span>`;
         }
+        setupDraggable(div);
+        
+        div.addEventListener('dblclick', (e) => {
+            e.stopPropagation(); 
+            if(data.type === 'table') openEditModal(data.id);
+            else if(confirm("¿Borrar elemento?")) deleteObj(data.id);
+        });
+        document.getElementById('canvas-area').appendChild(div);
+        
+        if(data.type === 'table' && !isLoading) analyzeTableRules(data);
+        if(isLoading && data.type === 'table') setTimeout(()=>analyzeTableRules(data), 100); 
     }
 
-    // --- MODAL ---
+    // --- EDICIÓN ---
     function openEditModal(id) {
-        const el = mapElements.find(e => e.id === id);
-        editingElementId = id;
+        const t = mapElements.find(e => e.id === id);
+        if(!t) return;
+        editingTableId = id;
+        document.getElementById('edit-name').value = t.name;
+        document.getElementById('edit-shape').value = t.subtype;
+        document.getElementById('edit-capacity').value = t.capacity || 10;
+        document.getElementById('edit-width').value = t.width;
+        document.getElementById('edit-height').value = t.height;
+        document.getElementById('edit-rotation').value = t.rotation || 0;
         document.getElementById('edit-modal').style.display = 'flex';
-        document.getElementById('edit-name').value = el.name;
-        document.getElementById('edit-capacity').value = el.capacity || 10;
-        document.getElementById('edit-w').value = Math.round(el.w);
-        document.getElementById('edit-h').value = Math.round(el.h);
-        document.getElementById('edit-rot').value = el.rotation || 0;
-        
-        const list = document.getElementById('table-guest-list');
-        list.innerHTML = '';
-        if(el.type === 'table') {
-            document.getElementById('count-seated').innerText = el.guests.length;
-            el.guests.forEach(g => {
-                list.innerHTML += `<div class="gl-item"><div><strong>${g.nombre}</strong><br><small>${g.groupId}</small></div><span class="btn-kick" onclick="kickGuest('${g.id}')">✕</span></div>`;
-            });
-        }
     }
 
-    function kickGuest(guestId) {
-        const t = mapElements.find(e => e.id === editingElementId);
-        t.guests = t.guests.filter(g => g.id !== guestId);
-        analyzeTableRules(t);
-        updateDivContent(document.getElementById(t.id), t);
-        saveLocalLayout();
-        renderSidebar();
-        openEditModal(editingElementId);
-    }
+    function saveTableEdits() {
+        const t = mapElements.find(e => e.id === editingTableId);
+        if(t) {
+            t.name = document.getElementById('edit-name').value;
+            t.subtype = document.getElementById('edit-shape').value;
+            t.capacity = parseInt(document.getElementById('edit-capacity').value);
+            t.width = parseInt(document.getElementById('edit-width').value);
+            t.height = parseInt(document.getElementById('edit-height').value);
+            t.rotation = parseInt(document.getElementById('edit-rotation').value);
+            
+            const div = document.getElementById(t.id);
+            div.className = `map-obj shape-${t.subtype} obj-${t.subtype}`;
+            div.style.width = t.width + 'px';
+            div.style.height = t.height + 'px';
+            div.style.transform = `translate(${t.x}px, ${t.y}px) rotate(${t.rotation}deg)`;
+            
+            const texts = div.querySelectorAll('.table-name, .table-count, .table-alert, .vegan-indicator, span');
+            texts.forEach(el => el.style.transform = `rotate(-${t.rotation}deg)`);
 
-    function saveElementEdits() {
-        const el = mapElements.find(e => e.id === editingElementId);
-        if(el) {
-            el.name = document.getElementById('edit-name').value;
-            el.w = parseInt(document.getElementById('edit-w').value);
-            el.h = parseInt(document.getElementById('edit-h').value);
-            el.rotation = parseInt(document.getElementById('edit-rot').value);
-            if(el.type === 'table') {
-                el.capacity = parseInt(document.getElementById('edit-capacity').value);
-                analyzeTableRules(el);
-            }
-            const div = document.getElementById(el.id);
-            updateDivGeometry(div, el);
-            updateDivContent(div, el);
+            div.querySelector('.table-name').innerText = t.name;
+            analyzeTableRules(t);
             saveLocalLayout();
         }
         document.getElementById('edit-modal').style.display = 'none';
     }
 
-    function deleteSelectedElement() {
-        if(confirm("¿Eliminar?")) {
-            const el = mapElements.find(e => e.id === editingElementId);
-            if(el.type === 'table') { el.guests = []; renderSidebar(); }
-            mapElements = mapElements.filter(e => e.id !== editingElementId);
-            document.getElementById(editingElementId).remove();
-            saveLocalLayout();
-            document.getElementById('edit-modal').style.display = 'none';
+    function deleteSelectedTable() {
+        if(confirm("¿Eliminar mesa y liberar invitados?")) deleteObj(editingTableId);
+        document.getElementById('edit-modal').style.display = 'none';
+    }
+
+    function deleteObj(id) {
+        const el = mapElements.find(e => e.id === id);
+        if(el && el.type === 'table') {
+            el.guests = []; 
+            renderSidebar(); 
+        }
+        mapElements = mapElements.filter(e => e.id !== id);
+        document.getElementById(id).remove();
+        saveLocalLayout();
+    }
+
+    function analyzeTableRules(table) {
+        let warnings = [];
+        let veganCount = 0;
+        const tableDiv = document.getElementById(table.id);
+        
+        tableDiv.querySelector('.table-count').innerText = `${table.guests.length}/${table.capacity}`;
+        if(table.guests.length >= table.capacity) tableDiv.classList.add('table-full');
+        else tableDiv.classList.remove('table-full');
+
+        table.guests.forEach(g => { if((g.tags||"").includes('VEGAN')) veganCount++; });
+        const veganBadge = tableDiv.querySelector('.vegan-indicator');
+        veganBadge.style.display = veganCount > 0 ? 'block' : 'none';
+        veganBadge.innerText = `🥗 ${veganCount}`;
+
+        const hasEx = table.guests.some(g => (g.tags||"").includes('EX'));
+        if (hasEx) warnings.push("💔 ALERTA: EX en la mesa.");
+
+        const kids = table.guests.filter(g => (g.tags||"").includes('NIÑO'));
+        kids.forEach(kid => {
+            const hasParent = table.guests.some(ad => ad.groupId === kid.groupId && ad.id !== kid.id && !ad.tags.includes('NIÑO'));
+            if (!hasParent) warnings.push(`🚨 ALERTA: Niño solo (${kid.nombre.split(' ')[0]})`);
+        });
+
+        const hasTeens = table.guests.some(g => (g.vibra||"").toUpperCase() === 'ADOLESCENTES');
+        const hasElders = table.guests.some(g => (g.vibra||"").toUpperCase() === 'MAYORES');
+        if (hasTeens && hasElders) warnings.push("⚠️ AMBIENTE: Adolescentes y Mayores.");
+
+        if (hasElders) {
+             const noise = mapElements.filter(e => e.subtype === 'dj' || e.subtype === 'dance');
+             noise.forEach(obj => {
+                const dist = Math.hypot(table.x - obj.x, table.y - obj.y);
+                if(dist < 250) warnings.push("🔊 RUIDO: Mesa de mayores cerca del DJ.");
+             });
+        }
+        
+        const hasWheelchair = table.guests.some(g => g.movilidad === 'SILLA_RUEDAS');
+        if (hasWheelchair) {
+             const wc = mapElements.find(e => e.subtype === 'wc');
+             if(wc) {
+                 const dist = Math.hypot(table.x - wc.x, table.y - wc.y);
+                 if(dist > 600) warnings.push("♿ ACCESIBILIDAD: Lejos de baños.");
+             }
+        }
+
+        const alertIcon = tableDiv.querySelector('.table-alert');
+        const tooltip = tableDiv.querySelector('.alert-tooltip');
+        
+        if (warnings.length > 0) {
+            alertIcon.style.display = 'flex'; tooltip.innerHTML = warnings.join('<br>');
+            tableDiv.style.borderColor = warnings.some(w => w.includes('🚨')) ? 'red' : '#ff9800';
+        } else {
+            alertIcon.style.display = 'none'; tableDiv.style.borderColor = 'white';
         }
     }
 
-    function clearLocalLayout() { if(confirm("¿Borrar todo?")) { localStorage.removeItem('pj_floorplan_v8'); location.reload(); } }
+    // --- INTERACT ---
+    function setupDraggable(el) {
+        interact(el).draggable({
+            inertia: true,
+            modifiers: [ interact.modifiers.restrictRect({ restriction: 'parent', endOnly: true }) ],
+            listeners: {
+                move(event) {
+                    const t = event.target;
+                    const id = t.dataset.id;
+                    const obj = mapElements.find(e => e.id === id);
+                    
+                    if(obj) {
+                        obj.x += event.dx;
+                        obj.y += event.dy;
+                        t.style.transform = `translate(${obj.x}px, ${obj.y}px) rotate(${obj.rotation||0}deg)`;
+                    }
+                },
+                end(event) { 
+                    const obj = mapElements.find(e => e.id === event.target.dataset.id);
+                    if(obj && obj.type === 'table') analyzeTableRules(obj);
+                    saveLocalLayout();
+                }
+            }
+        });
+    }
 
+    function setupDropzone(el) {
+        interact(el).dropzone({
+            accept: '.draggable-guest', overlap: 0.50,
+            ondragenter: (e) => e.target.classList.add('drag-hover'),
+            ondragleave: (e) => e.target.classList.remove('drag-hover'),
+            ondrop: (e) => {
+                assignGuest(e.relatedTarget.dataset.id, e.target.dataset.id);
+                e.target.classList.remove('drag-hover');
+            }
+        });
+    }
+
+    interact('.draggable-guest').draggable({
+        autoScroll: true,
+        listeners: {
+            move(event) {
+                const t = event.target;
+                const x = (parseFloat(t.getAttribute('data-x')) || 0) + event.dx;
+                const y = (parseFloat(t.getAttribute('data-y')) || 0) + event.dy;
+                t.style.transform = `translate(${x}px, ${y}px)`;
+                t.setAttribute('data-x', x); t.setAttribute('data-y', y);
+                t.style.zIndex = 9999; t.style.position = 'fixed';
+            },
+            end(event) {
+                event.target.style.transform = 'none';
+                event.target.setAttribute('data-x', 0); event.target.setAttribute('data-y', 0);
+                event.target.style.position = 'relative'; event.target.style.zIndex = '';
+            }
+        }
+    });
+
+    function assignGuest(guestId, tableId) {
+        const table = mapElements.find(e => e.id === tableId);
+        const guest = guests.find(g => g.id === guestId);
+        
+        if(!table || !guest) return;
+        if(table.guests.length >= table.capacity) { alert("Mesa llena"); return; }
+
+        mapElements.forEach(t => {
+            if(t.guests) t.guests = t.guests.filter(g => g.id !== guestId);
+        });
+        
+        table.guests.push(guest);
+        renderSidebar(); 
+        analyzeTableRules(table);
+        saveLocalLayout();
+    }
+
+    // --- PERSISTENCIA LOCAL Y REMOTA ---
+    function saveLocalLayout() {
+        localStorage.setItem('pj_floorplan', JSON.stringify(mapElements));
+    }
+    
+    function clearLocalLayout() {
+        if(confirm("¿Borrar todo el diseño?")) {
+            localStorage.removeItem('pj_floorplan');
+            location.reload();
+        }
+    }
+
+    // --- FUNCIÓN CORREGIDA (API) ---
     async function saveData() {
-        const btn = document.querySelector('.btn-save'); btn.innerHTML = "GUARDANDO...";
+        const btn = document.querySelector('.btn-save'); 
+        const originalText = btn.innerHTML;
+        btn.innerText = "Guardando...";
+        btn.disabled = true;
+
         const assignments = [];
-        mapElements.forEach(t => { if(t.guests) t.guests.forEach(g => assignments.push({id: g.id, mesa: t.name})); });
+        mapElements.forEach(t => {
+            if(t.guests) t.guests.forEach(g => assignments.push({ id: g.id, mesa: t.name }));
+        });
+
         try {
-            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'SAVE_TABLES', assignments: assignments }) });
-            alert("✅ Guardado");
-        } catch(e) { alert("Error de red. Datos seguros localmente."); }
-        btn.innerHTML = "GUARDAR";
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                redirect: 'follow', // <--- CAMBIADO A 'FOLLOW' PARA PODER LEER RESPUESTA
+                headers: {'Content-Type': 'text/plain;charset=utf-8'},
+                body: JSON.stringify({
+                    action: 'SAVE_TABLES', 
+                    assignments: assignments
+                })
+            });
+
+            if(response.ok) {
+                alert("¡Distribución guardada correctamente en Excel!");
+            } else {
+                throw new Error("Error en respuesta de servidor");
+            }
+        } catch(e) { 
+            console.error(e);
+            alert("Error al guardar. Verifica tu conexión."); 
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    function syncTablesFromExcel() {
+        const mesasExcel = [...new Set(guests.map(g => g.mesa).filter(m => m && m !== "Por asignar"))];
+        const mesasMapa = mapElements.filter(e => e.type === 'table').map(e => e.name);
+        const nuevasMesas = mesasExcel.filter(m => !mesasMapa.includes(m));
+
+        if (nuevasMesas.length > 0) {
+            alert(`📢 Se encontraron ${nuevasMesas.length} mesas nuevas en el Excel.\nSe añadirán en la parte superior para que las acomodes.`);
+            nuevasMesas.forEach((m, i) => {
+                const el = {
+                    id: 'tbl_sync_' + m + '_' + Date.now(), 
+                    type: 'table', subtype: 'round', 
+                    x: 100 + (i * 150), y: 50, 
+                    guests: [], name: m, capacity: 10, 
+                    width: 130, height: 130, rotation: 0
+                };
+                mapElements.push(el);
+                renderElement(el);
+            });
+            saveLocalLayout();
+        }
     }
 </script>
 </body>

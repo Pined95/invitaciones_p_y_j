@@ -1,5 +1,5 @@
-// 👇 URL DEL APPS SCRIPT (Tu Backend)
-const API_URL = "https://script.google.com/macros/s/AKfycbxkWDPOJ4q4P81f9DDyVs8cWwV7wEz7_hk9YdNOZvYQYTwtetc-VNtqpqsANmMcbQE/exec"; 
+// 👇 URL DEL APPS SCRIPT (ACTUALIZADA)
+const API_URL = "https://script.google.com/macros/s/AKfycbymKVluAzH8VNN7IRsiPGZhVQVMeMvim4ICQRaG-4GroFu873x1g1zji1WtD-DWwUY/exec"; 
 
 let html5QrcodeScanner = null;
 let currentScannedMembers = [];
@@ -8,15 +8,15 @@ let audioContext = null;
 // Inicializar
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- NUEVO: CÓDIGO DE SEGURIDAD (PIN) ---
+    // --- CÓDIGO DE SEGURIDAD (PIN) ---
     const pin = localStorage.getItem('security_pin');
-    if(pin !== '2026') { // <--- Puedes cambiar '2026' por el número que quieras
+    if(pin !== '2026') { 
         const userPin = prompt("🔐 Ingresa el PIN de seguridad para escanear:");
         if(userPin !== '2026') {
             document.body.innerHTML = '<div style="display:flex; height:100vh; align-items:center; justify-content:center; flex-direction:column;"><h1>⛔ Acceso Denegado</h1><p>No tienes permiso para estar aquí.</p></div>';
-            return; // Esto detiene todo el sistema
+            return; 
         }
-        localStorage.setItem('security_pin', userPin); // Guarda el PIN para que no lo pida a cada rato
+        localStorage.setItem('security_pin', userPin); 
     }
     // ----------------------------------------
 
@@ -38,7 +38,6 @@ function startScanner() {
         (text) => {
             html5QrcodeScanner.pause();
             let id = text;
-            // Intentar limpiar si es URL completa
             try { 
                 if(text.includes('id=')) id = new URL(text).searchParams.get('id'); 
             } catch(e){}
@@ -57,8 +56,8 @@ async function fetchGroupInfo(id) {
         const res = await fetch(`${API_URL}?action=scanQR&id=${encodeURIComponent(id)}`);
         const data = await res.json();
         
-        if(data.status === 'SUCCESS') {
-            showSelectionModal(data.groupName, data.members, data.mesa);
+        if(data.status === 'success' || data.status === 'SUCCESS') {
+            showSelectionModal(data.groupName || data.mainName, data.members, data.mesa); // Ajuste para leer nombres correctamente
             statusText.innerText = "";
         } else {
             alert("⛔ Código no encontrado o sin confirmación.");
@@ -66,6 +65,7 @@ async function fetchGroupInfo(id) {
             statusText.innerText = "Listo para escanear...";
         }
     } catch(e) { 
+        console.error(e);
         alert("Error de conexión"); 
         if(html5QrcodeScanner) html5QrcodeScanner.resume(); 
     }
@@ -73,19 +73,18 @@ async function fetchGroupInfo(id) {
 
 // --- 3. MOSTRAR MODAL SELECCIÓN ---
 function showSelectionModal(name, members, mesa) {
-    currentScannedMembers = members; // Guardar para uso posterior
-    const mode = document.getElementById('checkin-mode').value; // 'est' o 'rec'
+    currentScannedMembers = members; 
+    const mode = document.getElementById('checkin-mode').value; 
     
-    document.getElementById('modal-group-name').innerText = name;
-    // Guardamos la mesa en un atributo temporal del modal para usarla al confirmar
+    document.getElementById('modal-group-name').innerText = name || "Invitado";
     document.getElementById('selection-modal').dataset.mesa = mesa; 
 
     const listDiv = document.getElementById('modal-list');
     listDiv.innerHTML = '';
 
     members.forEach(m => {
-        // Verificar si ya entró en este modo
-        const alreadyIn = (mode === 'est' ? m.inEst : m.inRec);
+        // Verificar si ya entró (Revisamos si el campo checkInRec o checkInEst tiene texto)
+        const alreadyIn = (mode === 'est' ? (m.checkInEst && m.checkInEst.length > 0) : (m.checkInRec && m.checkInRec.length > 0));
         
         listDiv.innerHTML += `
             <div class="guest-check-item">
@@ -101,13 +100,12 @@ function showSelectionModal(name, members, mesa) {
     document.getElementById('selection-modal').style.display = 'flex';
 }
 
-// --- 4. CONFIRMAR ENTRADA (Backend: DO_CHECKIN) ---
+// --- 4. CONFIRMAR ENTRADA (Backend: BATCH_CHECKIN) ---
 async function confirmEntry() {
     const mode = document.getElementById('checkin-mode').value;
     const selectedIds = [];
     const selectedNames = [];
     
-    // Recopilar seleccionados NUEVOS (no deshabilitados)
     currentScannedMembers.forEach(m => {
         const chk = document.getElementById(`chk_${m.id}`);
         if (chk.checked && !chk.disabled) {
@@ -128,31 +126,23 @@ async function confirmEntry() {
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
-            redirect: 'follow', // Importante para que funcione con Google
+            redirect: 'follow', 
             headers: {'Content-Type': 'text/plain;charset=utf-8'},
             body: JSON.stringify({
-                action: 'DO_CHECKIN',
+                action: 'BATCH_CHECKIN', // <--- CORREGIDO (Era DO_CHECKIN)
                 ids: selectedIds,
                 mode: mode
             })
         });
 
         if (response.ok) {
-            // Si el servidor dice "OK", procedemos
-            const result = await response.json(); // Opcional: leer respuesta del servidor
-            
-            // Éxito: Cerrar modal, sonar "bip" y mostrar notificación
             closeModal();
             playAudio(true);
             
-            // Preparar datos para notificación y log
             const groupName = document.getElementById('modal-group-name').innerText;
             const mesa = document.getElementById('selection-modal').dataset.mesa;
             
-            // Agregar al historial local
             addToHistory(groupName, selectedIds.length, mode);
-            
-            // Mostrar Notificación Flotante
             showFloatingNotification(groupName, mesa, selectedNames);
         } else {
             throw new Error("El servidor no respondió correctamente.");
@@ -160,7 +150,7 @@ async function confirmEntry() {
 
     } catch(e) { 
         console.error(e);
-        alert("⚠️ Error: No se pudo registrar la entrada. Revisa tu conexión a internet."); 
+        alert("⚠️ Error: No se pudo registrar la entrada. Revisa tu conexión."); 
     }
     
     btn.innerText = originalText; btn.disabled = false;
@@ -168,13 +158,12 @@ async function confirmEntry() {
 
 function closeModal() {
     document.getElementById('selection-modal').style.display = 'none';
-    // No reanudamos cámara aquí, esperamos a que cierren la notificación flotante
 }
 
 // --- 5. NOTIFICACIÓN FLOTANTE ---
 function showFloatingNotification(name, mesa, membersNames) {
     document.getElementById('notif-title').innerText = name;
-    document.getElementById('notif-table').innerText = mesa && mesa !== "Sin Asignar" ? `MESA ${mesa}` : "SIN MESA";
+    document.getElementById('notif-table').innerText = mesa && mesa !== "Por asignar" ? `MESA ${mesa}` : "SIN MESA";
     
     const listDiv = document.getElementById('notif-members');
     listDiv.innerHTML = membersNames.map(n => `<div class="notify-item">✅ ${n}</div>`).join('');
@@ -194,10 +183,8 @@ async function manualSearch() {
         const res = await fetch(`${API_URL}?action=search&q=${encodeURIComponent(q)}`);
         const data = await res.json();
         
-        // Si hay resultados, usamos el primero para abrir el flujo normal
-        // (En una versión pro, mostraríamos lista para elegir, pero esto simplifica)
         if(data.results && data.results.length > 0) {
-            // Llamamos a fetchGroupInfo con el ID del primer resultado
+            // Usamos el ID del primer resultado para obtener el grupo completo
             fetchGroupInfo(data.results[0].id);
         } else {
             alert("No encontrado");

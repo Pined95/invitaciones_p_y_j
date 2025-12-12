@@ -4,222 +4,116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Envíos P&J</title>
-    
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { 
-            --gold: #C59D5F; --dark: #1a1a1a; --cream: #FDFBF7; 
-            --whatsapp: #25D366; --white: #ffffff;
-            --success: #2e7d32; --error: #c62828; --pending: #f57c00;
-            --sent-bg: #e8f5e9; --sent-border: #4caf50;
+        :root { --gold: #C59D5F; --dark: #1a1a1a; --light: #f4f4f9; --whatsapp: #25D366; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* SIDEBAR (Panel de Mensaje) */
+        #sidebar { width: 350px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
+        h2 { color: var(--gold); margin-top: 0; }
+        
+        .template-box { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; resize: none; box-sizing: border-box;}
+        .variables { font-size: 0.8rem; color: #666; }
+        .variable-tag { background: #eee; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #ccc; }
+        
+        .stats { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; font-size: 0.9rem; }
+
+        /* LISTA DE ENVÍOS */
+        #main-area { flex: 1; padding: 20px; overflow-y: auto; }
+        
+        .group-card { 
+            background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #ddd; transition: 0.3s;
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .group-card.sent { border-left-color: var(--whatsapp); opacity: 0.7; }
+        .group-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        .group-info h3 { margin: 0; font-size: 1.1rem; color: var(--dark); }
+        .group-members { font-size: 0.8rem; color: #666; margin-top: 5px; }
         
-        * { box-sizing: border-box; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--cream); margin: 0; display: flex; height: 100vh; color: var(--dark); overflow: hidden; }
+        .actions { display: flex; gap: 10px; }
+        .btn { border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         
-        /* SIDEBAR */
-        .sidebar { 
-            width: 400px; background: var(--white); border-right: 1px solid #ccc; 
-            padding: 20px; display: flex; flex-direction: column; gap: 15px; 
-            box-shadow: 4px 0 20px rgba(0,0,0,0.1); z-index: 10; overflow-y: auto; flex-shrink: 0;
-        }
+        .btn-wa { background: var(--whatsapp); color: white; text-decoration: none; }
+        .btn-wa:hover { background: #128C7E; }
+        .btn-copy { background: #eee; color: #333; }
+        .btn-copy:hover { background: #ddd; }
         
-        h2 { font-family: 'Cinzel', serif; color: var(--gold); margin: 0; font-size: 1.4rem; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        
-        /* TABS */
-        .tabs { display: flex; gap: 5px; background: #f0f0f0; padding: 4px; border-radius: 8px; }
-        .tab { flex: 1; text-align: center; padding: 8px; cursor: pointer; border-radius: 6px; font-size: 0.7rem; font-weight: bold; color: #666; transition: 0.2s; }
-        .tab.active { background: white; color: var(--gold); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-mark { background: transparent; border: 1px solid #ccc; color: #999; }
+        .btn-mark.active { background: var(--gold); color: white; border-color: var(--gold); }
 
-        .template-container { display: none; }
-        .template-container.active { display: block; animation: fadeIn 0.3s; }
+        /* Search */
+        .search-bar { margin-bottom: 20px; }
+        .search-bar input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
 
-        label { font-size: 0.7rem; font-weight: bold; color: #999; text-transform: uppercase; display: block; margin-bottom: 5px; }
-        
-        textarea { 
-            width: 100%; height: 150px; padding: 12px; border: 1px solid #ccc; 
-            border-radius: 8px; font-family: inherit; resize: none; font-size: 0.85rem; 
-            background: #fafafa; transition: 0.3s; line-height: 1.5;
-        }
-        textarea:focus { border-color: var(--gold); background: white; outline: none; }
-        
-        .tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
-        .tag { background: var(--dark); color: var(--gold); padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; cursor: pointer; }
-
-        /* MAIN CONTENT */
-        .main-content { flex: 1; padding: 20px 40px; overflow-y: auto; background-image: radial-gradient(#dcdcdc 1px, transparent 1px); background-size: 20px 20px; }
-        
-        .top-filters { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-bar { flex: 1; padding: 12px; border: 1px solid var(--gold); border-radius: 8px; font-family: inherit; font-size: 1rem; background: white; }
-        .filter-select { padding: 12px; border: 1px solid #ccc; border-radius: 8px; background: white; cursor: pointer; font-family: inherit; }
-
-        /* CARDS */
-        .card { 
-            background: white; border-radius: 8px; padding: 20px; margin-bottom: 15px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #ccc; 
-            display: flex; flex-direction: column; gap: 10px; transition: 0.3s;
-        }
-        .card.sent { border-left-color: var(--sent-border); background: var(--sent-bg); }
-        .card.needs-reminder { border-left-color: var(--pending); background: #fff8e1; }
-
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .card-title h3 { margin: 0; font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--dark); }
-        .card-subtitle { font-size: 0.8rem; color: #666; font-style: italic; margin-top: 4px; }
-        
-        /* BADGES */
-        .status-badge { font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-        .badge-fresh { color: var(--success); background: #c8e6c9; }
-        .badge-stale { color: #e65100; background: #ffe0b2; border: 1px solid #ffcc80; }
-        .badge-type { background: #eee; color: #666; text-transform: uppercase; }
-
-        /* FOOTER & BUTTONS */
-        .card-footer { 
-            display: flex; justify-content: space-between; align-items: center; 
-            margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ddd; 
-        }
-        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
-
-        /* Botones de WhatsApp Individuales */
-        .btn-wa-mini {
-            background: white; border: 1px solid var(--whatsapp); color: var(--whatsapp);
-            padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer;
-            font-weight: 600; display: flex; align-items: center; gap: 5px; transition: 0.2s;
-        }
-        .btn-wa-mini:hover { background: var(--whatsapp); color: white; transform: translateY(-2px); }
-        
-        /* Estilo Recordatorio */
-        .btn-wa-mini.reminder { border-color: var(--pending); color: var(--pending); }
-        .btn-wa-mini.reminder:hover { background: var(--pending); color: white; }
-
-        .btn-no-tel { background: #f5f5f5; color: #999; border: 1px solid #ddd; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; cursor: not-allowed; }
-
-        /* Check Manual */
-        .btn-check { 
-            width: 35px; height: 35px; border-radius: 50%; border: 1px solid #ccc; 
-            background: white; color: #ccc; cursor: pointer; display: flex; 
-            justify-content: center; align-items: center; transition: 0.2s; font-size: 1rem;
-        }
-        .btn-check:hover { border-color: var(--gold); color: var(--gold); }
-        .card.sent .btn-check { background: var(--sent-border); color: white; border-color: var(--sent-border); }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>Centro de Envíos</h2>
+    <div id="sidebar">
+        <h2>📢 Centro de Envíos</h2>
         
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('plural')">👨‍👩‍👧‍👦 Grupal</div>
-            <div class="tab" onclick="switchTab('singular')">👤 Individual</div>
-            <div class="tab" onclick="switchTab('recordatorio')">⏰ Recordatorio</div>
-        </div>
+        <div class="template-box">
+            <label><strong>Plantilla de Mensaje:</strong></label>
+            <textarea id="msg-template">¡Hola {nombre}! 👋
 
-        <div id="tpl-plural" class="template-container active">
-            <label>Mensaje Grupal (Familia)</label>
-            <textarea id="msg-plural">¡Hola Familia {nombre}! 👋
+Nos encantaría que nos acompañaran en nuestra boda. 👰🤵
 
-Nos llena de emoción invitarlos a nuestra boda. Será un día muy especial y queremos compartirlo con ustedes. 👰🤵
-
-Aquí les dejamos su invitación digital y pases de acceso:
+Aquí les dejo su invitación digital y pase de acceso:
 {link}
 
-¡Esperamos contar con su presencia!</textarea>
-            <div class="tags"><span class="tag" onclick="insertTag('msg-plural', '{nombre}')">+ Nombre</span><span class="tag" onclick="insertTag('msg-plural', '{link}')">+ Link</span></div>
+¡Esperamos contar con ustedes!</textarea>
+            
+            <div class="variables">
+                Variables: 
+                <span class="variable-tag" onclick="insertVar('{nombre}')">{nombre}</span>
+                <span class="variable-tag" onclick="insertVar('{link}')">{link}</span>
+            </div>
         </div>
 
-        <div id="tpl-singular" class="template-container">
-            <label>Mensaje Individual</label>
-            <textarea id="msg-singular">¡Hola {nombre}! 👋
-
-Me llena de emoción invitarte a nuestra boda. Será un día muy especial y quiero compartirlo contigo. 👰🤵
-
-Aquí te dejo tu invitación digital y pase de acceso:
-{link}
-
-¡Espero contar contigo!</textarea>
-            <div class="tags"><span class="tag" onclick="insertTag('msg-singular', '{nombre}')">+ Nombre</span><span class="tag" onclick="insertTag('msg-singular', '{link}')">+ Link</span></div>
-        </div>
-
-        <div id="tpl-recordatorio" class="template-container">
-            <label>Recordatorio</label>
-            <textarea id="msg-recordatorio">¡Hola {nombre}! ✨
-
-Solo paso a recordarles que nuestra boda está cerca y nos encantaría saber si podrán acompañarnos para organizar sus lugares.
-
-Pueden confirmar aquí: {link}
-
-¡Un abrazo!</textarea>
-            <div class="tags"><span class="tag" onclick="insertTag('msg-recordatorio', '{nombre}')">+ Nombre</span><span class="tag" onclick="insertTag('msg-recordatorio', '{link}')">+ Link</span></div>
-        </div>
-
-        <div style="margin-top:auto; background:#f9f9f9; padding:15px; border-radius:8px; font-size:0.8rem;">
-            <div style="margin-bottom:5px;"><strong>📊 Resumen:</strong></div>
-            <div style="display:flex; justify-content:space-between;"><span>Total:</span> <strong id="st-total">0</strong></div>
-            <div style="display:flex; justify-content:space-between;"><span>Enviados:</span> <strong id="st-sent" style="color:var(--success)">0</strong></div>
-            <button onclick="resetSentHistory()" style="width:100%; margin-top:10px; border:none; background:white; border:1px solid #ddd; padding:5px; cursor:pointer; font-size:0.7rem; color:red;">Borrar Historial</button>
+        <div class="stats">
+            <div>Total Grupos: <strong id="stat-total">0</strong></div>
+            <div>Enviados: <strong id="stat-sent" style="color:var(--whatsapp)">0</strong></div>
+            <div>Pendientes: <strong id="stat-pending">0</strong></div>
+            <button onclick="resetSentStatus()" style="margin-top:10px; font-size:0.7rem; color:red; border:none; background:none; cursor:pointer; text-decoration:underline;">Reiniciar estatus</button>
         </div>
     </div>
 
-    <div class="main-content">
-        <div class="top-filters">
-            <input type="text" class="search-bar" id="search" placeholder="🔍 Buscar invitado, teléfono..." onkeyup="renderList()">
-            <select class="filter-select" id="filter-type" onchange="renderList()">
-                <option value="all">Todos</option>
-                <option value="pending">Sin Enviar</option>
-                <option value="sent">Ya Enviados</option>
-                <option value="reminder">Requiere Recordatorio</option>
-            </select>
+    <div id="main-area">
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Buscar familia o invitado..." onkeyup="filterList()">
         </div>
-        <div id="cards-container">
-            <p style="text-align:center; color:#999; margin-top:50px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando...</p>
+        <div id="groups-list">
+            <p style="text-align:center; color:#999;">Cargando invitados...</p>
         </div>
     </div>
 
 <script>
-    // --- API URL ---
-    const API_URL = "https://script.google.com/macros/s/AKfycbyKWw1ST_THRFt9joUGpKDLVxM1goT_PxZ6nmXw1-9luzRPi7JX_MZmQ5k4GY2dVUw/exec"; 
-    
+    // 👇 URL DEL APPS SCRIPT (ACTUALIZADA)
+    const API_URL = "https://script.google.com/macros/s/AKfycbymKVluAzH8VNN7IRsiPGZhVQVMeMvim4ICQRaG-4GroFu873x1g1zji1WtD-DWwUY/exec"; 
+
     let groups = [];
-    // Diccionario: { "ID_GRUPO": timestamp_envio }
-    let sentLog = JSON.parse(localStorage.getItem('pj_sent_timestamps_final') || '{}');
-
+    
     window.onload = async () => {
-        // Cargar plantillas de memoria si existen
-        ['plural', 'singular', 'recordatorio'].forEach(t => {
-            if(localStorage.getItem(`pj_tpl_${t}`)) document.getElementById(`msg-${t}`).value = localStorage.getItem(`pj_tpl_${t}`);
-            document.getElementById(`msg-${t}`).addEventListener('input', (e) => localStorage.setItem(`pj_tpl_${t}`, e.target.value));
-        });
-
+        loadSentStatus(); 
         try {
-            const res = await fetch(`${API_URL}?action=getSendList`); 
+            const res = await fetch(`${API_URL}?action=getSendList`);
             const data = await res.json();
+            
             if(data.status === 'success') {
-                processData(data.guests);
+                processGroups(data.guests);
                 renderList();
                 updateStats();
             }
-        } catch(e) { 
-            console.error(e);
-            document.getElementById('cards-container').innerHTML = '<p style="text-align:center; color:red;">Error de conexión</p>';
-        }
+        } catch(e) { alert("Error cargando datos"); }
     };
 
-    function switchTab(type) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.template-container').forEach(c => c.classList.remove('active'));
-        
-        const idx = type === 'plural' ? 0 : (type === 'singular' ? 1 : 2);
-        document.querySelectorAll('.tab')[idx].classList.add('active');
-        document.getElementById(`tpl-${type}`).classList.add('active');
-    }
-
-    function processData(guests) {
+    function processGroups(guests) {
         const grouped = {};
         
         guests.forEach(g => {
@@ -228,181 +122,143 @@ Pueden confirmar aquí: {link}
             if(!grouped[gid]) {
                 grouped[gid] = {
                     id: gid,
-                    mainName: g.nombreGrupo || g.nombre,
+                    mainName: g.nombreGrupo || g.nombre, 
+                    phone: g.telefono, 
                     link: g.link,
                     members: [],
-                    phones: [], // Array de objetos {name, number}
-                    isPlural: false
+                    isSent: isMarkedSent(gid)
                 };
             }
+            if(!grouped[gid].phone && g.telefono) grouped[gid].phone = g.telefono;
             
-            grouped[gid].members.push(g.nombre);
-
-            // LOGICA ROBUSTA DE TELÉFONO
-            // Limpia todo lo que no sea número
-            let rawPhone = String(g.telefono || "").replace(/\D/g, "");
-            
-            // Si tiene longitud válida, lo agregamos
-            if (rawPhone.length >= 10) {
-                // Verificamos si ya existe este número en el grupo para no duplicar botón
-                const exists = grouped[gid].phones.find(p => p.number === rawPhone);
-                if (!exists) {
-                    grouped[gid].phones.push({
-                        name: g.nombre.split(' ')[0], // Nombre corto para el botón
-                        number: rawPhone
-                    });
-                }
-            }
-        });
-
-        // Detectar Plural
-        Object.values(grouped).forEach(g => {
-            const nameLower = g.mainName.toLowerCase();
-            if(g.members.length > 1 || nameLower.includes('fam') || nameLower.includes(' y ') || nameLower.includes('&')) {
-                g.isPlural = true;
-            }
+            grouped[gid].members.push(g.nombre.split(' ')[0]); 
         });
 
         groups = Object.values(grouped);
     }
 
     function renderList() {
-        const term = document.getElementById('search').value.toLowerCase();
-        const filter = document.getElementById('filter-type').value;
-        const container = document.getElementById('cards-container');
+        const container = document.getElementById('groups-list');
+        const filter = document.getElementById('search').value.toLowerCase();
         container.innerHTML = '';
-        
-        let visibleCount = 0;
 
         groups.forEach(g => {
-            // Lógica de Tiempos
-            const lastSent = sentLog[g.id] || 0;
-            const isSent = lastSent > 0;
-            const daysSince = isSent ? Math.floor((Date.now() - lastSent) / (1000 * 60 * 60 * 24)) : 0;
-            const needsReminder = isSent && daysSince >= 3;
-
-            // Filtros de Vista
-            if(filter === 'pending' && isSent) return;
-            if(filter === 'sent' && !isSent) return;
-            if(filter === 'reminder' && !needsReminder) return;
-
-            // Filtro de Texto (Busca en nombre grupo, miembros o teléfonos)
-            const textMatch = g.mainName.toLowerCase().includes(term) || 
-                              g.members.some(m => m.toLowerCase().includes(term)) ||
-                              g.phones.some(p => p.number.includes(term));
-
-            if(textMatch) {
-                visibleCount++;
+            if(g.mainName.toLowerCase().includes(filter)) {
+                const membersText = g.members.join(', ');
+                const phoneClean = g.phone ? g.phone.replace(/\D/g, '') : ''; 
                 
-                // 1. Elegir Plantilla
-                let msgType = g.isPlural ? 'plural' : 'singular';
-                if(needsReminder) msgType = 'recordatorio';
+                let msg = document.getElementById('msg-template').value;
+                msg = msg.replace('{nombre}', g.mainName).replace('{link}', g.link);
+                const waLink = `https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}`;
 
-                let rawMsg = document.getElementById(`msg-${msgType}`).value;
+                const card = document.createElement('div');
+                card.className = `group-card ${g.isSent ? 'sent' : ''}`;
+                card.id = `card-${g.id}`;
                 
-                // 2. Limpieza de Nombre
-                let cleanName = g.mainName;
-                if(g.isPlural && rawMsg.includes('Familia {nombre}')) cleanName = cleanName.replace(/^Familia\s+/i, ''); 
-
-                // 3. Reemplazar y Codificar
-                rawMsg = rawMsg.replace(/{nombre}/g, cleanName).replace(/{link}/g, g.link);
-                const encodedMsg = encodeURIComponent(rawMsg);
-
-                // 4. Generar Botones de WhatsApp
-                let buttonsHtml = '';
-                if (g.phones.length === 0) {
-                    buttonsHtml = `<span class="btn-no-tel"><i class="fa-solid fa-ban"></i> Sin teléfono</span>`;
-                } else {
-                    g.phones.forEach(p => {
-                        const url = `https://api.whatsapp.com/send?phone=${p.number}&text=${encodedMsg}`;
-                        // Si toca recordatorio, cambiamos el estilo del botón
-                        const btnClass = needsReminder ? 'btn-wa-mini reminder' : 'btn-wa-mini';
-                        const icon = needsReminder ? 'fa-solid fa-bell' : 'fa-brands fa-whatsapp';
+                card.innerHTML = `
+                    <div class="group-info">
+                        <h3>${g.mainName}</h3>
+                        <div class="group-members">${membersText}</div>
+                        ${!g.phone ? '<small style="color:red">Sin teléfono</small>' : `<small style="color:#666">📱 ${g.phone}</small>`}
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-copy" onclick="copyLink('${g.link}')" title="Copiar Link"><i class="fa-regular fa-copy"></i></button>
                         
-                        buttonsHtml += `
-                            <button class="${btnClass}" onclick="sendWA('${g.id}', '${url}')">
-                                <i class="${icon}"></i> ${p.name}
-                            </button>`;
-                    });
-                }
-
-                // 5. Etiqueta de Estado
-                let statusLabel = `<span class="badge-type status-badge">${g.isPlural?'Grupal':'Individual'}</span>`;
-                let cardClass = 'card';
-                
-                if(isSent) {
-                    cardClass += ' sent';
-                    if(needsReminder) {
-                        cardClass += ' needs-reminder';
-                        statusLabel = `<div class="status-badge badge-stale"><i class="fa-solid fa-triangle-exclamation"></i> Hace ${daysSince} días</div>`;
-                    } else {
-                        statusLabel = `<div class="status-badge badge-fresh"><i class="fa-solid fa-check"></i> Enviado hoy</div>`;
-                    }
-                }
-
-                const html = `
-                    <div class="${cardClass}" id="card-${g.id}">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <h3>${g.mainName}</h3>
-                                <div class="card-subtitle">${g.members.join(', ')}</div>
-                            </div>
-                            ${statusLabel}
-                        </div>
-                        <div class="card-footer">
-                            <div class="btn-group">${buttonsHtml}</div>
-                            <button class="btn-check" onclick="toggleSent('${g.id}')" title="Marcar/Desmarcar">
-                                <i class="fa-solid fa-check"></i>
-                            </button>
-                        </div>
-                    </div>`;
-                container.insertAdjacentHTML('beforeend', html);
+                        ${g.phone ? 
+                                `<button class="btn btn-wa" onclick="confirmAndSend('${g.id}', '${waLink}')">
+                                    <i class="fa-brands fa-whatsapp"></i> Enviar
+                                </button>` : 
+                                `<button class="btn btn-wa" style="opacity:0.5; cursor:not-allowed">Sin Tel</button>`
+                            }
+                        
+                        <button class="btn btn-mark ${g.isSent ? 'active' : ''}" onclick="toggleSent('${g.id}')" title="Marcar como enviado">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
             }
         });
-
-        if(visibleCount === 0) container.innerHTML = '<div style="text-align:center; padding:40px; color:#999;">No se encontraron resultados.</div>';
     }
 
-    // --- ACCIONES ---
+    function filterList() { renderList(); }
 
-    function sendWA(id, url) {
-        window.open(url, '_blank');
-        // Auto-marcar como enviado (guarda fecha)
-        sentLog[id] = Date.now();
-        saveLog();
-        setTimeout(() => { renderList(); updateStats(); }, 1500);
+    function insertVar(text) {
+        const textarea = document.getElementById('msg-template');
+        textarea.setRangeText(text, textarea.selectionStart, textarea.selectionEnd, 'end');
     }
 
-    function toggleSent(id) {
-        if(sentLog[id]) delete sentLog[id];
-        else sentLog[id] = Date.now();
-        saveLog();
-        renderList();
-        updateStats();
+    function copyLink(link) {
+        navigator.clipboard.writeText(link);
+        alert("Link copiado");
     }
 
-    function saveLog() { localStorage.setItem('pj_sent_timestamps_final', JSON.stringify(sentLog)); }
+    function loadSentStatus() { }
 
-    function insertTag(areaId, tag) {
-        const area = document.getElementById(areaId);
-        area.setRangeText(tag, area.selectionStart, area.selectionEnd, 'end');
-        area.dispatchEvent(new Event('input'));
-        area.focus();
+    function isMarkedSent(id) {
+        const sentList = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
+        return sentList.includes(id);
     }
 
-    function resetSentHistory() {
-        if(confirm("¿Borrar historial de envíos? Se perderán las fechas.")) {
-            sentLog = {};
-            saveLog();
-            renderList();
+    function markAsSent(id) {
+        let sentList = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
+        if(!sentList.includes(id)) {
+            sentList.push(id);
+            localStorage.setItem('pj_sent_list', JSON.stringify(sentList));
+            
+            const group = groups.find(g => g.id === id);
+            if(group) group.isSent = true;
+            
+            const card = document.getElementById(`card-${id}`);
+            if(card) {
+                card.classList.add('sent');
+                card.querySelector('.btn-mark').classList.add('active');
+            }
             updateStats();
         }
     }
 
+    function toggleSent(id) {
+        let sentList = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
+        const group = groups.find(g => g.id === id);
+        
+        if(sentList.includes(id)) {
+            sentList = sentList.filter(x => x !== id);
+            if(group) group.isSent = false;
+        } else {
+            sentList.push(id);
+            if(group) group.isSent = true;
+        }
+        
+        localStorage.setItem('pj_sent_list', JSON.stringify(sentList));
+        renderList(); 
+        updateStats();
+    }
+
     function updateStats() {
-        document.getElementById('st-total').innerText = groups.length;
-        document.getElementById('st-sent').innerText = Object.keys(sentLog).length;
+        const total = groups.length;
+        const sent = groups.filter(g => g.isSent).length;
+        document.getElementById('stat-total').innerText = total;
+        document.getElementById('stat-sent').innerText = sent;
+        document.getElementById('stat-pending').innerText = total - sent;
+    }
+    
+    function resetSentStatus() {
+        if(confirm("¿Borrar todo el historial de envíos de este dispositivo?")) {
+            localStorage.removeItem('pj_sent_list');
+            location.reload();
+        }
+    }
+
+    function confirmAndSend(id, link) {
+        window.open(link, '_blank');
+        setTimeout(() => {
+            if(confirm("¿Se abrió WhatsApp y lograste enviar el mensaje?")) {
+                markAsSent(id);
+            }
+        }, 1000);
     }
 </script>
+
 </body>
 </html>
