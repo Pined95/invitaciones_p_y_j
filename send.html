@@ -181,9 +181,9 @@ Aquí les dejo su invitación digital y pase de acceso:
                         <button class="btn btn-copy" onclick="copyLink('${g.link}')" title="Copiar Link"><i class="fa-regular fa-copy"></i></button>
                         
                         ${g.phone ? 
-                                `<button class="btn btn-wa" onclick="confirmAndSend('${g.id}', '${waLink}')">
+                                `<a href="${waLink}" target="_blank" class="btn btn-wa" onclick="wppLinkClicked('${g.id}')">
                                     <i class="fa-brands fa-whatsapp"></i> Enviar
-                                </button>` : 
+                                </a>` : 
                                 `<button class="btn btn-wa" style="opacity:0.5; cursor:not-allowed">Sin Tel</button>`
                             }
                         
@@ -266,13 +266,12 @@ Aquí les dejo su invitación digital y pase de acceso:
         }
     }
 
-    function confirmAndSend(id, link) {
-        window.open(link, '_blank');
+    function wppLinkClicked(id) {
         setTimeout(() => {
-            if(confirm("¿Se abrió WhatsApp y lograste enviar el mensaje?")) {
+            if (confirm("¿Lograste enviar el mensaje por WhatsApp? \n\n(Presiona 'Aceptar' para marcarlo como enviado)")) {
                 markAsSent(id);
             }
-        }, 1000);
+        }, 3000);
     }
 </script>
 

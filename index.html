@@ -126,9 +126,73 @@
         .ticket-cutout-top { background:#F4F1EA; width:24px; height:24px; border-radius:50%; position:absolute; top:-14px; left:50%; transform:translateX(-50%); box-shadow:inset 0 -2px 5px rgba(0,0,0,0.05); }
         .ticket-cutout-side-l { background:#E8E4D9; width:24px; height:24px; border-radius:50%; position:absolute; top: -12px; left:-12px; box-shadow:inset -2px 0 5px rgba(0,0,0,0.05); z-index: 5;}
         .ticket-cutout-side-r { background:#E8E4D9; width:24px; height:24px; border-radius:50%; position:absolute; top: -12px; right:-12px; box-shadow:inset 2px 0 5px rgba(0,0,0,0.05); z-index: 5;}
+
+/* Estilos para el fondo de Acuarelas */
+.watercolor-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: -1; /* Detrás de todo */
+    overflow: hidden;
+    pointer-events: none; /* Que no estorbe al click */
+}
+
+.wc-group {
+    position: absolute;
+    opacity: 0.6; /* Transparencia para que se mezclen */
+    mix-blend-mode: multiply; /* Efecto de mezcla de pintura real */
+    transition: transform 0.1s linear; /* Suavizado */
+    will-change: transform;
+}
+
+.wc-img {
+    width: 300px; /* Tamaño base */
+    height: auto;
+    display: block;
+    position: absolute;
+}
+
+/* Posiciones estratégicas (Empalmados en pares) */
+/* Grupo 1: Arriba Izquierda */
+.wc-g1 { top: -50px; left: -50px; }
+.wc-g1 .img-a { top: 0; left: 0; transform: rotate(0deg); }
+.wc-g1 .img-b { top: 40px; left: 60px; transform: rotate(45deg); opacity: 0.8; }
+
+/* Grupo 2: Medio Derecha */
+.wc-g2 { top: 40%; right: -80px; }
+.wc-g2 .img-a { top: 0; right: 0; transform: rotate(180deg); }
+.wc-g2 .img-b { top: 50px; right: 30px; transform: rotate(130deg); }
+
+/* Grupo 3: Abajo Izquierda */
+.wc-g3 { bottom: -60px; left: -20px; }
+.wc-g3 .img-a { bottom: 0; left: 0; transform: rotate(90deg); }
+.wc-g3 .img-b { bottom: 20px; left: 50px; transform: rotate(10deg); }
+
+/* Animación de entrada suave */
+.wc-group { animation: wc-fade-in 3s ease; }
+@keyframes wc-fade-in { from { opacity: 0; } to { opacity: 0.6; } }
     </style>
 </head>
 <body>
+
+    <div class="watercolor-container">
+        <div class="wc-group wc-g1" data-speed="0.05" data-limit="30">
+            <img src="img/watercolor-1.png" class="wc-img img-a" alt="">
+            <img src="img/watercolor-2.png" class="wc-img img-b" alt="">
+        </div>
+
+        <div class="wc-group wc-g2" data-speed="-0.08" data-limit="50">
+            <img src="img/watercolor-3.png" class="wc-img img-a" alt="">
+            <img src="img/watercolor-1.png" class="wc-img img-b" alt="">
+        </div>
+
+        <div class="wc-group wc-g3" data-speed="0.03" data-limit="20">
+            <img src="img/watercolor-4.png" class="wc-img img-a" alt="">
+            <img src="img/watercolor-2.png" class="wc-img img-b" alt="">
+        </div>
+    </div>
 
     <div id="welcome-overlay">
         <h1 style="font-family: var(--font-script); font-size: 5rem; color: var(--gold); margin-bottom: 0; line-height: 1; font-weight: normal;">P & J</h1>
@@ -239,9 +303,9 @@
         </div>
 
         <div class="carousel reveal">
-            <img src="img/foto1.jpg" class="active" style="object-position: center;"> 
-            <img src="img/foto2.jpg" style="object-position: center 80%;" loading="lazy">
-            <img src="img/foto3.jpg" style="object-position: center;" loading="lazy">
+            <img src="img/foto1.webp" class="active" style="object-position: center;"> 
+            <img src="img/foto2.webp" style="object-position: center 80%;" loading="lazy">
+            <img src="img/foto3.webp" style="object-position: center;" loading="lazy">
         </div>
 
         <div class="section reveal" style="background:white; padding-top:20px;">
@@ -764,6 +828,31 @@
 
     const observer = new IntersectionObserver((e) => { e.forEach(i => { if(i.isIntersecting) i.target.classList.add('active'); }); }, {threshold: 0.1});
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// --- Lógica de Acuarelas Parallax Limitado ---
+document.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    const groups = document.querySelectorAll('.wc-group');
+
+    groups.forEach(group => {
+        const speed = parseFloat(group.getAttribute('data-speed'));
+        const limit = parseFloat(group.getAttribute('data-limit'));
+        
+        // Calculamos el movimiento crudo
+        let move = scrollY * speed;
+
+        // "Clampeamos" el movimiento para que sea una caja limitada
+        // Si el scroll sigue, la mancha deja de moverse al llegar al límite
+        if (move > limit) move = limit;
+        if (move < -limit) move = -limit;
+
+        // Opcional: Si quieres que rebote suavemente en lugar de topar seco, usa Math.sin
+        // let move = Math.sin(scrollY * 0.002) * limit; 
+
+        // Aplicamos la transformación (usamos translate3d para aceleración por GPU)
+        group.style.transform = `translate3d(0, ${move}px, 0)`;
+    });
+}, { passive: true }); // passive: true mejora el rendimiento del scroll
 
 // Función auxiliar para reintentar si Google falla
 async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {

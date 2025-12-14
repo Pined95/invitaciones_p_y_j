@@ -42,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------
 
     renderHistory();
+    updateSyncButton();
+
     // Enter para buscar
     const searchInput = document.getElementById('search-input');
     if(searchInput) {
@@ -49,10 +51,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'Enter') manualSearch();
         });
     }
+
+    // Auto-sync on load and when connection is restored
+    syncPendingCheckins();
+    window.addEventListener('online', syncPendingCheckins);
 });
 
 // --- 1. ESCANEAR ---
 function startScanner() {
+    initAudio();
     document.getElementById('btn-cam').style.display = 'none';
     html5QrcodeScanner = new Html5Qrcode("reader");
     html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
@@ -144,34 +151,44 @@ async function confirmEntry() {
     const originalText = btn.innerText;
     btn.innerText = "Registrando..."; btn.disabled = true;
 
+    const payload = {
+        action: 'BATCH_CHECKIN',
+        ids: selectedIds,
+        mode: mode,
+        // Add metadata for offline queue UI
+        _groupName: document.getElementById('modal-group-name').innerText,
+        _mesa: document.getElementById('selection-modal').dataset.mesa,
+        _selectedNames: selectedNames
+    };
+
     try {
         const response = await fetchWithRetry(API_URL, {
             method: 'POST',
             redirect: 'follow', 
             headers: {'Content-Type': 'text/plain;charset=utf-8'},
-            body: JSON.stringify({
-                action: 'BATCH_CHECKIN', // <--- CORREGIDO (Era DO_CHECKIN)
-                ids: selectedIds,
-                mode: mode
-            })
+            body: JSON.stringify(payload)
         });
 
         if (response.ok) {
             closeModal();
             playAudio(true);
             
-            const groupName = document.getElementById('modal-group-name').innerText;
-            const mesa = document.getElementById('selection-modal').dataset.mesa;
-            
-            addToHistory(groupName, selectedIds.length, mode);
-            showFloatingNotification(groupName, mesa, selectedNames);
+            addToHistory(payload._groupName, selectedIds.length, mode);
+            showFloatingNotification(payload._groupName, payload._mesa, payload._selectedNames);
         } else {
+            // If the server responds with an error, we'll also save it for later.
             throw new Error("El servidor no respondió correctamente.");
         }
 
     } catch(e) { 
         console.error(e);
-        alert("⚠️ Error: No se pudo registrar la entrada. Revisa tu conexión."); 
+        // --- OFFLINE QUEUE LOGIC ---
+        alert("⚠️ Error de conexión. El registro se guardó localmente y se sincronizará automáticamente.");
+        savePendingCheckin(payload);
+        // We still provide optimistic UI feedback
+        closeModal();
+        addToHistory(payload._groupName, selectedIds.length, mode, true); // Add pending flag
+        showFloatingNotification(payload._groupName, payload._mesa, payload._selectedNames);
     }
     
     btn.innerText = originalText; btn.disabled = false;
@@ -234,10 +251,11 @@ function playAudio(success) {
     }
 }
 
-function addToHistory(name, count, mode) {
+function addToHistory(name, count, mode, isPending = false) {
     let log = JSON.parse(localStorage.getItem('checkinLog') || '[]');
-    log.unshift({ name, count, mode, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-    if(log.length > 20) log.pop();
+    const statusIcon = isPending ? '🕒' : '';
+    log.unshift({ name, count, mode, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), status: statusIcon });
+    if(log.length > 30) log.pop();
     localStorage.setItem('checkinLog', JSON.stringify(log));
     renderHistory();
 }
@@ -254,7 +272,7 @@ function renderHistory() {
     div.innerHTML = log.map(l => `
         <div class="log-item" style="border-left-color: ${l.mode==='est'?'#33ccff':'#C59D5F'}">
             <div class="log-header">
-                <span class="log-name">${l.name}</span>
+                <span class="log-name">${l.status || ''} ${l.name}</span>
                 <span class="log-time">${l.time}</span>
             </div>
             <div class="log-details">
@@ -269,5 +287,70 @@ function resetStats() {
     if(confirm("¿Borrar historial local?")) {
         localStorage.removeItem('checkinLog');
         renderHistory();
+    }
+}
+
+// --- OFFLINE QUEUE FUNCTIONS ---
+function getPendingCheckins() {
+    return JSON.parse(localStorage.getItem('pendingCheckins') || '[]');
+}
+
+function savePendingCheckin(payload) {
+    const queue = getPendingCheckins();
+    queue.push(payload);
+    localStorage.setItem('pendingCheckins', JSON.stringify(queue));
+    updateSyncButton();
+}
+
+async function syncPendingCheckins() {
+    let queue = getPendingCheckins();
+    if (queue.length === 0) return;
+
+    const syncButton = document.getElementById('sync-btn');
+    if (syncButton) syncButton.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Sincronizando... (${queue.length})`;
+
+    const failed = [];
+    
+    for (const payload of queue) {
+        try {
+            const response = await fetchWithRetry(API_URL, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            }, 1); // Only retry once during sync to avoid getting stuck
+
+            if (response.ok) {
+                console.log("Check-in pendiente sincronizado:", payload.ids);
+            } else {
+                failed.push(payload);
+            }
+        } catch (error) {
+            console.warn("Fallo al sincronizar, se reintentará luego:", payload.ids);
+            failed.push(payload);
+        }
+    }
+
+    localStorage.setItem('pendingCheckins', JSON.stringify(failed));
+    updateSyncButton();
+    if(failed.length === 0) {
+        alert("✅ Todos los registros pendientes han sido sincronizados.");
+    } else {
+        alert(`⚠️ ${failed.length} registros no pudieron sincronizarse. Se reintentará más tarde.`);
+    }
+}
+
+function updateSyncButton() {
+    const syncButton = document.getElementById('sync-btn');
+    if (!syncButton) return;
+    const queue = getPendingCheckins();
+    const count = queue.length;
+
+    if (count > 0) {
+        syncButton.style.display = 'flex';
+        syncButton.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Sincronizar (${count})`;
+        syncButton.style.background = 'var(--error)';
+    } else {
+        syncButton.style.display = 'none';
     }
 }
