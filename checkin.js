@@ -1,6 +1,27 @@
 // 👇 URL DEL APPS SCRIPT (ACTUALIZADA)
 const API_URL = "https://script.google.com/macros/s/AKfycbymKVluAzH8VNN7IRsiPGZhVQVMeMvim4ICQRaG-4GroFu873x1g1zji1WtD-DWwUY/exec"; 
 
+// Función auxiliar para reintentar si Google falla
+async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
+    try {
+        const response = await fetch(url, options);
+        // Si Google nos dice "Too Many Requests" o error de servidor (5xx)
+        if (!response.ok && retries > 0) {
+            console.warn(`Reintentando... intentos restantes: ${retries}`);
+            await new Promise(r => setTimeout(r, backoff));
+            return fetchWithRetry(url, options, retries - 1, backoff * 2); // Espera el doble cada vez
+        }
+        return response;
+    } catch (error) {
+        if (retries > 0) {
+            console.warn(`Error de red. Reintentando... ${retries}`);
+            await new Promise(r => setTimeout(r, backoff));
+            return fetchWithRetry(url, options, retries - 1, backoff * 2);
+        }
+        throw error;
+    }
+} 
+
 let html5QrcodeScanner = null;
 let currentScannedMembers = [];
 let audioContext = null;
@@ -53,7 +74,7 @@ async function fetchGroupInfo(id) {
     statusText.innerText = "Buscando...";
     
     try {
-        const res = await fetch(`${API_URL}?action=scanQR&id=${encodeURIComponent(id)}`);
+        const res = await fetchWithRetry(`${API_URL}?action=scanQR&id=${encodeURIComponent(id)}`);
         const data = await res.json();
         
         if(data.status === 'success' || data.status === 'SUCCESS') {
@@ -124,7 +145,7 @@ async function confirmEntry() {
     btn.innerText = "Registrando..."; btn.disabled = true;
 
     try {
-        const response = await fetch(API_URL, {
+        const response = await fetchWithRetry(API_URL, {
             method: 'POST',
             redirect: 'follow', 
             headers: {'Content-Type': 'text/plain;charset=utf-8'},
@@ -180,7 +201,7 @@ async function manualSearch() {
     statusText.innerText = "Buscando...";
     
     try {
-        const res = await fetch(`${API_URL}?action=search&q=${encodeURIComponent(q)}`);
+        const res = await fetchWithRetry(`${API_URL}?action=search&q=${encodeURIComponent(q)}`);
         const data = await res.json();
         
         if(data.results && data.results.length > 0) {

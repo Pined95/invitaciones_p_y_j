@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
@@ -21,7 +20,7 @@
                 --font-script: 'High Spirited', cursive; --font-display: 'Wasted Vindey', serif; --font-body: 'Montserrat', sans-serif; }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #E8E4D9; font-family: var(--font-body); margin: 0; color: var(--text-dark); overflow-x: hidden; padding-bottom: 70px; }
+        body { background-color: #E8E4D9; font-family: var(--font-body); margin: 0; color: var(--text-dark); overflow-x: hidden; padding-bottom: 70px; overscroll-behavior: none; }
         .app-container { max-width: 480px; margin: 0 auto; background: var(--bg-cream); min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative; padding-bottom: 80px; }
 
         /* OVERLAY BIENVENIDA */
@@ -35,7 +34,7 @@
         .watercolor-bg { position: relative; z-index: 1; }
         .watercolor-bg::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; background: radial-gradient(circle, rgba(197, 157, 95, 0.08) 0%, rgba(255,255,255,0) 70%); z-index: -1; pointer-events: none; border-radius: 50%; filter: blur(20px); }
 
-        .hero { height: 100vh; background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('img/portada.jpg'); background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; padding-bottom: 60px; position: relative; }
+        .hero { height: 100vh; background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('img/portada.webp'); background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; padding-bottom: 60px; position: relative; }
         .hero-logo { width: 180px; margin-bottom: auto; margin-top: 60px; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5)); z-index: 10; animation: fadeIn 2s ease; }
         .hero-text { color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.7); margin-bottom: 20px; }
         .hero-names { font-family: var(--font-script); font-size: 4.5rem; line-height: 0.9; margin: 0; font-weight: normal; }
@@ -206,21 +205,21 @@
 
     <div class="app-container" id="main-content">
         
-        <div class="hero">
-            <div class="hero-logo"><img src="img/logo2.png" width="180"></div>
-            <div class="hero-text">
-                <div class="hero-names">Paola & Jorge</div>
-                <div class="hero-date">SÁBADO 14 DE MARZO, 2026</div>
-            </div>
-        </div>
+            <div class="hero">
+                <div class="hero-logo"><img src="img/logo2.png" width="180"></div>
+                <div class="hero-text">
+                    <div class="hero-names">Paola & Jorge</div>
+                    <div class="hero-date">SÁBADO 14 DE MARZO, 2026</div>
+                </div>
         
-        <div class="countdown reveal">
-            <div class="time-box"><span class="time-number" id="d">00</span><span class="time-label">Días</span></div>
-            <div class="time-box"><span class="time-number" id="h">00</span><span class="time-label">Hrs</span></div>
-            <div class="time-box"><span class="time-number" id="m">00</span><span class="time-label">Min</span></div>
-            <div class="time-box"><span class="time-number" id="s">00</span><span class="time-label">Seg</span></div>
-        </div>
-
+                <div class="countdown reveal">
+                    <div class="time-box"><span class="time-number" id="d">00</span><span class="time-label">Días</span></div>
+                    <div class="time-box"><span class="time-number" id="h">00</span><span class="time-label">Hrs</span></div>
+                    <div class="time-box"><span class="time-number" id="m">00</span><span class="time-label">Min</span></div>
+                    <div class="time-box"><span class="time-number" id="s">00</span><span class="time-label">Seg</span></div>
+                </div>
+                
+            </div>
         <div class="section reveal">
             <div class="gold-frame">
                 <div class="frame-content">
@@ -254,7 +253,7 @@
                 <div class="event-place">Parroquia del Buen Pastor</div>
                 <div class="event-address">Baja California 729, Fracc. San José, Cd. Victoria.</div>
                 <div class="map-actions">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Parroquia+del+Buen+Pastor+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Parroquia+del+Buen+Pastor+Baja+California+729+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
                     <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda+P%26J+(Misa)&dates=20260314T143000/20260314T153000&details=Ceremonia+Religiosa&location=Parroquia+del+Buen+Pastor,+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
                 </div>
             </div>
@@ -265,7 +264,7 @@
                 <div class="event-place">Candilejas Eventos</div>
                 <div class="event-address">Gaspar de la Garza, Valle de Aguayo.<br><strong>(Solo Familia Cercana)</strong></div>
                 <div class="map-actions">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Candilejas+Eventos+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Salón+Candilejas+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
                     <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda+Civil+P%26J&dates=20260314T180000/20260314T190000&details=Ceremonia+Civil+Familiar&location=Candilejas+Eventos,+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
                 </div>
             </div>
@@ -276,7 +275,7 @@
                 <div class="event-place">Candilejas Eventos</div>
                 <div class="event-address">Gaspar de la Garza, Valle de Aguayo, Cd. Victoria.</div>
                 <div class="map-actions">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Candilejas+Eventos+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Salón+Candilejas+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
                     <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Fiesta+Boda+P%26J&dates=20260314T190000/20260315T020000&details=Recepción+Boda+Paola+y+Jorge&location=Candilejas+Eventos,+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
                     <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[nickname]=Candilejas%20Eventos&dropoff[formatted_address]=Cd%20Victoria" class="btn-app uber hidden day-b-visible"><i class="ph-light ph-car"></i> Pedir Uber</a>
                 </div>
@@ -290,14 +289,14 @@
                 <div class="hotel-card">
                     <div class="hotel-name">Hotel Hampton Inn</div>
                     <p style="font-size:0.85rem; margin:5px 0;">Opción Premium. A 10 min del salón.</p>
-                    <a href="#" class="hotel-link"><i class="ph-light ph-phone"></i> Reservar</a>
-                    <a href="https://goo.gl/maps/..." target="_blank" class="hotel-link"><i class="ph-light ph-map-pin"></i> Ubicación</a>
+                    <a href="https://www.hilton.com/es/hotels/cdjvchx-hampton-ciudad-victoria/" target="_blank" class="hotel-link"><i class="ph-light ph-globe"></i> Web</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Hampton+Inn+by+Hilton+Ciudad+Victoria" target="_blank" class="hotel-link"><i class="ph-light ph-map-pin"></i> Ubicación</a>
                 </div>
                 <div class="hotel-card">
                     <div class="hotel-name">Hotel iStay</div>
                     <p style="font-size:0.85rem; margin:5px 0;">Excelente ubicación en zona comercial.</p>
                     <a href="#" class="hotel-link"><i class="ph-light ph-phone"></i> Reservar</a>
-                    <a href="https://www.google.com/maps/search/?api=1&query=Hotel+iStay+Ciudad+Victoria" target="_blank" class="hotel-link"><i class="ph-light ph-map-pin"></i> Ubicación</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=iStay+Hotel+Ciudad+Victoria" target="_blank" class="hotel-link"><i class="ph-light ph-map-pin"></i> Ubicación</a>
                 </div>
             </div>
             <div style="margin-top:40px; background: white; padding:25px; border:1px dashed var(--gold); border-radius:8px;">
@@ -417,15 +416,13 @@
 
     </div>
 
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-    AOS.init();
     // 👇 URL DEL APPS SCRIPT (ACTUALIZADA)
     const API_URL = "https://script.google.com/macros/s/AKfycbymKVluAzH8VNN7IRsiPGZhVQVMeMvim4ICQRaG-4GroFu873x1g1zji1WtD-DWwUY/exec"; 
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
     const today = new Date();
-    const weddingDay = new Date("March 14, 2026"); 
+    const weddingDay = new Date("2026-03-14T00:00:00"); 
     const isDayB = today.toDateString() === weddingDay.toDateString();
 
     // AUDIO
@@ -466,8 +463,14 @@
 
         if(userId) {
             try {
-                const res = await fetch(`${API_URL}?action=getInvite&id=${userId}`);
-                const data = await res.json();
+                const res = await fetchWithRetry(`${API_URL}?action=getInvite&id=${userId}`);
+                const text = await res.text(); // Leemos como texto primero
+                let data;
+                try {
+                    data = JSON.parse(text); // Intentamos convertir a JSON
+                } catch (err) {
+                    throw new Error("El servidor devolvió un error inesperado (HTML).");
+                }
                     if(data.status === 'success') {
                         const greetingLabel = document.getElementById('greeting-label');
                         const nameLabel = document.getElementById('main-guest-name');
@@ -573,21 +576,23 @@
 
     async function sendRSVP() {
         const btn = document.querySelector('.btn-full');
-        const originalText = btn.innerText;
+        const originalText = "ENVIAR CONFIRMACIÓN"; // Texto original fijo para restaurar
+        
+        // 1. Bloquear botón
         btn.innerText = "PROCESANDO..."; 
         btn.disabled = true;
 
-        // VERIFICAR SI HAY AL MENOS UN "SI"
+        // 2. Verificar si asisten
         const hayAsistentes = currentMembersData.some(m => m.estado === 'SI');
 
-        // UI OPTIMISTA: Mostrar resultado inmediato
+        // 3. UI OPTIMISTA: Mostrar resultado inmediato para que se sienta rápido
         if (hayAsistentes) {
-            showTicket(); // Muestra el boleto si van
+            showTicket(); 
         } else {
-            showThankYouMessage(); // Muestra gracias si nadie va
+            showThankYouMessage(); 
         }
         
-        // ENVÍO DE DATOS
+        // 4. Preparar datos
         const responses = currentMembersData.map((m, i) => ({
             id: m.id, 
             rsvp: m.estado || 'PENDIENTE', 
@@ -596,8 +601,9 @@
         const song = document.getElementById('song-suggestion').value;
         const msg = document.getElementById('guest-message').value;
 
+        // 5. Enviar al servidor
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetchWithRetry(API_URL, {
                 method: 'POST',
                 redirect: 'follow',
                 headers: {'Content-Type': 'text/plain;charset=utf-8'},
@@ -609,14 +615,28 @@
                 })
             });
 
+            const responseText = await response.text();
+            if (responseText.trim().toLowerCase().startsWith('<!doctype html')) {
+                throw new Error("El servidor devolvió un error inesperado (HTML).");
+            }
+
             if (response.ok) {
                 console.log("Confirmación guardada en servidor.");
             } else {
-                console.warn("Error en respuesta de servidor, pero la UI ya actualizó.");
+                throw new Error("El servidor respondió con error: " + (responseText || "Sin detalles"));
             }
         } catch(e) { 
             console.error("Error al enviar la confirmación:", e);
-            // No alertamos al usuario para no romper la experiencia, ya que visualmente ya tiene su resultado.
+            // Si falla, avisamos al usuario y reactivamos el botón (aunque la UI ya cambió, 
+            // esto es útil por si el usuario recarga o si decidieras quitar la UI optimista).
+            alert("Hubo un pequeño problema de conexión al guardar tu respuesta. Por favor verifica que tengas internet.");
+            
+            // Opcional: Si quieres regresar a la pantalla anterior si falla:
+            // window.location.reload(); 
+            
+            // Restaurar botón por si acaso
+            btn.innerText = originalText;
+            btn.disabled = false;
         }
     }
 
@@ -667,7 +687,7 @@
                 <p style="font-family:var(--font-display); letter-spacing:2px; font-size:0.8rem; color:#999; text-transform:uppercase;">Boda Paola & Jorge</p>
                 
                 <div style="margin:20px auto; width:160px; height:160px; border:1px solid #eee; padding:5px; border-radius:4px;">
-                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}" style="width:100%; height:100%; object-fit:contain;">
+                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}" crossorigin="anonymous" style="width:100%; height:100%; object-fit:contain;">
                 </div>
 
                 <div style="font-size:1.3rem; font-weight:bold; color:var(--text-dark); margin-bottom:5px;">${ticketName}</div>
@@ -721,7 +741,7 @@
         }).catch(() => alert("Error al copiar. Puedes hacerlo manualmente: "+text)); 
     }
     
-    const targetDate = new Date("March 14, 2026 14:30:00").getTime();
+    const targetDate = new Date("2026-03-14T14:30:00").getTime();
     setInterval(() => {
         const now = new Date().getTime();
         const dist = targetDate - now;
@@ -744,6 +764,27 @@
 
     const observer = new IntersectionObserver((e) => { e.forEach(i => { if(i.isIntersecting) i.target.classList.add('active'); }); }, {threshold: 0.1});
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Función auxiliar para reintentar si Google falla
+async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
+    try {
+        const response = await fetch(url, options);
+        // Si Google nos dice "Too Many Requests" o error de servidor (5xx)
+        if (!response.ok && retries > 0) {
+            console.warn(`Reintentando... intentos restantes: ${retries}`);
+            await new Promise(r => setTimeout(r, backoff));
+            return fetchWithRetry(url, options, retries - 1, backoff * 2); // Espera el doble cada vez
+        }
+        return response;
+    } catch (error) {
+        if (retries > 0) {
+            console.warn(`Error de red. Reintentando... ${retries}`);
+            await new Promise(r => setTimeout(r, backoff));
+            return fetchWithRetry(url, options, retries - 1, backoff * 2);
+        }
+        throw error;
+    }
+}
 </script>
 </body>
 </html>

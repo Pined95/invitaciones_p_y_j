@@ -9,7 +9,7 @@
     
     <style>
         :root { --gold: #C59D5F; --dark: #1a1a1a; --light: #f4f4f9; --whatsapp: #25D366; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; overscroll-behavior: none; }
         
         /* SIDEBAR (Panel de Mensaje) */
         #sidebar { width: 350px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
@@ -100,10 +100,26 @@ Aquí les dejo su invitación digital y pase de acceso:
     let groups = [];
     
     window.onload = async () => {
+        // --- BLOQUEO DE SEGURIDAD ---
+        // Asegúrate de poner la misma contraseña que usaste en los otros archivos
+        if(prompt("🔐 Contraseña de Envíos:") !== "PYJ310524") { 
+            document.body.innerHTML = "<div style='display:flex;height:100vh;justify-content:center;align-items:center;'><h1>⛔ Acceso Denegado</h1></div>"; 
+            return; 
+        }
+        // -----------------------------
+
         loadSentStatus(); 
         try {
             const res = await fetch(`${API_URL}?action=getSendList`);
-            const data = await res.json();
+            const text = await res.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (err) {
+                alert("El servidor devolvió un error inesperado (probablemente HTML).");
+                console.error("Error al parsear JSON:", text);
+                throw new Error("Respuesta no es JSON.");
+            }
             
             if(data.status === 'success') {
                 processGroups(data.guests);

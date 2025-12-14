@@ -15,7 +15,7 @@
             --joven: #ff5722; --adulto: #607d8b;
             --ex: #795548; --vegano: #4caf50;
         }
-        body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow: hidden; display: flex; background: #e0e0e0; }
+        body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow: hidden; display: flex; background: #e0e0e0; overscroll-behavior: none; }
         
         /* SIDEBAR */
         #sidebar { width: 340px; background: white; border-right: 1px solid #999; display: flex; flex-direction: column; z-index: 20; box-shadow: 2px 0 15px rgba(0,0,0,0.2); }
@@ -184,7 +184,15 @@
         loadLocalLayout(); 
         try {
             const res = await fetch(`${API_URL}?action=getAllConfirmed`);
-            const data = await res.json();
+            const text = await res.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (err) {
+                alert("El servidor devolvió un error inesperado (probablemente HTML).");
+                console.error("Error al parsear JSON:", text);
+                throw new Error("Respuesta no es JSON.");
+            }
             if(data.status === 'success') { 
                 guests = data.guests; 
                 syncGuestsWithLayout(); 
