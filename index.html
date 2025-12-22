@@ -7,201 +7,151 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
+        /* --- TIPOGRAFÍAS --- */
         @font-face { font-family: 'High Spirited'; src: url('fonts/High Spirited.ttf') format('truetype'); font-weight: normal; }
         @font-face { font-family: 'Wasted Vindey'; src: url('fonts/Wasted-Vindey.ttf') format('truetype'); font-weight: normal; }
 
-        :root { --gold: #C59D5F; --text-dark: #1a1a1a; --text-gray: #555; --bg-cream: #FDFBF7; --white: #ffffff; 
-                --font-script: 'High Spirited', cursive; --font-display: 'Wasted Vindey', serif; --font-body: 'Montserrat', sans-serif; }
+        /* --- VARIABLES DE COLOR --- */
+        :root { 
+            --gold: #C59D5F; 
+            --text-dark: #1a1a1a; 
+            --text-gray: #555; 
+            --bg-cream: #FDFBF7; 
+            --white: #ffffff; 
+            --font-script: 'High Spirited', cursive; 
+            --font-display: 'Wasted Vindey', serif; 
+            --font-body: 'Montserrat', sans-serif; 
+        }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background-color: #E8E4D9; font-family: var(--font-body); margin: 0; color: var(--text-dark); overflow-x: hidden; padding-bottom: 70px; overscroll-behavior: none; }
         .app-container { max-width: 480px; margin: 0 auto; background: var(--bg-cream); min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative; padding-bottom: 80px; }
 
-        /* OVERLAY BIENVENIDA */
-        #welcome-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-cream); z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease, visibility 0.8s; }
-        #welcome-overlay.fade-out { opacity: 0; visibility: hidden; }
-        .welcome-btn { margin-top: 30px; padding: 15px 40px; background: transparent; border: 1px solid var(--gold); color: var(--text-dark); font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 2px; cursor: pointer; transition: 0.3s; }
-        .welcome-btn:hover { background: var(--gold); color: white; }
-
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 1s ease; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        .watercolor-bg { position: relative; z-index: 1; }
-        .watercolor-bg::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; background: radial-gradient(circle, rgba(197, 157, 95, 0.08) 0%, rgba(255,255,255,0) 70%); z-index: -1; pointer-events: none; border-radius: 50%; filter: blur(20px); }
-
+        /* --- HERO --- */
         .hero { height: 100vh; background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('img/portada.webp'); background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; padding-bottom: 60px; position: relative; }
         .hero-logo { width: 180px; margin-bottom: auto; margin-top: 60px; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5)); z-index: 10; animation: fadeIn 2s ease; }
-        .hero-text { color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.7); margin-bottom: 20px; }
-        .hero-names { font-family: var(--font-script); font-size: 4.5rem; line-height: 0.9; margin: 0; font-weight: normal; }
-        .hero-date { font-family: var(--font-display); letter-spacing: 3px; font-size: 1.3rem; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.8); padding-top: 15px; display: inline-block; }
+        .hero-names { font-family: var(--font-script); font-size: 4.5rem; color: white; line-height: 0.9; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.7); }
+        .hero-date { font-family: var(--font-display); letter-spacing: 3px; font-size: 1.3rem; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.8); padding-top: 15px; display: inline-block; color: white; }
 
+        /* --- COUNTDOWN --- */
         .countdown { display: flex; gap: 15px; margin-top: 20px; margin-bottom: 20px; }
         .time-box { background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.4); padding: 10px; border-radius: 4px; min-width: 65px; }
         .time-number { font-family: var(--font-display); font-size: 1.8rem; font-weight: 600; color: white; display: block; }
         .time-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; color: #eee; }
 
+        /* --- MARCOS Y SECCIONES --- */
         .section { padding: 60px 25px; text-align: center; position: relative; }
         .gold-frame { border: 2px solid var(--gold); padding: 40px 20px; position: relative; margin: 20px 0; background: white; }
         .gold-frame::before { content: ''; position: absolute; top: -6px; bottom: -6px; left: 6px; right: 6px; border-top: 1px solid var(--gold); border-bottom: 1px solid var(--gold); pointer-events: none; }
         
-        h2.title { font-family: var(--font-display); color: var(--gold); font-size: 2.2rem; margin-bottom: 30px; letter-spacing: 1px; position: relative; display: inline-block; }
-        h2.title::after { content: ''; display: block; width: 50px; height: 2px; background: var(--gold); margin: 10px auto 0; }
-        h3.script-title { font-family: var(--font-script); font-size: 3.5rem; color: var(--text-dark); margin: 15px 0; line-height: 1.1; font-weight: normal; }
-        
         .parents-block { font-family: var(--font-display); font-size: 1.2rem; color: #000; line-height: 1.6; margin-bottom: 25px; font-weight: 500; }
         .cross { font-size: 0.8rem; vertical-align: super; color: #666; }
 
+        /* --- MENSAJE PERSONAL --- */
+        .personal-note { font-family: var(--font-display); font-size: 1.6rem; color: var(--gold); margin-top: 20px; line-height: 1.4; padding: 0 25px; display: none; position: relative; }
+        .personal-note:not(:empty)::before { content: '“'; font-family: var(--font-display); font-size: 3rem; color: #ddd; position: absolute; left: -5px; top: -10px; }
+        .personal-note:not(:empty)::after { content: '”'; font-family: var(--font-display); font-size: 3rem; color: #ddd; position: absolute; right: -5px; bottom: -20px; }
+
+        /* --- CARRUSEL --- */
         .carousel { position: relative; width: 100%; height: 450px; overflow: hidden; margin: 40px 0; }
         .carousel img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 1.5s ease-in-out; -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); }
         .carousel img.active { opacity: 1; }
 
-        .event-card { border-left: 4px solid var(--gold); text-align: left; padding: 25px; margin-bottom: 40px; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.05); position: relative; border-radius: 0 15px 15px 0; }
+        /* --- ITINERARIO --- */
+        .title { font-family: var(--font-display); color: var(--gold); font-size: 2.2rem; margin-bottom: 30px; letter-spacing: 1px; position: relative; display: inline-block; }
+        .title::after { content: ''; display: block; width: 50px; height: 2px; background: var(--gold); margin: 10px auto 0; }
+        
+        .event-card { border-left: 4px solid var(--gold); text-align: left; padding: 25px; margin-bottom: 40px; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-radius: 0 15px 15px 0; position: relative; }
         .event-icon { font-size: 2.5rem; margin-bottom: 15px; color: var(--gold); }
         .event-name { font-family: var(--font-script); font-size: 2.8rem; color: var(--text-dark); margin: 5px 0; line-height: 1; font-weight: normal;}
         .event-time { font-family: var(--font-display); font-weight: bold; color: var(--gold); font-size: 1.3rem; letter-spacing: 1px; }
-        .event-place { font-weight: 600; font-size: 1rem; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px; }
         .event-address { font-size: 0.9rem; color: var(--text-gray); margin-top: 5px; margin-bottom: 20px; line-height: 1.5; }
 
-        .btn-app { font-size: 0.8rem; padding: 10px 18px; border-radius: 25px; text-decoration: none; font-weight: 600; border: 1px solid #ddd; display: inline-flex; align-items: center; gap: 8px; background: white; color: #333; margin-right: 10px; margin-bottom: 10px; transition: all 0.2s; }
+        .btn-app { font-size: 0.8rem; padding: 10px 18px; border-radius: 25px; text-decoration: none; font-weight: 600; border: 1px solid #ddd; display: inline-flex; align-items: center; gap: 8px; background: white; color: #333; margin-right: 5px; margin-bottom: 10px; transition: all 0.2s; cursor: pointer; }
         .btn-app:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
-        .btn-app.uber { border-color: black; color: black; background: #f9f9f9; }
+        .btn-app.uber { background: #000; color: white; border: none; width: 100%; justify-content: center; }
 
+        /* --- TIEMPO LIBRE GRID --- */
+        .todo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .todo-card { background: white; padding: 20px 10px; border-radius: 12px; border: 1px solid #f2efea; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.02); cursor: pointer; }
+        .todo-card i { font-size: 2.2rem; color: var(--gold); margin-bottom: 10px; }
+        .todo-card span { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dark); text-align: center; }
+
+        /* --- HOTELES --- */
         .hotel-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
         .hotel-card { background: white; padding: 20px; border-radius: 10px; border: 1px solid #eee; text-align: left; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .hotel-name { font-weight: bold; color: var(--gold); margin-bottom: 5px; font-family: var(--font-display); font-size: 1.1rem;}
-        .hotel-link { font-size: 0.8rem; text-decoration: none; color: var(--text-dark); border-bottom: 1px solid var(--gold); margin-right: 15px;}
+        .hotel-btn-steps { width: 100%; margin-top: 15px; padding: 12px; background: var(--text-dark); color: var(--gold); border: none; font-family: var(--font-display); cursor: pointer; border-radius: 4px; font-size: 0.85rem; letter-spacing: 1px; transition: 0.3s; }
+        .steps-container { text-align: left; margin-top: 20px; }
+        .step-item { display: flex; gap: 15px; margin-bottom: 20px; }
+        .step-number { width: 30px; height: 30px; background: var(--gold); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; flex-shrink: 0; font-family: var(--font-display); }
+        .step-text { font-size: 0.9rem; line-height: 1.4; color: #444; text-align: left; }
 
-        .gift-section { background: #fff; padding: 50px 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-top: 30px; display: flex; flex-direction: column; align-items: center; }
-        .gift-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 18px; margin-bottom: 15px; border: 1px solid #ddd; background: white; color: #333; text-decoration: none; font-weight: 500; transition: 0.3s; font-family: 'Montserrat', sans-serif; font-size: 1rem; cursor: pointer; border-radius: 5px; gap: 10px;}
+        /* --- REGALOS --- */
+        .gift-section { background: #fff; padding: 50px 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-top: 30px; }
+        .gift-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 18px; margin-bottom: 15px; border: 1px solid #ddd; background: white; color: #333; text-decoration: none; font-weight: 500; transition: 0.3s; font-family: 'Montserrat', sans-serif; font-size: 1rem; border-radius: 5px; gap: 10px; cursor: pointer; }
         .bank-btn { background-color: var(--text-dark); color: var(--gold); border: 1px solid var(--text-dark); }
 
-        .faq-item { text-align: left; border-bottom: 1px solid #ddd; padding: 20px 0; }
-        .faq-question { font-weight: 600; font-family: var(--font-display); font-size: 1.1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center;}
-        .faq-answer { display: none; font-size: 0.9rem; color: #555; margin-top: 15px; line-height: 1.6; }
-        .faq-item.active .faq-answer { display: block; animation: fadeIn 0.5s; }
-        .faq-item.active .faq-question { color: var(--gold); }
-
-        #rsvp-section { background: #F4F1EA; }
-        .guest-row { background: white; padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        /* --- RSVP --- */
+        .guest-row { background: white; padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; text-align: left; }
         .toggle-group { display: flex; gap: 5px; margin-top: 10px; }
-        .toggle-btn { flex:1; padding: 12px; border:1px solid #ccc; background:white; cursor:pointer; font-size:0.75rem; font-family:'Montserrat'; text-transform:uppercase; transition:0.3s; font-weight: 600;}
+        .toggle-btn { flex:1; padding: 12px; border:1px solid #ccc; background:white; cursor:pointer; font-size:0.75rem; font-family:'Montserrat'; text-transform:uppercase; transition:0.3s; font-weight: 600; text-align: center; border-radius: 4px; }
         .toggle-btn.selected { background: var(--gold); color: white; border-color: var(--gold); }
         .toggle-btn.reject.selected { background: #999; border-color: #999; }
+        .script-title { font-family: var(--font-script); font-size: 3.5rem; color: var(--text-dark); margin: 15px 0; line-height: 1.1; font-weight: normal; }
 
-        .personal-note { font-family: var(--font-display); font-size: 1.8rem; color: var(--gold); margin-top: 20px; line-height: 1.4; padding: 0 10px; animation: fadeIn 2s ease; font-weight: normal; }
-        .personal-note::before { content: '“'; font-family: var(--font-display); font-size: 3rem; color: #ddd; vertical-align: -15px; margin-right: 5px; }
-        .personal-note::after { content: '”'; font-family: var(--font-display); font-size: 3rem; color: #ddd; vertical-align: -15px; margin-left: 5px; }
-
-        #day-b-mode { display: none; background: var(--text-dark); color: white; padding: 40px 20px; text-align: center; position: relative; z-index: 999; }
-        .day-b-btn { display: flex; align-items: center; justify-content: center; gap: 10px; background: white; color: var(--text-dark); padding: 15px; margin-bottom: 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: var(--font-display); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .day-b-btn.waze { background: #33ccff; color: white; }
-        .day-b-btn.photo { background: var(--gold); color: white; }
-
-        .btn { display: inline-block; padding: 15px 40px; border: 1px solid var(--gold); background: transparent; color: var(--text-dark); font-family: var(--font-display); font-size: 1rem; letter-spacing: 2px; cursor: pointer; text-decoration: none; margin-top: 15px; transition: 0.3s; }
-        .btn:hover { background: var(--gold); color: white; }
-        .btn-full { width: 100%; background: var(--text-dark); color: var(--gold); border-color: var(--text-dark); }
-
-        /* STICKY NAV BAR */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding: 10px 0; z-index: 2000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .nav-item { text-decoration: none; color: #999; font-size: 0.7rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 25%; cursor: pointer; }
-        .nav-item i { font-size: 1.2rem; margin-bottom: 2px; }
-        .nav-item.highlight { color: var(--gold); font-weight: 600; }
-
-        .hidden { display: none !important; }
-        .flex { display: flex !important; }
-        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; animation: fadeIn 0.3s; }
-        .modal-content { background-color: #fff; padding: 40px 20px; border: 2px solid var(--gold); width: 90%; max-width: 400px; text-align: center; position: relative; border-radius: 8px;}
-        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 30px; cursor: pointer; color: #999; }
-
-        .music-btn { position: fixed; top: 20px; right: 20px; width: 45px; height: 45px; background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); border: 2px solid var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; z-index: 100; cursor: pointer; animation: spin 8s linear infinite; box-shadow: 0 2px 10px rgba(0,0,0,0.2); font-size: 1.2rem; color: var(--gold); }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Estilos específicos para el Ticket Digital */
-        .ticket-cutout-top { background:#F4F1EA; width:24px; height:24px; border-radius:50%; position:absolute; top:-14px; left:50%; transform:translateX(-50%); box-shadow:inset 0 -2px 5px rgba(0,0,0,0.05); }
+        /* --- TICKET & RECORTES --- */
         .ticket-cutout-side-l { background:#E8E4D9; width:24px; height:24px; border-radius:50%; position:absolute; top: -12px; left:-12px; box-shadow:inset -2px 0 5px rgba(0,0,0,0.05); z-index: 5;}
         .ticket-cutout-side-r { background:#E8E4D9; width:24px; height:24px; border-radius:50%; position:absolute; top: -12px; right:-12px; box-shadow:inset 2px 0 5px rgba(0,0,0,0.05); z-index: 5;}
 
-/* Estilos para el fondo de Acuarelas */
-.watercolor-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    z-index: -1; /* Detrás de todo */
-    overflow: hidden;
-    pointer-events: none; /* Que no estorbe al click */
-}
+        /* --- MODALES --- */
+        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; animation: fadeIn 0.3s; }
+        .modal-content { background-color: #fff; padding: 40px 20px; border: 2px solid var(--gold); width: 90%; max-width: 400px; text-align: center; position: relative; border-radius: 8px; max-height: 90vh; overflow-y: auto;}
+        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 30px; cursor: pointer; color: #999; }
+        
+        /* --- UTILIDADES --- */
+        .hidden { display: none !important; }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 1s ease; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* --- CARGA & MÚSICA --- */
+        #welcome-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-cream); z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease, visibility 0.8s; }
+        #welcome-overlay.fade-out { opacity: 0; visibility: hidden; }
+        .welcome-btn { margin-top: 30px; padding: 15px 40px; background: transparent; border: 1px solid var(--gold); color: var(--text-dark); font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 2px; cursor: pointer; transition: 0.3s; }
+        .welcome-btn:hover { background: var(--gold); color: white; }
+        
+        .music-btn { position: fixed; top: 20px; right: 20px; width: 45px; height: 45px; background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); border: 2px solid var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; z-index: 100; cursor: pointer; animation: spin 8s linear infinite; box-shadow: 0 2px 10px rgba(0,0,0,0.2); font-size: 1.2rem; color: var(--gold); }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-.wc-group {
-    position: absolute;
-    opacity: 0.6; /* Transparencia para que se mezclen */
-    mix-blend-mode: multiply; /* Efecto de mezcla de pintura real */
-    transition: transform 0.1s linear; /* Suavizado */
-    will-change: transform;
-}
-
-.wc-img {
-    width: 300px; /* Tamaño base */
-    height: auto;
-    display: block;
-    position: absolute;
-}
-
-/* Posiciones estratégicas (Empalmados en pares) */
-/* Grupo 1: Arriba Izquierda */
-.wc-g1 { top: -50px; left: -50px; }
-.wc-g1 .img-a { top: 0; left: 0; transform: rotate(0deg); }
-.wc-g1 .img-b { top: 40px; left: 60px; transform: rotate(45deg); opacity: 0.8; }
-
-/* Grupo 2: Medio Derecha */
-.wc-g2 { top: 40%; right: -80px; }
-.wc-g2 .img-a { top: 0; right: 0; transform: rotate(180deg); }
-.wc-g2 .img-b { top: 50px; right: 30px; transform: rotate(130deg); }
-
-/* Grupo 3: Abajo Izquierda */
-.wc-g3 { bottom: -60px; left: -20px; }
-.wc-g3 .img-a { bottom: 0; left: 0; transform: rotate(90deg); }
-.wc-g3 .img-b { bottom: 20px; left: 50px; transform: rotate(10deg); }
-
-/* Animación de entrada suave */
-.wc-group { animation: wc-fade-in 3s ease; }
-@keyframes wc-fade-in { from { opacity: 0; } to { opacity: 0.6; } }
+        /* --- ACUARELAS --- */
+        .watercolor-container { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
+        .wc-group { position: absolute; opacity: 0.6; mix-blend-mode: multiply; transition: transform 0.1s linear; will-change: transform; }
+        .wc-img { width: 300px; height: auto; display: block; position: absolute; }
+        .wc-g1 { top: -50px; left: -50px; }
+        .wc-g2 { top: 40%; right: -80px; }
+        .wc-g3 { bottom: -60px; left: -20px; }
     </style>
 </head>
 <body>
 
     <div class="watercolor-container">
-        <div class="wc-group wc-g1" data-speed="0.05" data-limit="30">
-            <img src="img/watercolor-1.png" class="wc-img img-a" alt="">
-            <img src="img/watercolor-2.png" class="wc-img img-b" alt="">
-        </div>
-
-        <div class="wc-group wc-g2" data-speed="-0.08" data-limit="50">
-            <img src="img/watercolor-3.png" class="wc-img img-a" alt="">
-            <img src="img/watercolor-1.png" class="wc-img img-b" alt="">
-        </div>
-
-        <div class="wc-group wc-g3" data-speed="0.03" data-limit="20">
-            <img src="img/watercolor-4.png" class="wc-img img-a" alt="">
-            <img src="img/watercolor-2.png" class="wc-img img-b" alt="">
-        </div>
+        <div class="wc-group wc-g1" data-speed="0.05" data-limit="30"><img src="img/watercolor-1.png" class="wc-img" alt=""></div>
+        <div class="wc-group wc-g2" data-speed="-0.08" data-limit="50"><img src="img/watercolor-3.png" class="wc-img" alt=""></div>
+        <div class="wc-group wc-g3" data-speed="0.03" data-limit="20"><img src="img/watercolor-4.png" class="wc-img" alt=""></div>
     </div>
 
     <div id="welcome-overlay">
         <h1 style="font-family: var(--font-script); font-size: 5rem; color: var(--gold); margin-bottom: 0; line-height: 1; font-weight: normal;">P & J</h1>
         <p style="font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 3px; color: var(--text-dark);">14 . 03 . 2026</p>
-        
         <div id="loading-msg" style="margin-top: 30px; font-size: 0.9rem; color: #666; letter-spacing: 1px;">
             <i class="ph-light ph-spinner" style="animation: spin 1s linear infinite;"></i> CARGANDO INVITACIÓN...
         </div>
-
         <button id="enter-btn" class="welcome-btn" onclick="enterSite()" style="display:none;">ENTRAR</button>
     </div>
 
@@ -210,90 +160,34 @@
     </audio>
     <div class="music-btn" onclick="toggleMusic()"><i class="ph-light ph-music-note"></i></div>
 
-    <nav class="bottom-nav" id="main-nav">
-        <a href="javascript:void(0)" onclick="window.scrollTo(0,0)" class="nav-item">
-            <i class="ph-light ph-house"></i>Inicio
-        </a>
-        <a href="javascript:void(0)" onclick="document.querySelector('.event-card').scrollIntoView({behavior: 'smooth'})" class="nav-item">
-            <i class="ph-light ph-map-pin"></i>Mapa
-        </a>
-        <a href="javascript:void(0)" onclick="document.getElementById('rsvp-section').scrollIntoView({behavior: 'smooth'})" class="nav-item highlight">
-            <i class="ph-light ph-envelope-open"></i>Confirmar
-        </a>
-        <a href="javascript:void(0)" onclick="document.querySelector('.gift-section').scrollIntoView({behavior: 'smooth'})" class="nav-item">
-            <i class="ph-light ph-gift"></i>Regalo
-        </a>
-    </nav>
-
-    <div id="day-b-mode">
-        <div style="text-align:center; margin-bottom:30px;">
-            <h1 style="font-family:'High Spirited'; font-size:4rem; color:var(--gold); margin:0; font-weight:normal;">¡Es Hoy!</h1>
-            <p style="font-family:'Wasted Vindey'; font-size:1.2rem;">Bienvenidos a nuestra boda</p>
-        </div>
-
-        <div id="day-b-qr" style="background:white; padding:20px; border-radius:12px; margin-bottom:20px; text-align:center; display:none;">
-            <p style="font-weight:bold; margin-bottom:10px;">TU PASE DE ACCESO</p>
-            <div id="day-b-qr-img"></div>
-            <p style="font-size:0.8rem; color:#666;">Muéstralo en la entrada</p>
-        </div>
-
-        <div class="day-b-grid">
-            <div class="day-b-card" onclick="window.open('http://googleusercontent.com/maps.google.com/80')">
-                <i class="ph-light ph-church"></i>
-                <div style="font-weight:bold">Iglesia</div>
-            </div>
-            <div class="day-b-card" onclick="window.open('https://maps.app.goo.gl/TU_LINK_SALON')">
-                <i class="ph-light ph-wine"></i>
-                <div style="font-weight:bold">Recepción</div>
-            </div>
-            <div class="day-b-card" style="grid-column: span 2; background:var(--text-dark); color:white;" onclick="alert('Link a Google Photos')">
-                <i class="ph-light ph-camera" style="color:white"></i>
-                <div style="font-weight:bold">SUBIR FOTOS</div>
-            </div>
-            <div class="day-b-card" onclick="document.getElementById('menu-modal').style.display='flex'">
-                <i class="ph-light ph-utensils"></i>
-                <div style="font-weight:bold">Menú</div>
-            </div>
-             <div class="day-b-card" onclick="alert('¡Reto: Tómate una selfie con los novios!')">
-                <i class="ph-light ph-dice-three"></i>
-                <div style="font-weight:bold">Reto</div>
-            </div>
-        </div>
-
-        <div style="margin-top:40px; text-align:center;">
-            <button onclick="document.getElementById('day-b-mode').style.display='none'; document.getElementById('main-content').style.display='block';" style="background:transparent; border:none; color:#999; text-decoration:underline;">
-                Ver invitación completa
-            </button>
-        </div>
-    </div>
-
     <div class="app-container" id="main-content">
         
-            <div class="hero">
-                <div class="hero-logo"><img src="img/logo2.png" width="180"></div>
-                <div class="hero-text">
-                    <div class="hero-names">Paola & Jorge</div>
-                    <div class="hero-date">SÁBADO 14 DE MARZO, 2026</div>
-                </div>
-        
-                <div class="countdown reveal">
-                    <div class="time-box"><span class="time-number" id="d">00</span><span class="time-label">Días</span></div>
-                    <div class="time-box"><span class="time-number" id="h">00</span><span class="time-label">Hrs</span></div>
-                    <div class="time-box"><span class="time-number" id="m">00</span><span class="time-label">Min</span></div>
-                    <div class="time-box"><span class="time-number" id="s">00</span><span class="time-label">Seg</span></div>
-                </div>
-                
+        <div class="hero">
+            <div class="hero-logo"><img src="img/logo2.png" width="180"></div>
+            <div class="hero-text">
+                <div class="hero-names">Paola & Jorge</div>
+                <div class="hero-date">SÁBADO 14 DE MARZO, 2026</div>
             </div>
+            <div class="countdown reveal">
+                <div class="time-box"><span class="time-number" id="d">00</span><span class="time-label">Días</span></div>
+                <div class="time-box"><span class="time-number" id="h">00</span><span class="time-label">Hrs</span></div>
+                <div class="time-box"><span class="time-number" id="m">00</span><span class="time-label">Min</span></div>
+                <div class="time-box"><span class="time-number" id="s">00</span><span class="time-label">Seg</span></div>
+            </div>
+        </div>
+
         <div class="section reveal">
             <div class="gold-frame">
                 <div class="frame-content">
                     <p style="font-size:0.9rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:30px;">Con la bendición de Dios y nuestros padres</p>
                     <div class="parents-block">Claudia Elizabeth Porras Ochoa<br>Alfonso Buenfild de la Peña <span class="cross">†</span></div>
                     <div class="parents-block">Maria del Refugio Herrera Lopez<br>Jorge Humberto Pineda Barrera</div>
+                    
                     <div style="margin: 40px 0;">
-                        <p style="font-family: var(--font-script); font-size:3rem; font-weight:normal;">Uniremos nuestras vidas</p>
+                        <p style="font-family: var(--font-script); font-size:3rem; font-weight:normal; margin:0;">Uniremos nuestras vidas</p>
                         <p style="font-size:0.9rem; color:#666; font-style:italic;">"El amor todo lo puede, todo lo espera, todo lo soporta."</p>
                     </div>
+                    
                     <hr style="width: 50px; border: 1px solid var(--gold); margin: 20px auto;">
                     <p id="greeting-label" style="font-family: var(--font-display); font-weight:600; margin-bottom:10px; font-size:1.2rem;">HOLA</p>
                     <h2 id="main-guest-name" style="font-family: var(--font-script); font-size:3.5rem; margin:0; color:var(--text-dark); font-weight: normal;">Invitado</h2>
@@ -308,8 +202,9 @@
             <img src="img/foto3.webp" style="object-position: center;" loading="lazy">
         </div>
 
-        <div class="section reveal" style="background:white; padding-top:20px;">
+        <div class="section reveal" style="background:white;">
             <h2 class="title">Itinerario</h2>
+            
             <div class="event-card watercolor-bg">
                 <div class="event-icon"><i class="ph-light ph-church"></i></div>
                 <div class="event-time">2:30 PM</div>
@@ -317,21 +212,11 @@
                 <div class="event-place">Parroquia del Buen Pastor</div>
                 <div class="event-address">Baja California 729, Fracc. San José, Cd. Victoria.</div>
                 <div class="map-actions">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Parroquia+del+Buen+Pastor+Baja+California+729+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
-                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda+P%26J+(Misa)&dates=20260314T143000/20260314T153000&details=Ceremonia+Religiosa&location=Parroquia+del+Buen+Pastor,+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Parroquia+del+Buen+Pastor+Baja+California+729+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Ubicación</a>
+                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda+P%26J+(Misa)&dates=20260314T143000/20260314T153000" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
                 </div>
             </div>
-            <div id="civil-card" class="event-card watercolor-bg hidden">
-                <div class="event-icon"><i class="ph-light ph-pen-nib"></i></div>
-                <div class="event-time">6:00 PM</div>
-                <div class="event-name">Boda Civil</div>
-                <div class="event-place">Candilejas Eventos</div>
-                <div class="event-address">Gaspar de la Garza, Valle de Aguayo.<br><strong>(Solo Familia Cercana)</strong></div>
-                <div class="map-actions">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Salón+Candilejas+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
-                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda+Civil+P%26J&dates=20260314T180000/20260314T190000&details=Ceremonia+Civil+Familiar&location=Candilejas+Eventos,+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
-                </div>
-            </div>
+
             <div class="event-card watercolor-bg">
                 <div class="event-icon"><i class="ph-light ph-wine"></i></div>
                 <div class="event-time">7:00 PM</div>
@@ -339,50 +224,62 @@
                 <div class="event-place">Candilejas Eventos</div>
                 <div class="event-address">Gaspar de la Garza, Valle de Aguayo, Cd. Victoria.</div>
                 <div class="map-actions">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Salón+Candilejas+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Google Maps</a>
-                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Fiesta+Boda+P%26J&dates=20260314T190000/20260315T020000&details=Recepción+Boda+Paola+y+Jorge&location=Candilejas+Eventos,+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
-                    <a href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[nickname]=Candilejas%20Eventos&dropoff[formatted_address]=Cd%20Victoria" class="btn-app uber hidden day-b-visible"><i class="ph-light ph-car"></i> Pedir Uber</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Salón+Candilejas+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Ubicación</a>
+                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Fiesta+Boda+P%26J&dates=20260314T190000/20260315T020000" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
+                    <a href="https://m.uber.com/ul/?action=setPickup&dropoff[nickname]=Candilejas%20Eventos" id="uber-btn" class="btn-app uber hidden"><i class="ph-light ph-car"></i> Pedir Uber</a>
                 </div>
             </div>
         </div>
 
         <div class="section reveal">
-            <h2 class="title">Guía para Foráneos</h2>
-            <p style="font-size:0.9rem; color:#666; margin-top:10px;">Recomendaciones para su estancia.</p>
+            <h2 class="title">Hospedaje</h2>
             <div class="hotel-grid">
                 <div class="hotel-card">
-                    <div class="hotel-name">Hotel Hampton Inn</div>
-                    <p style="font-size:0.85rem; margin:5px 0;">Opción Premium. A 10 min del salón.</p>
-                    <a href="https://www.hilton.com/es/hotels/cdjvchx-hampton-ciudad-victoria/" target="_blank" class="hotel-link"><i class="ph-light ph-globe"></i> Web</a>
-                    <a href="https://www.google.com/maps/search/?api=1&query=Hampton+Inn+by+Hilton+Ciudad+Victoria" target="_blank" class="hotel-link"><i class="ph-light ph-map-pin"></i> Ubicación</a>
+                    <div class="hotel-name">Hampton by Hilton</div>
+                    <div style="font-size:0.8rem; color:#666;">Desayuno Incluido • Transportación</div>
+                    <button onclick="openHotelModal('hampton')" class="hotel-btn-steps">CÓMO RESERVAR</button>
                 </div>
                 <div class="hotel-card">
-                    <div class="hotel-name">Hotel iStay</div>
-                    <p style="font-size:0.85rem; margin:5px 0;">Excelente ubicación en zona comercial.</p>
-                    <a href="#" class="hotel-link"><i class="ph-light ph-phone"></i> Reservar</a>
-                    <a href="https://www.google.com/maps/search/?api=1&query=iStay+Hotel+Ciudad+Victoria" target="_blank" class="hotel-link"><i class="ph-light ph-map-pin"></i> Ubicación</a>
+                    <div class="hotel-name">iStay Hotel Victoria</div>
+                    <div style="font-size:0.8rem; color:#666;">Tarifa Grupal • Desayuno</div>
+                    <button onclick="openHotelModal('istay')" class="hotel-btn-steps">CÓMO RESERVAR</button>
                 </div>
-            </div>
-            <div style="margin-top:40px; background: white; padding:25px; border:1px dashed var(--gold); border-radius:8px;">
-                <h3 style="font-family: var(--font-script); font-size:2.5rem; margin:0; font-weight: normal;">Tiempo Libre</h3>
-                <p style="font-size:0.9rem; margin-top:5px; color:#888;">¿Qué hacer entre la Misa y la Fiesta?</p>
-                <ul style="text-align:left; font-size:0.9rem; color:#555; margin-top:20px; line-height:1.8; list-style:none; padding-left:0;">
-                    <li><i class="ph-light ph-coffee icon-gold"></i> Café en <strong>Starbucks Campestre</strong>.</li>
-                    <li><i class="ph-light ph-wine icon-gold"></i> Drinks en <strong>La Mentira</strong>.</li>
-                    <li><i class="ph-light ph-bed icon-gold"></i> Descanso en el hotel.</li>
-                </ul>
             </div>
         </div>
 
-        <div class="gift-section reveal">
-            <i class="ph-light ph-gift icon-large"></i>
+        <div class="section reveal" style="background: #faf9f6;">
+            <h3 style="font-family: var(--font-display); font-size:1.3rem; color:var(--gold); margin:0; letter-spacing:1px; text-transform: uppercase;">Tiempo Libre</h3>
+            <p style="font-size:0.8rem; margin-top:5px; color:#888; font-weight: 500;">¿Qué hacer entre la Misa y la Fiesta?</p>
+            
+            <div class="todo-grid">
+                <div class="todo-card" onclick="openInfoModal('Café & Lounge', 'Disfruta un ambiente moderno en <b>Sunrise Café</b> (Plaza Verde Limón) o un clásico en <b>Starbucks Campestre</b>.')">
+                    <i class="ph-light ph-coffee"></i><span>Café</span>
+                </div>
+                <div class="todo-card" onclick="openInfoModal('Snack Local', 'Prueba las famosas <b>Flautas del Arce</b> o unas tradicionales <b>Gorditas Doña Tota</b>.')">
+                    <i class="ph-light ph-hamburger"></i><span>Snacks</span>
+                </div>
+                <div class="todo-card" onclick="openInfoModal('Paseo Corto', 'Camina por <b>Plaza Campestre</b> o visita el <b>Museo Tamux</b>.')">
+                    <i class="ph-light ph-map-trifold"></i><span>Paseo</span>
+                </div>
+                <div class="todo-card" onclick="openInfoModal('Descanso', 'Relájate en el <b>Hampton Inn</b> o <b>iStay Hotel</b> antes de la fiesta.')">
+                    <i class="ph-light ph-bed"></i><span>Descanso</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="gift-registry-section" class="gift-section reveal">
+            <i class="ph-light ph-gift" style="font-size: 3rem; color: var(--gold); margin-bottom: 10px;"></i>
             <h2 class="title" style="margin-top:10px;">Mesa de Regalos</h2>
-            <p style="font-size:1rem; color:#666; margin-bottom:30px; max-width: 80%;">Su presencia es nuestro mejor regalo. Si desean tener un detalle con nosotros:</p>
-            <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51644125" class="gift-btn"><i class="ph-light ph-shopping-bag"></i> Liverpool (Evento: 51644125)</a>
-            <a href="https://www.amazon.com.mx/wedding/share/PaolayJorge_140326" class="gift-btn"><i class="ph-bold ph-amazon-logo"></i> Amazon Wishlist</a>
-            <button onclick="openModal()" class="gift-btn bank-btn"><i class="ph-light ph-credit-card"></i> Datos Bancarios</button>
+            
+            <div id="registry-content">
+                <p style="font-size:1rem; color:#666; margin-bottom:30px; max-width: 80%;">Su presencia es nuestro mejor regalo. Si desean tener un detalle con nosotros:</p>
+                <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51644125" class="gift-btn"><i class="ph-light ph-shopping-bag"></i> Liverpool (51644125)</a>
+                <a href="https://www.amazon.com.mx/wedding/share/PaolayJorge_140326" class="gift-btn"><i class="ph-bold ph-amazon-logo"></i> Amazon Wishlist</a>
+                <button onclick="openBankModal()" class="gift-btn bank-btn"><i class="ph-light ph-credit-card"></i> Datos Bancarios</button>
+            </div>
+
             <div style="margin-top:20px; border:1px dashed var(--gold); padding:15px; border-radius:8px; background:#fdfdf0;">
-                <i class="ph-light ph-envelope-simple icon-gold" style="font-size:1.5rem;"></i>
+                <i class="ph-light ph-envelope-simple" style="font-size:1.5rem; color:var(--gold);"></i>
                 <p style="margin:5px 0; font-weight:bold; font-size:1rem;">LLUVIA DE SOBRES</p>
                 <p style="font-size:0.9rem; margin:0;">Dispondremos de un buzón en la recepción.</p>
             </div>
@@ -403,418 +300,258 @@
             </div>
         </div>
 
-        <div class="section reveal" style="background:#fff;">
-            <h2 class="title">Preguntas Frecuentes</h2>
-            <div class="faq-item" onclick="this.classList.toggle('active')">
-                <div class="faq-question">¿Los niños son bienvenidos? <span style="color:var(--gold)">+</span></div>
-                <div class="faq-answer">Amamos a sus pequeños, pero queremos que disfruten la noche libremente. La recepción será <strong>exclusivamente para adultos</strong>.</div>
-            </div>
-            <div class="faq-item" onclick="this.classList.toggle('active')">
-                <div class="faq-question">¿Hasta cuándo puedo confirmar? <span style="color:var(--gold)">+</span></div>
-                <div class="faq-answer">Por favor confirma tu asistencia antes del <strong>1 de Febrero</strong>.</div>
-            </div>
-            <div class="faq-item" onclick="this.classList.toggle('active')">
-                <div class="faq-question">¿Hay estacionamiento? <span style="color:var(--gold)">+</span></div>
-                <div class="faq-answer">Sí, el salón Candilejas cuenta con estacionamiento privado y vigilancia.</div>
-            </div>
-        </div>
-
-        <div id="rsvp-section" class="section reveal">
-            <h3 class="script-title">¡Queremos celebrar contigo!</h3>
-            <div style="margin: 0 auto 30px; max-width: 85%; font-size: 1rem; line-height: 1.6;">
-                <p>Han sido parte fundamental de nuestra historia y no nos imaginamos este día sin ustedes.</p>
-                <p style="font-weight: 600; color: var(--gold); font-size:1.2rem; margin-top:10px;">¿Nos acompañan?</p>
-            </div>
-            <p style="font-size:0.8rem; margin-bottom:15px; color:#666;">Por favor confirma antes del 1 de Febrero.</p>
-            <div style="background: white; border: 1px solid #e0e0e0; padding: 10px; margin-bottom: 30px; border-radius: 4px; display:inline-block;">
-                <p style="font-size:0.9rem; color:#d32f2f; margin:0; font-weight:bold;">🚫 NO NIÑOS</p>
-            </div>
+        <div id="rsvp-section" class="section reveal" style="background:#F4F1EA;">
+            <h3 class="script-title">Confirmación</h3>
+            <p style="font-size:0.8rem; margin-bottom:15px; color:#666;">Por favor confirma la asistencia de cada persona:</p>
             <div id="guests-list"></div>
+            
             <div style="text-align:left; margin-top:30px;">
                 <label style="font-family: var(--font-display); font-size:0.9rem;">SUGIERE UNA CANCIÓN</label>
-                <input type="text" id="song-suggestion" class="btn" style="width:100%; text-align:left; border-bottom:1px solid var(--text-dark); border-top:none; border-left:none; border-right:none; border-radius:0; margin-bottom:20px;" placeholder="Ej. Vivir mi vida - Marc Anthony">
-                
-                <label style="font-family: var(--font-display); font-size:0.9rem;">MENSAJE PARA LOS NOVIOS</label>
-                <textarea id="guest-message" class="btn" style="width:100%; text-align:left; border:1px solid #ccc; border-radius:4px; min-height:80px; margin-top:5px; background:white; font-family:'Montserrat';" placeholder="Escríbenos algo bonito..."></textarea>
+                <input type="text" id="song-suggestion" class="btn-app" style="width:100%; text-align:left; justify-content:flex-start; cursor:text;" placeholder="Ej. Vivir mi vida - Marc Anthony">
             </div>
-            <button class="btn btn-full" onclick="sendRSVP()">ENVIAR CONFIRMACIÓN</button>
+            
+            <button class="btn-app" style="width:100%; justify-content:center; background:var(--text-dark); color:white; padding:15px; margin-top:20px;" onclick="sendFinalRSVP()">ENVIAR CONFIRMACIÓN</button>
         </div>
 
         <div id="ticket-section" class="section hidden reveal">
-            <div class="gold-frame" id="digital-ticket-card" style="background:white; padding:0; border-radius:10px; border:none; position:relative; overflow:hidden; width:90%; max-width:350px; margin:auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-                </div>
-
-            <div style="margin-top:25px; display:flex; gap:10px; justify-content:center; flex-direction:column; align-items:center;">
-                <p style="color:#666; font-size:0.85rem; margin-bottom:10px;">Guarda este boleto para tu ingreso.</p>
-                <button onclick="downloadTicket()" class="btn" style="background:var(--text-dark); color:white; border:none; display:flex; align-items:center; gap:8px;">
-                    <i class="ph-light ph-download"></i> Descargar Boleto
-                </button>
-                <button onclick="window.location.reload()" class="btn" style="margin-top:10px; border:none; color:#666; font-size:0.8rem;">VOLVER A LA INVITACIÓN</button>
+            <div class="gold-frame" id="digital-ticket-card" style="padding:0; border-radius:10px; border:none; position:relative; overflow:hidden; width:90%; max-width:350px; margin:auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
             </div>
-        </div>
-
-        <div id="bank-modal" class="modal" onclick="closeModal(event)">
-            <div class="modal-content">
-                <span class="close-modal" onclick="closeModalForce()">×</span>
-                <h3 style="font-family: var(--font-display); color:var(--gold); font-size:1.8rem; margin-bottom:20px;">Datos Bancarios</h3>
-                <div class="bank-info" style="text-align:left; font-size:1rem; line-height:1.8;">
-                    <p><strong>Banco:</strong> BBVA</p>
-                    <p><strong>Titular:</strong> Ana Paola Buenfild Porras</p>
-                    <p><strong>CLABE:</strong> 012 345 67890123456 7 <span class="copy-btn" onclick="copyText('012345678901234567', this)">COPIAR</span></p>
-                    <p><strong>Concepto:</strong> Boda + Tu Apellido</p>
-                </div>
-                <button class="btn" style="margin-top:30px; width:100%;" onclick="closeModalForce()">CERRAR</button>
-            </div>
-        </div>
-
-        <div id="menu-modal" class="modal" onclick="this.style.display='none'">
-            <div class="modal-content" style="background:#fff; color:#000;">
-                <h2 style="font-family:var(--font-display); color:var(--gold);">Cena</h2>
-                <p><strong>Entrada:</strong><br>Crema de Elote con rajas</p>
-                <hr style="border-top:1px dashed #ccc; margin:10px 0;">
-                <p><strong>Plato Fuerte:</strong><br>Suprema de Ave en salsa de chipotle<br>Puré de papa rústico</p>
-                <hr style="border-top:1px dashed #ccc; margin:10px 0;">
-                <p><strong>Postre:</strong><br>Pastel de Boda</p>
-            </div>
+            <button onclick="downloadTicket()" class="btn-app" style="width:100%; justify-content:center; background:var(--gold); color:white; border:none; margin-top:20px;">
+                <i class="ph-light ph-download"></i> Descargar Boleto
+            </button>
         </div>
 
     </div>
 
+    <div id="info-modal" class="modal" onclick="closeInfoModal(event)">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeInfoModalForce()">×</span>
+            <h3 id="info-modal-title" style="font-family: var(--font-display); color:var(--gold); font-size:1.8rem; margin-bottom:15px;"></h3>
+            <p id="info-modal-body" style="font-size:1rem; line-height:1.6; color:#444; text-align: center;"></p>
+            <button class="btn-app" style="width:100%; justify-content:center; margin-top:25px;" onclick="closeInfoModalForce()">CERRAR</button>
+        </div>
+    </div>
+
+    <div id="bank-modal" class="modal" onclick="closeBankModal(event)">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeBankModalForce()">×</span>
+            <h3 style="font-family: var(--font-display); color:var(--gold); font-size:1.8rem; margin-bottom:20px;">Datos Bancarios</h3>
+            <div style="text-align:left; font-size:1rem; line-height:1.8;">
+                <p><strong>Banco:</strong> Spin by Oxxo</p>
+                <p><strong>Titular:</strong> Ana Paola Buenfild Porras</p>
+                <p><strong>CLABE:</strong> 728969000119488509 <span style="color:var(--gold); font-weight:bold; cursor:pointer; font-size:0.7rem; border:1px solid var(--gold); padding:2px 5px; border-radius:4px;" onclick="copyText('728969000119488509', this)">COPIAR</span></p>
+                <p><strong>Tarjeta:</strong> 1234 5678 9012 3456</p>
+            </div>
+            <button class="btn-app" style="width:100%; justify-content:center; margin-top:25px;" onclick="closeBankModalForce()">CERRAR</button>
+        </div>
+    </div>
+
+    <div id="hotel-modal-hampton" class="modal" onclick="closeHotelModal(event, 'hampton')">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeHotelModalForce('hampton')">×</span>
+            <h2 style="font-family:var(--font-display); color:var(--gold);">Hampton by Hilton</h2>
+            <div class="steps-container">
+                <div class="step-item"><div class="step-number">1</div><div class="step-text">Llama directo al hotel: <br><strong>(834) 153 7070</strong></div></div>
+                <div class="step-item"><div class="step-number">2</div><div class="step-text">Menciona la clave: <br><strong>BODA DE PAOLA Y JORGE</strong></div></div>
+                <div class="step-item"><div class="step-number">3</div><div class="step-text">Tarifa Especial: $1,672.00 <br><small>(Máx 4 pers. $350 extra p/p)</small></div></div>
+            </div>
+            <button class="btn-app" style="width:100%; justify-content:center;" onclick="closeHotelModalForce('hampton')">ENTENDIDO</button>
+        </div>
+    </div>
+
+    <div id="hotel-modal-istay" class="modal" onclick="closeHotelModal(event, 'istay')">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeHotelModalForce('istay')">×</span>
+            <h2 style="font-family:var(--font-display); color:var(--gold);">iStay Hotel Victoria</h2>
+            <div class="steps-container">
+                <div class="step-item"><div class="step-number">1</div><div class="step-text">Llama al hotel o al 800: <br><strong>(834) 318 6000</strong></div></div>
+                <div class="step-item"><div class="step-number">2</div><div class="step-text">Usa la clave de bloqueo: <br><strong>BODA DE PAOLA & JORGE</strong></div></div>
+                <div class="step-item"><div class="step-number">3</div><div class="step-text">Tarifa Especial: $1,362.55 <br><small>(Incluye desayuno e internet)</small></div></div>
+            </div>
+            <button class="btn-app" style="width:100%; justify-content:center;" onclick="closeHotelModalForce('istay')">ENTENDIDO</button>
+        </div>
+    </div>
+
 <script>
-    // 👇 URL DEL APPS SCRIPT (ACTUALIZADA)
+    // ⚠️ REEMPLAZA ESTA URL CON LA QUE TE DIO APPS SCRIPT ⚠️
     const API_URL = "https://script.google.com/macros/s/AKfycbymKVluAzH8VNN7IRsiPGZhVQVMeMvim4ICQRaG-4GroFu873x1g1zji1WtD-DWwUY/exec"; 
+    
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
-    const today = new Date();
-    const weddingDay = new Date("2026-03-14T00:00:00"); 
-    const isDayB = today.toDateString() === weddingDay.toDateString();
-
-    // AUDIO
-    const audio = document.getElementById("bg-music");
-    const musicBtn = document.querySelector('.music-btn');
-    let isPlaying = false;
-
-    function enterSite() {
-        const overlay = document.getElementById('welcome-overlay');
-        overlay.classList.add('fade-out');
-        setTimeout(() => overlay.style.display = 'none', 800);
-        toggleMusic();
-    }
-
-    function toggleMusic() {
-        if (audio.paused) {
-            audio.play().then(() => {
-                isPlaying = true;
-                musicBtn.style.animationPlayState = 'running';
-                musicBtn.style.opacity = '1';
-            }).catch(e => console.log("Audio espera interacción"));
-        } else {
-            audio.pause();
-            isPlaying = false;
-            musicBtn.style.animationPlayState = 'paused';
-            musicBtn.style.opacity = '0.5';
-        }
-    }
+    let currentMembersData = [];
 
     window.onload = async () => {
-        document.getElementById('ticket-section').style.display = 'none';
-
-        if (isDayB) {
-            document.getElementById('day-b-mode').style.display = 'block';
-            document.getElementById('main-content').style.display = 'none';
-            document.getElementById('main-nav').style.display = 'none';
+        const today = new Date();
+        const weddingDay = new Date("2026-03-14T00:00:00");
+        if (today.toDateString() === weddingDay.toDateString()) {
+            document.getElementById('uber-btn').classList.remove('hidden');
         }
 
         if(userId) {
             try {
                 const res = await fetchWithRetry(`${API_URL}?action=getInvite&id=${userId}`);
-                const text = await res.text(); // Leemos como texto primero
-                let data;
-                try {
-                    data = JSON.parse(text); // Intentamos convertir a JSON
-                } catch (err) {
-                    throw new Error("El servidor devolvió un error inesperado (HTML).");
-                }
-                    if(data.status === 'success') {
-                        const greetingLabel = document.getElementById('greeting-label');
-                        const nameLabel = document.getElementById('main-guest-name');
-                        
-                        // Variables básicas
-                        const grupo = data.nombreGrupo || "";
-                        const nombreIndividual = data.nombresInvitacion || data.mainName;
-                        const mensaje = data.mensaje || "";
-                        const esCivil = data.showCivil;
+                const data = await res.json();
 
-                        // 1. Configurar Textos de Saludo
-                        if (grupo && grupo.trim().length > 0) {
-                            nameLabel.textContent = grupo;
-                            greetingLabel.textContent = "HOLA FAMILIA";
-                        } else {
-                            nameLabel.textContent = nombreIndividual;
-                            greetingLabel.textContent = "HOLA";
-                        }
-                        
-                        // 2. Mensaje Personalizado
-                        const msgBox = document.getElementById('personal-msg-box');
-                        if (msgBox) {
-                            if(mensaje) {
-                                msgBox.textContent = mensaje;
-                                msgBox.style.display = 'block';
-                            } else {
-                                msgBox.style.display = 'none';
-                            }
-                        }
-                        
-                        // 3. Mostrar tarjeta Civil si corresponde
-                        if (esCivil) {
-                            const civilCard = document.getElementById('civil-card');
-                            if(civilCard) civilCard.classList.remove('hidden'); 
-                        }
+                if(data.status === 'success') {
+                    document.getElementById('main-guest-name').innerText = data.nombreGrupo || data.mainName;
+                    if(data.nombreGrupo) document.getElementById('greeting-label').innerText = "HOLA FAMILIA";
 
-                        // 4. LÓGICA DE CONFIRMACIÓN PREVIA
-                        currentMembersData = data.members; 
-
-                        // Verificamos estado previo
-                        const yaRespondieron = data.members.some(m => m.estado && m.estado !== 'PENDIENTE' && m.estado.trim() !== '');
-                        const asisten = data.members.some(m => m.estado && (m.estado.includes('SI') || m.estado.includes('CONFIRMADO')));
-
-                        if (yaRespondieron) {
-                            if (asisten) {
-                                // CASO A: SI ASISTEN -> MOSTRAR BOLETO
-                                setTimeout(() => { showTicket(); }, 500);
-                            } else {
-                                // CASO B: NO ASISTEN -> MENSAJE DE GRACIAS
-                                showThankYouMessage();
-                            }
-                        } else {
-                            // CASO C: PENDIENTE -> MOSTRAR FORMULARIO
-                            renderList(data.members);
-                        }
-
-                        document.getElementById('loading-msg').style.display = 'none';
-                        document.getElementById('enter-btn').style.display = 'block';
+                    const msgs = data.members.map(m => m.mensaje).filter(x => x && x.trim() !== "");
+                    if(msgs.length > 0) {
+                        const box = document.getElementById('personal-msg-box');
+                        box.innerText = msgs.join(" / ");
+                        box.style.display = 'block';
                     }
-            } catch(e) { 
-                console.error("Error cargando invitación", e);
-                document.getElementById('loading-msg').style.display = 'none';
-                document.getElementById('enter-btn').style.display = 'block';
-            }
+
+                    if(data.hideRegistry) {
+                        document.getElementById('registry-content').style.display = 'none';
+                    }
+
+                    currentMembersData = data.members;
+                    renderGuestList();
+
+                    document.getElementById('loading-msg').style.display = 'none';
+                    document.getElementById('enter-btn').style.display = 'block';
+                }
+            } catch(e) { console.error(e); }
         } else {
-            // Modo demo / Sin ID
-            document.getElementById('loading-msg').style.display = 'none';
-            document.getElementById('enter-btn').style.display = 'block';
+             document.getElementById('loading-msg').style.display = 'none';
+             document.getElementById('enter-btn').style.display = 'block';
         }
     };
 
-    let currentMembersData = [];
-
-    function renderList(members) {
-        currentMembersData = members;
+    function renderGuestList() {
         const list = document.getElementById('guests-list');
-        if(!list) return;
-        list.innerHTML = '';
-        members.forEach((m, i) => {
-            const isYes = m.estado && (m.estado.includes('SI') || m.estado.includes('CONFIRMADO'));
-            const isNo = m.estado && (m.estado.includes('NO') || m.estado.includes('DECLINADO'));
-            
-            list.innerHTML += `
-                <div class="guest-row">
-                    <div style="font-family: var(--font-display); font-weight:600; margin-bottom:5px; font-size:1.1rem;">${m.nombre}</div>
-                    <div class="toggle-group">
-                        <div class="toggle-btn ${isYes?'selected':''}" onclick="setStatus(${i}, 'SI', this)">ASISTIRÉ</div>
-                        <div class="toggle-btn reject ${isNo?'selected':''}" onclick="setStatus(${i}, 'NO', this)">NO PODRÉ</div>
-                    </div>
-                    <input id="al-${i}" placeholder="¿Alguna alergia?" style="width:100%; margin-top:10px; padding:10px; border:1px solid #eee; border-radius:4px; display:${isYes?'block':'none'}; font-size:0.9rem;" value="${m.alergias||''}">
-                </div>`;
-        });
+        list.innerHTML = currentMembersData.map((m, i) => `
+            <div class="guest-row">
+                <div style="font-family: var(--font-display); font-weight:600; margin-bottom:5px; font-size:1.1rem;">${m.nombre}</div>
+                <div class="toggle-group">
+                    <button class="toggle-btn ${m.estado==='SI'?'selected':''}" onclick="setStatus(${i}, 'SI')">ASISTIRÉ</button>
+                    <button class="toggle-btn reject ${m.estado==='NO'?'selected':''}" onclick="setStatus(${i}, 'NO')">NO PODRÉ</button>
+                </div>
+            </div>
+        `).join('');
     }
 
-    function setStatus(index, status, btn) {
+    function setStatus(index, status) {
         currentMembersData[index].estado = status;
-        const parent = btn.parentElement;
-        parent.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        const allergyInput = document.getElementById(`al-${index}`);
-        if(allergyInput) allergyInput.style.display = status === 'SI' ? 'block' : 'none';
+        renderGuestList();
     }
 
-    async function sendRSVP() {
-        const btn = document.querySelector('.btn-full');
-        const originalText = "ENVIAR CONFIRMACIÓN"; // Texto original fijo para restaurar
-        
-        // 1. Bloquear botón
-        btn.innerText = "PROCESANDO..."; 
+    async function sendFinalRSVP() {
+        const btn = document.querySelector('button[onclick="sendFinalRSVP()"]');
+        btn.innerText = "ENVIANDO...";
         btn.disabled = true;
 
-        // 2. Verificar si asisten
-        const hayAsistentes = currentMembersData.some(m => m.estado === 'SI');
-
-        // 3. UI OPTIMISTA: Mostrar resultado inmediato para que se sienta rápido
-        if (hayAsistentes) {
-            showTicket(); 
-        } else {
-            showThankYouMessage(); 
-        }
-        
-        // 4. Preparar datos
-        const responses = currentMembersData.map((m, i) => ({
-            id: m.id, 
-            rsvp: m.estado || 'PENDIENTE', 
-            alergias: document.getElementById(`al-${i}`) ? document.getElementById(`al-${i}`).value : ''
-        }));
         const song = document.getElementById('song-suggestion').value;
-        const msg = document.getElementById('guest-message').value;
+        const responses = currentMembersData.map(m => ({ id: m.id, rsvp: m.estado, alergias: '' })); 
 
-        // 5. Enviar al servidor
         try {
-            const response = await fetchWithRetry(API_URL, {
+            await fetch(API_URL, {
                 method: 'POST',
-                redirect: 'follow',
-                headers: {'Content-Type': 'text/plain;charset=utf-8'},
-                body: JSON.stringify({
-                    action: 'RSVP_GROUP', 
-                    responses: responses, 
-                    song: song,
-                    msg: msg
-                })
+                body: JSON.stringify({ action: 'RSVP_GROUP', responses: responses, song: song, msg: '' })
             });
-
-            const responseText = await response.text();
-            if (responseText.trim().toLowerCase().startsWith('<!doctype html')) {
-                throw new Error("El servidor devolvió un error inesperado (HTML).");
-            }
-
-            if (response.ok) {
-                console.log("Confirmación guardada en servidor.");
+            
+            const confirmados = currentMembersData.filter(m => m.estado === 'SI');
+            if(confirmados.length > 0) {
+                showTicket(confirmados);
             } else {
-                throw new Error("El servidor respondió con error: " + (responseText || "Sin detalles"));
+                alert("Gracias por avisar. Lamentamos que no puedan acompañarnos.");
+                btn.innerText = "ENVIADO";
             }
-        } catch(e) { 
-            console.error("Error al enviar la confirmación:", e);
-            // Si falla, avisamos al usuario y reactivamos el botón (aunque la UI ya cambió, 
-            // esto es útil por si el usuario recarga o si decidieras quitar la UI optimista).
-            alert("Hubo un pequeño problema de conexión al guardar tu respuesta. Por favor verifica que tengas internet.");
-            
-            // Opcional: Si quieres regresar a la pantalla anterior si falla:
-            // window.location.reload(); 
-            
-            // Restaurar botón por si acaso
-            btn.innerText = originalText;
+        } catch(e) {
+            alert("Error de conexión. Intenta de nuevo.");
+            btn.innerText = "ENVIAR CONFIRMACIÓN";
             btn.disabled = false;
         }
     }
 
-    function showThankYouMessage() {
-        const rsvpSection = document.getElementById('rsvp-section');
-        rsvpSection.innerHTML = `
-            <div style="padding:40px 20px;">
-                <h3 class="script-title">Gracias por avisar</h3>
-                <p style="font-size:1.1rem; margin-top:20px;">Lamentamos que no puedan acompañarnos.</p>
-                <p style="color:#666;">¡Los extrañaremos!</p>
-                <button class="btn" onclick="window.location.reload()" style="margin-top:20px;">VOLVER A CARGAR</button>
-            </div>
-        `;
-    }
-
-    function showTicket() {
-        // 1. Ocultar RSVP
+    function showTicket(confirmados) {
         document.getElementById('rsvp-section').style.display = 'none';
-
-        // 2. Preparar Sección Ticket
-        const ticketSection = document.getElementById('ticket-section');
-        ticketSection.classList.remove('hidden');
-        ticketSection.style.display = 'flex';
-        ticketSection.style.flexDirection = 'column';
-
-        // 3. Calcular Datos
-        const confirmados = currentMembersData.filter(m => m.estado && (m.estado.includes('SI') || m.estado.includes('CONFIRMADO')));
-        // Si no hay confirmados (ej. demo), usar total
-        const count = confirmados.length > 0 ? confirmados.length : currentMembersData.length;
+        const section = document.getElementById('ticket-section');
+        section.classList.remove('hidden');
         
-        // Mesas
-        const mesasArr = confirmados.map(m => m.mesa).filter(m => m && m !== "Por asignar");
-        const mesasUnicas = [...new Set(mesasArr)];
-        const mesaTexto = mesasUnicas.length > 0 ? mesasUnicas.join(", ") : "Por asignar";
+        const count = confirmados.length;
+        const mesa = confirmados[0].mesa || "Por asignar";
+        const qrContent = userId || "DEMO";
 
-        const ticketName = document.getElementById('main-guest-name').innerText;
-        // Si no hay ID real, usamos uno dummy para que el QR no se rompa
-        const qrContent = userId ? userId : "DEMO_QR_CODE";
-        const displayId = userId ? userId.substring(0,6) : "DEMO";
-
-        // 4. Inyectar HTML del Boleto
-        const ticketCard = document.getElementById('digital-ticket-card');
-        ticketCard.innerHTML = `
+        document.getElementById('digital-ticket-card').innerHTML = `
             <div style="background:#1a1a1a; height:12px; width:100%;"></div>
-            
-            <div style="padding:30px 20px 20px; text-align:center;">
-                <h2 style="font-family:var(--font-script); color:var(--gold); font-size:2.8rem; line-height:1; margin:0 0 5px;">Pase de Acceso</h2>
-                <p style="font-family:var(--font-display); letter-spacing:2px; font-size:0.8rem; color:#999; text-transform:uppercase;">Boda Paola & Jorge</p>
-                
-                <div style="margin:20px auto; width:160px; height:160px; border:1px solid #eee; padding:5px; border-radius:4px;">
-                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}" crossorigin="anonymous" style="width:100%; height:100%; object-fit:contain;">
+            <div style="padding:30px 20px; text-align:center;">
+                <h2 style="font-family:var(--font-script); color:var(--gold); font-size:2.8rem; margin:0;">Pase de Acceso</h2>
+                <div style="margin:20px auto; width:150px; height:150px; border:1px solid #eee; padding:5px;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrContent}" style="width:100%;">
                 </div>
-
-                <div style="font-size:1.3rem; font-weight:bold; color:var(--text-dark); margin-bottom:5px;">${ticketName}</div>
-                <div style="font-size:0.8rem; color:#666;">ID: ${displayId}</div>
+                <div style="font-size:1.2rem; font-weight:bold;">${document.getElementById('main-guest-name').innerText}</div>
+                <div style="display:flex; justify-content:space-around; margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
+                    <div><small style="color:#999; text-transform:uppercase;">Adultos</small><div style="font-size:1.5rem; font-weight:bold;">${count}</div></div>
+                    <div><small style="color:#999; text-transform:uppercase;">Mesa</small><div style="font-size:1.5rem; font-weight:bold; color:var(--gold);">${mesa}</div></div>
+                </div>
             </div>
-
-            <div style="position:relative; height:20px; width:100%; display:flex; align-items:center; justify-content:center;">
-                <div style="border-top:2px dashed #ccc; width:100%;"></div>
-                <div class="ticket-cutout-side-l"></div>
-                <div class="ticket-cutout-side-r"></div>
-            </div>
-
-            <div style="padding:20px; background:#fcfcfc; display:flex; justify-content:space-around; align-items:center;">
-                <div style="text-align:center;">
-                    <div style="font-size:0.7rem; color:#999; text-transform:uppercase; letter-spacing:1px;">Adultos</div>
-                    <div style="font-size:1.8rem; font-weight:bold; color:var(--text-dark);">${count}</div>
-                </div>
-                <div style="width:1px; height:40px; background:#eee;"></div>
-                <div style="text-align:center;">
-                    <div style="font-size:0.7rem; color:#999; text-transform:uppercase; letter-spacing:1px;">Mesa</div>
-                    <div style="font-size:1.5rem; font-weight:bold; color:var(--gold);">${mesaTexto}</div>
-                </div>
+            <div style="position:relative; height:20px; border-top:2px dashed #ccc; margin-top:10px;">
+                <div class="ticket-cutout-side-l"></div><div class="ticket-cutout-side-r"></div>
             </div>
             <div style="background:#1a1a1a; height:8px; width:100%;"></div>
         `;
+    }
 
-        // Scroll al boleto
-        setTimeout(() => {
-            ticketSection.scrollIntoView({behavior: 'smooth', block: 'center'});
-        }, 300);
+    function enterSite() {
+        document.getElementById('welcome-overlay').classList.add('fade-out');
+        setTimeout(() => document.getElementById('welcome-overlay').style.display = 'none', 800);
+        toggleMusic();
+    }
+
+    function toggleMusic() {
+        const audio = document.getElementById("bg-music");
+        if (audio.paused) audio.play(); else audio.pause();
+    }
+
+    function openInfoModal(title, body) {
+        document.getElementById('info-modal-title').innerText = title;
+        document.getElementById('info-modal-body').innerHTML = body;
+        document.getElementById('info-modal').style.display = 'flex';
+    }
+    function closeInfoModalForce() { document.getElementById('info-modal').style.display = 'none'; }
+    function closeInfoModal(e) { if(e.target.id === 'info-modal') closeInfoModalForce(); }
+
+    function openBankModal() { document.getElementById('bank-modal').style.display = 'flex'; }
+    function closeBankModalForce() { document.getElementById('bank-modal').style.display = 'none'; }
+    function closeBankModal(e) { if(e.target.id === 'bank-modal') closeBankModalForce(); }
+
+    function openHotelModal(h) { document.getElementById(`hotel-modal-${h}`).style.display = 'flex'; }
+    function closeHotelModalForce(h) { document.getElementById(`hotel-modal-${h}`).style.display = 'none'; }
+    function closeHotelModal(e, h) { if(e.target.id === `hotel-modal-${h}`) closeHotelModalForce(h); }
+
+    function copyText(text, el) {
+        navigator.clipboard.writeText(text).then(() => {
+            el.innerText = '¡COPIADO!';
+            setTimeout(()=>el.innerText='COPIAR', 2000);
+        });
     }
 
     function downloadTicket() {
-        const ticketElement = document.getElementById('digital-ticket-card');
-        html2canvas(ticketElement, { scale: 2, useCORS: true }).then(canvas => {
+        html2canvas(document.getElementById('digital-ticket-card')).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'Boleto_Boda_PyJ.png';
-            link.href = canvas.toDataURL("image/png");
+            link.download = 'Pase_Boda.png';
+            link.href = canvas.toDataURL();
             link.click();
         });
     }
 
-    function openModal() { document.getElementById('bank-modal').classList.add('flex'); document.body.style.overflow = 'hidden'; }
-    function closeModalForce() { document.getElementById('bank-modal').classList.remove('flex'); document.body.style.overflow = 'auto'; }
-    function closeModal(e) { if(e.target.id === 'bank-modal') closeModalForce(); }
-    function copyText(text, el) {
-        navigator.clipboard.writeText(text).then(() => {
-            const originalText = el.innerText;
-            el.innerText = '¡COPIADO!';
-            setTimeout(() => { el.innerText = originalText; }, 2000);
-        }).catch(() => alert("Error al copiar. Puedes hacerlo manualmente: "+text)); 
-    }
-    
     const targetDate = new Date("2026-03-14T14:30:00").getTime();
     setInterval(() => {
-        const now = new Date().getTime();
-        const dist = targetDate - now;
-        if(dist < 0) { document.querySelector('.countdown').innerHTML = "<div style='color:white; font-weight:bold; font-size:1.5rem;'>¡ES HOY!</div>"; return; }
-        document.getElementById("d").innerText = Math.floor(dist / (1000 * 60 * 60 * 24));
-        document.getElementById("h").innerText = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        document.getElementById("m").innerText = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
-        document.getElementById("s").innerText = Math.floor((dist % (1000 * 60)) / 1000);
+        const dist = targetDate - new Date().getTime();
+        if(dist < 0) return;
+        document.getElementById("d").innerText = Math.floor(dist / 86400000).toString().padStart(2,'0');
+        document.getElementById("h").innerText = Math.floor((dist % 86400000) / 3600000).toString().padStart(2,'0');
+        document.getElementById("m").innerText = Math.floor((dist % 3600000) / 60000).toString().padStart(2,'0');
+        document.getElementById("s").innerText = Math.floor((dist % 60000) / 1000).toString().padStart(2,'0');
     }, 1000);
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => { if(entry.isIntersecting) entry.target.classList.add('active'); });
+    }, {threshold: 0.1});
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
     let currentSlide = 0;
     const slides = document.querySelectorAll('.carousel img');
@@ -826,54 +563,25 @@
         }, 4000);
     }
 
-    const observer = new IntersectionObserver((e) => { e.forEach(i => { if(i.isIntersecting) i.target.classList.add('active'); }); }, {threshold: 0.1});
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-// --- Lógica de Acuarelas Parallax Limitado ---
-document.addEventListener('scroll', () => {
-    const scrollY = window.scrollY;
-    const groups = document.querySelectorAll('.wc-group');
-
-    groups.forEach(group => {
-        const speed = parseFloat(group.getAttribute('data-speed'));
-        const limit = parseFloat(group.getAttribute('data-limit'));
-        
-        // Calculamos el movimiento crudo
-        let move = scrollY * speed;
-
-        // "Clampeamos" el movimiento para que sea una caja limitada
-        // Si el scroll sigue, la mancha deja de moverse al llegar al límite
-        if (move > limit) move = limit;
-        if (move < -limit) move = -limit;
-
-        // Opcional: Si quieres que rebote suavemente en lugar de topar seco, usa Math.sin
-        // let move = Math.sin(scrollY * 0.002) * limit; 
-
-        // Aplicamos la transformación (usamos translate3d para aceleración por GPU)
-        group.style.transform = `translate3d(0, ${move}px, 0)`;
+    document.addEventListener('scroll', () => {
+        const y = window.scrollY;
+        document.querySelectorAll('.wc-group').forEach(group => {
+            const speed = parseFloat(group.getAttribute('data-speed'));
+            const limit = parseFloat(group.getAttribute('data-limit'));
+            let move = y * speed;
+            if (move > limit) move = limit;
+            if (move < -limit) move = -limit;
+            group.style.transform = `translate3d(0, ${move}px, 0)`;
+        });
     });
-}, { passive: true }); // passive: true mejora el rendimiento del scroll
 
-// Función auxiliar para reintentar si Google falla
-async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
-    try {
-        const response = await fetch(url, options);
-        // Si Google nos dice "Too Many Requests" o error de servidor (5xx)
-        if (!response.ok && retries > 0) {
-            console.warn(`Reintentando... intentos restantes: ${retries}`);
-            await new Promise(r => setTimeout(r, backoff));
-            return fetchWithRetry(url, options, retries - 1, backoff * 2); // Espera el doble cada vez
-        }
-        return response;
-    } catch (error) {
-        if (retries > 0) {
-            console.warn(`Error de red. Reintentando... ${retries}`);
-            await new Promise(r => setTimeout(r, backoff));
-            return fetchWithRetry(url, options, retries - 1, backoff * 2);
-        }
-        throw error;
+    async function fetchWithRetry(url, retries = 3) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok && retries > 0) return fetchWithRetry(url, retries - 1);
+            return response;
+        } catch (error) { if (retries > 0) return fetchWithRetry(url, retries - 1); throw error; }
     }
-}
 </script>
 </body>
 </html>
