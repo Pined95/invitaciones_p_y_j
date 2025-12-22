@@ -1,5 +1,5 @@
 // 👇 URL DEL APPS SCRIPT (ACTUALIZADA)
-const API_URL = "https://script.google.com/macros/s/AKfycbymKVluAzH8VNN7IRsiPGZhVQVMeMvim4ICQRaG-4GroFu873x1g1zji1WtD-DWwUY/exec"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbzmscG6v4WNvxS1BLO61mx8RCAzSGbwBYInQw3RB4Gmuosv72rIq2NzqbIaQrlWdtg/exec"; 
 
 // Función auxiliar para reintentar si Google falla
 async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
@@ -353,4 +353,5 @@ function updateSyncButton() {
     } else {
         syncButton.style.display = 'none';
     }
+
 }
