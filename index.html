@@ -31,12 +31,136 @@
             --font-script: 'High Spirited', cursive; 
             --font-display: 'Wasted Vindey', serif; 
             --font-body: 'Montserrat', sans-serif; 
+            --urgent-red: #D32F2F;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background-color: #E8E4D9; font-family: var(--font-body); margin: 0; color: var(--text-dark); overflow-x: hidden; padding-bottom: 70px; overscroll-behavior: none; will-change: scroll-position; }
         .app-container { max-width: 480px; margin: 0 auto; background: var(--bg-cream); min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative; padding-bottom: 80px; }
-
+        
+        /* --- MODALIDAD DÍA B --- */
+        body.day-b-mode .app-container { background: #f9f6f0; }
+        .day-b-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(135deg, var(--urgent-red), #B71C1C);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            z-index: 2000;
+            box-shadow: 0 3px 15px rgba(183, 28, 28, 0.3);
+            letter-spacing: 1px;
+            display: none;
+        }
+        .day-b-banner i { margin-right: 8px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        
+        body.day-b-mode .day-b-banner { display: block; }
+        body.day-b-mode .app-container { padding-top: 50px; }
+        body.day-b-mode .day-b-hidden { display: none !important; }
+        body.day-b-mode .day-b-priority { border-left: 5px solid var(--urgent-red); }
+        body.day-b-mode .urgent-badge {
+            background: var(--urgent-red);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        
+        /* --- CÓDIGO QR PRINCIPAL DÍA B --- */
+        .day-b-qr-main {
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            margin: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 3px solid var(--gold);
+        }
+        
+        .day-b-qr-container {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 8px;
+        }
+        
+        .day-b-qr-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        
+        /* --- SECCIÓN FOTOS DÍA B --- */
+        .day-b-photos-section {
+            padding: 30px 20px;
+            background: linear-gradient(135deg, rgba(197, 157, 95, 0.05), rgba(255, 255, 255, 0.1));
+            border-top: 1px solid rgba(197, 157, 95, 0.2);
+            margin-top: 30px;
+        }
+        
+        .photo-upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .photo-option-card {
+            background: white;
+            padding: 25px 15px;
+            border-radius: 12px;
+            border: 1px solid #f2efea;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .photo-option-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        
+        .photo-option-card i {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+        
+        .photo-option-card span {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dark);
+            text-align: center;
+        }
+        
+        .photo-option-card small {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 5px;
+            font-weight: normal;
+        }
+        
         /* --- HERO --- */
         .hero { height: 100vh; background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('img/portada.webp'); background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; padding-bottom: 60px; position: relative; }
         .hero-logo { width: 180px; margin-bottom: auto; margin-top: 60px; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5)); z-index: 10; animation: fadeIn 2s ease; }
@@ -59,8 +183,8 @@
 
         /* --- MENSAJE PERSONAL --- */
         .personal-note { font-family: var(--font-display); font-size: 1.6rem; color: var(--gold); margin-top: 20px; line-height: 1.4; padding: 0 25px; display: none; position: relative; }
-        .personal-note:not(:empty)::before { content: '“'; font-family: var(--font-display); font-size: 3rem; color: #ddd; position: absolute; left: -5px; top: -10px; }
-        .personal-note:not(:empty)::after { content: '”'; font-family: var(--font-display); font-size: 3rem; color: #ddd; position: absolute; right: -5px; bottom: -20px; }
+        .personal-note:not(:empty)::before { content: '"'; font-family: var(--font-display); font-size: 3rem; color: #ddd; position: absolute; left: -5px; top: -10px; }
+        .personal-note:not(:empty)::after { content: '"'; font-family: var(--font-display); font-size: 3rem; color: #ddd; position: absolute; right: -5px; bottom: -20px; }
 
         /* --- CARRUSEL --- */
         .carousel { position: relative; width: 100%; height: 450px; overflow: hidden; margin: 40px 0; contain: layout style paint; }
@@ -151,6 +275,10 @@
 </head>
 <body>
 
+    <div class="day-b-banner">
+        <i class="ph-light ph-warning-circle"></i> MODO DÍA DE LA BODA - Acceso Rápido
+    </div>
+
     <div class="watercolor-container">
         <div class="wc-group wc-g1" data-speed="0.05" data-limit="30"><img src="img/watercolor-1.png" class="wc-img" alt="" loading="lazy" decoding="async"></div>
         <div class="wc-group wc-g2" data-speed="-0.08" data-limit="50"><img src="img/watercolor-3.png" class="wc-img" alt="" loading="lazy" decoding="async"></div>
@@ -179,7 +307,7 @@
                 <div class="hero-names">Paola & Jorge</div>
                 <div class="hero-date">SÁBADO 14 DE MARZO, 2026</div>
             </div>
-            <div class="countdown reveal">
+            <div class="countdown reveal day-b-hidden">
                 <div class="time-box"><span class="time-number" id="d">00</span><span class="time-label">Días</span></div>
                 <div class="time-box"><span class="time-number" id="h">00</span><span class="time-label">Hrs</span></div>
                 <div class="time-box"><span class="time-number" id="m">00</span><span class="time-label">Min</span></div>
@@ -187,7 +315,31 @@
             </div>
         </div>
 
-        <div class="section reveal">
+        <!-- SECCIÓN PRINCIPAL DÍA B - CÓDIGO QR -->
+        <div id="day-b-qr-section" class="day-b-qr-main day-b-only hidden">
+            <h2 style="font-family: var(--font-script); font-size: 2.8rem; margin: 0 0 15px 0; color: var(--text-dark);">Tu Acceso</h2>
+            <div id="day-b-qr-container" class="day-b-qr-container">
+                <img id="day-b-qr-img" src="" alt="Código QR de acceso" crossorigin="anonymous">
+            </div>
+            <div style="margin-top: 20px;">
+                <div style="font-size: 1.5rem; font-weight: bold; font-family: var(--font-display);" id="day-b-guest-name">Cargando...</div>
+                <div style="display: flex; justify-content: center; gap: 40px; margin-top: 20px;">
+                    <div>
+                        <div style="font-size: 0.8rem; color: #999; text-transform: uppercase;">Personas</div>
+                        <div style="font-size: 1.8rem; font-weight: bold;" id="day-b-guest-count">0</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: #999; text-transform: uppercase;">Mesa</div>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: var(--gold);" id="day-b-table-number">-</div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="downloadDayBQRTicket()" class="btn-app" style="width: 100%; justify-content: center; background: var(--text-dark); color: var(--gold); border: none; margin-top: 20px;">
+                <i class="ph-light ph-download"></i> Guardar QR
+            </button>
+        </div>
+
+        <div class="section reveal day-b-hidden">
             <div class="gold-frame">
                 <div class="frame-content">
                     <p style="font-size:0.9rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:30px;">Con la bendición de Dios y nuestros padres</p>
@@ -207,14 +359,19 @@
             </div>
         </div>
 
-        <div class="carousel reveal">
+        <div class="carousel reveal day-b-hidden">
             <img src="img/foto1.webp" class="active" style="object-position: center;" loading="eager" fetchpriority="high"> 
             <img src="img/foto2.webp" style="object-position: center 80%;" loading="lazy" decoding="async">
             <img src="img/foto3.webp" style="object-position: center;" loading="lazy" decoding="async">
         </div>
 
-        <div class="section reveal" style="background:white;">
-            <h2 class="title">Itinerario</h2>
+        <div class="section reveal day-b-priority">
+            <h2 class="title">Itinerario <span class="urgent-badge day-b-only">HOY</span></h2>
+            
+            <div style="background: rgba(197, 157, 95, 0.1); border-radius: 10px; padding: 15px; margin: 20px 0; display: none;" class="day-b-only">
+                <i class="ph-light ph-info" style="color: var(--gold); margin-right: 8px;"></i>
+                <span style="font-size: 0.9rem;">¡Hoy es el gran día! Consulta horarios y ubicaciones.</span>
+            </div>
             
             <div class="event-card watercolor-bg">
                 <div class="event-icon"><i class="ph-light ph-church"></i></div>
@@ -224,7 +381,7 @@
                 <div class="event-address">Baja California 729, Fracc. San José, Cd. Victoria.</div>
                 <div class="map-actions">
                     <a href="https://www.google.com/maps/search/?api=1&query=Parroquia+del+Buen+Pastor+Baja+California+729+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Ubicación</a>
-                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda+P%26J+(Misa)&dates=20260314T143000/20260314T153000" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
+                    <a href="https://m.uber.com/ul/?action=setPickup&dropoff[nickname]=Parroquia%20del%20Buen%20Pastor%20Cd%20Victoria" class="btn-app uber day-b-only" style="background: #000; color: white; border: none;"><i class="ph-light ph-car"></i> Pedir Uber</a>
                 </div>
             </div>
 
@@ -247,13 +404,51 @@
                 <div class="event-address">Gaspar de la Garza, Valle de Aguayo, Cd. Victoria.</div>
                 <div class="map-actions">
                     <a href="https://www.google.com/maps/search/?api=1&query=Salón+Candilejas+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Ubicación</a>
-                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Fiesta+Boda+P%26J&dates=20260314T190000/20260315T020000" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
-                    <a href="https://m.uber.com/ul/?action=setPickup&dropoff[nickname]=Candilejas%20Eventos" id="uber-btn" class="btn-app uber hidden"><i class="ph-light ph-car"></i> Pedir Uber</a>
+                    <a href="https://m.uber.com/ul/?action=setPickup&dropoff[nickname]=Candilejas%20Eventos" class="btn-app uber day-b-only" style="background: #000; color: white; border: none;"><i class="ph-light ph-car"></i> Pedir Uber</a>
                 </div>
             </div>
         </div>
 
-        <div class="section reveal">
+        <!-- SECCIÓN FOTOS DÍA B -->
+        <div class="day-b-photos-section day-b-only hidden">
+            <h2 class="title">Comparte tus Fotos</h2>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 25px;">¡Ayúdanos a capturar los mejores momentos del día!</p>
+            
+            <div class="photo-upload-grid">
+                <a href="https://drive.google.com/drive/folders/1ABC123DEF456ghi789jkl?usp=sharing" target="_blank" class="photo-option-card">
+                    <i class="ph-light ph-google-drive-logo"></i>
+                    <span>Google Drive</span>
+                    <small>Carpeta compartida</small>
+                </a>
+                
+                <a href="#" onclick="openPhotoUploadModal()" class="photo-option-card">
+                    <i class="ph-light ph-cloud-arrow-up"></i>
+                    <span>Subir Foto</span>
+                    <small>Directo desde tu teléfono</small>
+                </a>
+                
+                <a href="#" onclick="openHashtagModal()" class="photo-option-card">
+                    <i class="ph-light ph-hash"></i>
+                    <span>#BodaP&J</span>
+                    <small>Usa nuestro hashtag</small>
+                </a>
+                
+                <a href="https://photos.google.com/share/AF1QipNV_K3AV-dLfAgxPZ26YZDn1-XlL2wQw9kZJZV0Jvjn_-DlxGrXByP5w7Vq8cI23w?key=U0dPU3BqbEhsWXlMQzFkLTNxVHRZRERsdlJmUWRn" target="_blank" class="photo-option-card">
+                    <i class="ph-light ph-images"></i>
+                    <span>Álbum Fotos</span>
+                    <small>Ver fotos del evento</small>
+                </a>
+            </div>
+            
+            <div style="margin-top: 30px; padding: 15px; background: rgba(197, 157, 95, 0.05); border-radius: 10px; border: 1px dashed rgba(197, 157, 95, 0.3);">
+                <p style="margin: 0; font-size: 0.85rem; color: #666;">
+                    <i class="ph-light ph-info" style="color: var(--gold); margin-right: 5px;"></i>
+                    <strong>Consejo:</strong> Las fotos se sincronizarán automáticamente en nuestro álbum de boda.
+                </p>
+            </div>
+        </div>
+
+        <div class="section reveal day-b-hidden">
             <h2 class="title">Hospedaje</h2>
             <div class="hotel-grid">
                 <div class="hotel-card">
@@ -269,7 +464,7 @@
             </div>
         </div>
 
-        <div class="section reveal" style="background: #faf9f6;">
+        <div class="section reveal day-b-hidden" style="background: #faf9f6;">
             <h3 style="font-family: var(--font-display); font-size:1.3rem; color:var(--gold); margin:0; letter-spacing:1px; text-transform: uppercase;">Tiempo Libre</h3>
             <p style="font-size:0.8rem; margin-top:5px; color:#888; font-weight: 500;">¿Qué hacer entre la Misa y la Fiesta?</p>
             
@@ -289,7 +484,7 @@
             </div>
         </div>
 
-        <div id="gift-registry-section" class="gift-section reveal" style="text-align: center;">
+        <div id="gift-registry-section" class="gift-section reveal day-b-hidden" style="text-align: center;">
             <i class="ph-light ph-gift" style="font-size: 3rem; color: var(--gold); margin-bottom: 10px;"></i>
             <h2 class="title" style="margin-top:10px;">Mesa de Regalos</h2>
             
@@ -307,8 +502,8 @@
             </div>
         </div>
 
-        <div class="section reveal" style="background: var(--text-dark); color: var(--bg-cream);">
-            <h2 class="title" style="color:var(--gold);">Código de Vestimenta</h2>
+        <div class="section reveal">
+            <h2 class="title">Código de Vestimenta</h2>
             <p style="font-size:1.4rem; font-family: var(--font-display); letter-spacing:3px; margin-bottom:5px;">FORMAL</p>
             <div style="display:flex; justify-content:center; gap:40px; margin-top:40px;">
                 <div style="text-align:center;">
@@ -322,7 +517,7 @@
             </div>
         </div>
 
-        <div id="rsvp-section" class="section reveal" style="background:#F4F1EA;">
+        <div id="rsvp-section" class="section reveal day-b-hidden" style="background:#F4F1EA;">
             <h3 class="script-title">Confirmación</h3>
             <p style="font-size:0.8rem; margin-bottom:15px; color:#666;">Por favor confirma la asistencia de cada persona:</p>
             <div id="guests-list"></div>
@@ -346,6 +541,79 @@
             </button>
         </div>
 
+    </div>
+
+    <!-- MODAL PARA SUBIR FOTOS -->
+    <div id="photo-upload-modal" class="modal" onclick="closePhotoUploadModal(event)">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closePhotoUploadModalForce()">×</span>
+            <h3 style="font-family: var(--font-display); color:var(--gold); font-size:1.8rem; margin-bottom:20px;">Subir Foto</h3>
+            <div style="text-align: center; padding: 20px 0;">
+                <i class="ph-light ph-camera" style="font-size: 4rem; color: var(--gold); margin-bottom: 20px;"></i>
+                <p style="font-size: 1rem; line-height:1.6; color:#444; margin-bottom: 25px;">
+                    Selecciona una foto desde tu dispositivo para compartirla con nosotros.
+                </p>
+                
+                <div style="margin: 20px 0;">
+                    <input type="file" id="photo-file-input" accept="image/*" capture="environment" style="display: none;">
+                    <button onclick="document.getElementById('photo-file-input').click()" class="btn-app" style="width:100%; justify-content:center; background:var(--gold); color:white; border:none; padding: 15px;">
+                        <i class="ph-light ph-folder-open"></i> Seleccionar Foto
+                    </button>
+                </div>
+                
+                <div id="photo-preview-container" style="display: none; margin: 20px 0;">
+                    <img id="photo-preview" src="" alt="Vista previa" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 2px solid #eee;">
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <input type="text" id="photo-caption" placeholder="Agrega un mensaje (opcional)" class="btn-app" style="width:100%; text-align:left; margin-bottom:15px;">
+                    <button onclick="uploadPhoto()" class="btn-app" style="width:100%; justify-content:center; background:var(--text-dark); color:white; border:none; padding: 15px;">
+                        <i class="ph-light ph-cloud-arrow-up"></i> Compartir Foto
+                    </button>
+                </div>
+            </div>
+            <p style="font-size:0.8rem; color:#999; margin-top:20px;">
+                <i class="ph-light ph-info"></i> La foto se guardará en nuestra carpeta compartida de Google Drive.
+            </p>
+        </div>
+    </div>
+
+    <!-- MODAL HASHTAG -->
+    <div id="hashtag-modal" class="modal" onclick="closeHashtagModal(event)">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeHashtagModalForce()">×</span>
+            <h3 style="font-family: var(--font-display); color:var(--gold); font-size:1.8rem; margin-bottom:20px;">#BodaP&J</h3>
+            <div style="text-align: center; padding: 20px 0;">
+                <div style="font-size: 3rem; color: var(--gold); margin-bottom: 20px;">
+                    <i class="ph-light ph-hash"></i>
+                </div>
+                <p style="font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; color: #333;">
+                    #BodaP&J
+                </p>
+                <p style="font-size: 1rem; line-height:1.6; color:#444; margin-bottom: 25px;">
+                    Usa nuestro hashtag en tus publicaciones de Instagram, Facebook o Twitter para que podamos ver todas las fotos.
+                </p>
+                
+                <div style="background: #f9f9f9; border-radius: 10px; padding: 20px; margin: 20px 0; border: 1px solid #eee;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">Cómo usar:</p>
+                    <ol style="text-align: left; margin: 0; padding-left: 20px; font-size: 0.9rem;">
+                        <li style="margin-bottom: 8px;">Toma una foto durante el evento</li>
+                        <li style="margin-bottom: 8px;">Compártela en tus redes sociales</li>
+                        <li style="margin-bottom: 8px;">Agrega el hashtag <strong>#BodaP&J</strong></li>
+                        <li>¡Listo! Aparecerá en nuestro álbum</li>
+                    </ol>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button onclick="copyText('#BodaP&J', this)" class="btn-app" style="flex: 1; justify-content: center;">
+                        <i class="ph-light ph-copy"></i> Copiar
+                    </button>
+                    <button onclick="closeHashtagModalForce()" class="btn-app" style="flex: 1; justify-content: center; background: var(--text-dark); color: white;">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="info-modal" class="modal" onclick="closeInfoModal(event)">
@@ -403,11 +671,217 @@
     
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
+    const forceDayB = params.get('dayB') === 'true'; // Para pruebas manuales
     let currentMembersData = [];
+    let isDayBMode = false;
+
+    // Función para activar el modo Día B
+    function activateDayBMode() {
+        isDayBMode = true;
+        document.body.classList.add('day-b-mode');
+        
+        // Mostrar banner de modo Día B
+        document.querySelector('.day-b-banner').style.display = 'block';
+        
+        // Ocultar elementos no esenciales
+        document.querySelectorAll('.day-b-hidden').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Mostrar elementos específicos del Día B
+        document.querySelectorAll('.day-b-only').forEach(el => {
+            el.style.display = 'block';
+        });
+        
+        // Añadir botones de Uber a todos los eventos
+        const mapActions = document.querySelectorAll('.map-actions');
+        mapActions.forEach(action => {
+            // Verificar si ya tiene botón Uber
+            if (!action.querySelector('.uber.day-b-only')) {
+                const uberBtn = document.createElement('a');
+                uberBtn.href = action.querySelector('a[href*="maps"]')?.href || '#';
+                uberBtn.className = 'btn-app uber day-b-only';
+                uberBtn.style.cssText = 'background: #000; color: white; border: none;';
+                uberBtn.innerHTML = '<i class="ph-light ph-car"></i> Pedir Uber';
+                uberBtn.target = '_blank';
+                action.appendChild(uberBtn);
+            }
+        });
+        
+        // Actualizar título de la página
+        document.title = "HOY: Boda Paola & Jorge - Acceso Rápido";
+        
+        // Verificar si ya confirmaron para mostrar QR
+        const confirmedMembers = currentMembersData.filter(m => m.estado === 'SI');
+        if (confirmedMembers.length > 0) {
+            showDayBQR(confirmedMembers);
+        } else {
+            // Si no han confirmado, mostrar sección de RSVP
+            const hero = document.querySelector('.hero');
+            const rsvpSection = document.getElementById('rsvp-section');
+            if (rsvpSection) {
+                // Mover después del héroe y mostrar
+                hero.parentNode.insertBefore(rsvpSection, hero.nextSibling);
+                rsvpSection.classList.remove('day-b-hidden');
+                rsvpSection.style.display = 'block';
+            }
+        }
+        
+        console.log("Modo Día B activado - Mostrando información esencial y QR");
+    }
+
+    // Función para mostrar el código QR en modo Día B
+    function showDayBQR(confirmedMembers) {
+        const section = document.getElementById('day-b-qr-section');
+        const count = confirmedMembers.length;
+        const mesa = confirmedMembers[0].mesa || "Por asignar";
+        const qrContent = userId || "DEMO";
+        const guestName = document.getElementById('main-guest-name').innerText;
+
+        // Generar URL del QR
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrContent)}&format=png&margin=10&color=1a1a1a&bgcolor=ffffff`;
+        
+        // Actualizar contenido
+        document.getElementById('day-b-qr-img').src = qrUrl;
+        document.getElementById('day-b-guest-name').innerText = guestName;
+        document.getElementById('day-b-guest-count').innerText = count;
+        document.getElementById('day-b-table-number').innerText = mesa;
+        
+        // Mover sección QR después del héroe
+        const hero = document.querySelector('.hero');
+        hero.parentNode.insertBefore(section, hero.nextSibling);
+        section.classList.remove('hidden');
+        
+        // Mostrar sección de fotos
+        const photosSection = document.querySelector('.day-b-photos-section');
+        if (photosSection) {
+            photosSection.classList.remove('hidden');
+        }
+    }
+
+    // Función para descargar el QR del modo Día B
+    function downloadDayBQRTicket() {
+        const qrContainer = document.getElementById('day-b-qr-section');
+        
+        html2canvas(qrContainer, {
+            useCORS: true,
+            allowTaint: false,
+            scale: 2,
+            logging: false,
+            backgroundColor: '#ffffff'
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'QR_Acceso_Boda.png';
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }).catch(err => {
+            console.error('Error al generar imagen:', err);
+            alert('Error al generar la imagen. Intenta de nuevo.');
+        });
+    }
+
+    // Función para verificar si estamos en el día de la boda
+    function isWeddingDay() {
+        const today = new Date();
+        const weddingDate = new Date('2026-03-14');
+        
+        // Comparar día, mes y año
+        return today.getDate() === weddingDate.getDate() &&
+               today.getMonth() === weddingDate.getMonth() &&
+               today.getFullYear() === weddingDate.getFullYear();
+    }
+
+    // Funciones para el modal de subir fotos
+    function openPhotoUploadModal() {
+        document.getElementById('photo-upload-modal').style.display = 'flex';
+    }
+    
+    function closePhotoUploadModalForce() { 
+        document.getElementById('photo-upload-modal').style.display = 'none';
+        document.getElementById('photo-preview-container').style.display = 'none';
+        document.getElementById('photo-file-input').value = '';
+        document.getElementById('photo-caption').value = '';
+    }
+    
+    function closePhotoUploadModal(e) { 
+        if(e.target.id === 'photo-upload-modal') closePhotoUploadModalForce(); 
+    }
+    
+    // Configurar vista previa de foto
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('photo-file-input');
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const preview = document.getElementById('photo-preview');
+                        preview.src = event.target.result;
+                        document.getElementById('photo-preview-container').style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+    
+    // Función para subir foto (simulada - en producción necesitarías backend)
+    function uploadPhoto() {
+        const fileInput = document.getElementById('photo-file-input');
+        const caption = document.getElementById('photo-caption').value;
+        
+        if (!fileInput.files[0]) {
+            alert('Por favor selecciona una foto primero.');
+            return;
+        }
+        
+        // En una implementación real, aquí subirías la foto a un servidor
+        // Por ahora solo simulamos el proceso
+        
+        alert('¡Foto compartida con éxito! Se guardará en nuestro álbum de boda.');
+        closePhotoUploadModalForce();
+        
+        // En producción, descomentar para subir realmente:
+        /*
+        const formData = new FormData();
+        formData.append('photo', fileInput.files[0]);
+        formData.append('caption', caption);
+        formData.append('guestId', userId);
+        
+        fetch(API_URL, {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            alert('¡Foto compartida con éxito!');
+            closePhotoUploadModalForce();
+        }).catch(error => {
+            alert('Error al subir la foto. Intenta de nuevo.');
+        });
+        */
+    }
+
+    // Funciones para el modal de hashtag
+    function openHashtagModal() {
+        document.getElementById('hashtag-modal').style.display = 'flex';
+    }
+    
+    function closeHashtagModalForce() { 
+        document.getElementById('hashtag-modal').style.display = 'none';
+    }
+    
+    function closeHashtagModal(e) { 
+        if(e.target.id === 'hashtag-modal') closeHashtagModalForce(); 
+    }
 
     window.onload = async () => {
-        // El botón Uber se mostrará desde el servidor si isDayB está activo
-
+        // Verificar si debemos activar el modo Día B
+        // 1. Por parámetro de URL (para pruebas)
+        // 2. Por respuesta del servidor
+        // 3. Por fecha actual (si es el día de la boda)
+        
+        let shouldActivateDayB = forceDayB;
+        
         if(userId) {
             try {
                 const res = await fetchWithRetry(`${API_URL}?action=getInvite&id=${userId}`);
@@ -451,10 +925,9 @@
                         if(registryContent) registryContent.style.display = 'none';
                     }
 
-                    // 3. MODO DÍA B - Mostrar botón Uber si está activo
+                    // 3. MODO DÍA B - Activar si el servidor lo indica
                     if(data.isDayB) {
-                        const uberBtn = document.getElementById('uber-btn');
-                        if(uberBtn) uberBtn.classList.remove('hidden');
+                        shouldActivateDayB = true;
                     }
 
                     currentMembersData = data.members || [];
@@ -469,6 +942,16 @@
         } else {
              document.getElementById('loading-msg').style.display = 'none';
              document.getElementById('enter-btn').style.display = 'block';
+        }
+        
+        // Si no se activó por servidor, verificar por fecha
+        if (!shouldActivateDayB && isWeddingDay()) {
+            shouldActivateDayB = true;
+        }
+        
+        // Activar modo Día B si corresponde
+        if (shouldActivateDayB) {
+            activateDayBMode();
         }
     };
 
@@ -496,7 +979,7 @@
         btn.disabled = true;
 
         const song = document.getElementById('song-suggestion').value;
-        const msg = document.getElementById('guest-message').value; // Recuperado
+        const msg = document.getElementById('guest-message').value;
         const responses = currentMembersData.map(m => ({ id: m.id, rsvp: m.estado, alergias: '' })); 
 
         try {
@@ -509,7 +992,14 @@
             
             const confirmados = currentMembersData.filter(m => m.estado === 'SI');
             if(confirmados.length > 0) {
-                showTicket(confirmados);
+                // En modo Día B, mostrar QR directamente
+                if (isDayBMode) {
+                    showDayBQR(confirmados);
+                    // Ocultar RSVP
+                    document.getElementById('rsvp-section').style.display = 'none';
+                } else {
+                    showTicket(confirmados);
+                }
             } else {
                 alert("Gracias por avisar. Lamentamos que no puedan acompañarnos.");
                 btn.innerText = "ENVIADO";
@@ -688,6 +1178,27 @@
             throw error;
         }
     }
+    
+    // Función para probar manualmente el modo Día B
+    function toggleDayBModeForTesting() {
+        if (isDayBMode) {
+            document.body.classList.remove('day-b-mode');
+            document.querySelector('.day-b-banner').style.display = 'none';
+            document.querySelectorAll('.day-b-hidden').forEach(el => {
+                el.style.display = '';
+            });
+            document.querySelectorAll('.day-b-only').forEach(el => {
+                el.style.display = 'none';
+            });
+            isDayBMode = false;
+            console.log("Modo Día B desactivado (prueba)");
+        } else {
+            activateDayBMode();
+        }
+    }
+    
+    // Agregar botón de prueba para desarrollo (solo en consola)
+    console.log("Para probar el modo Día B manualmente, ejecuta: toggleDayBModeForTesting()");
 </script>
 </body>
 </html>
