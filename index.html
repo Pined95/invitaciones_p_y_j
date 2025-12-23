@@ -280,10 +280,10 @@
                 <div class="todo-card" onclick="openInfoModal('Snack Local', 'Prueba las famosas <a href=\'https://www.google.com/maps/search/Flautas+del+Arce\' target=\'_blank\' class=\'modal-link\'>Flautas del Arce</a> o unas tradicionales <a href=\'https://www.google.com/maps/search/Gorditas+Do%C3%B1a+Tota\' target=\'_blank\' class=\'modal-link\'>Gorditas Doña Tota</a>.')">
                     <i class="ph-light ph-hamburger"></i><span>Snacks</span>
                 </div>
-                <div class="todo-card" onclick="openInfoModal('Paseo Corto', 'Camina por <a href=\'https://www.google.com/maps/search/Plaza+Campestre+Victoria\' target=\'_blank\' class=\'modal-link\'>Plaza Campestre</a> o visita el <a href=\'https://www.google.com/maps/search/Museo+Tamux\' target=\'_blank\' class=\'modal-link\'>Museo Tamux</a>.')">
+                <div class="todo-card" onclick="openInfoModal('Paseo Corto', 'Camina por <a href=\'https://www.google.com/maps/search/Plaza+Campestre+Victoria\' target=\'_blank\' class=\'modal-link\'>Plaza Campestre</a> o visita <a href=\'https://maps.app.goo.gl/GvqD7fBs6p8YPWDy6\' target=\'_blank\' class=\'modal-link\'>Plaza Paseo Aventa</a>.')">
                     <i class="ph-light ph-map-trifold"></i><span>Paseo</span>
                 </div>
-                <div class="todo-card" onclick="openInfoModal('Descanso', 'Relájate en el <a href=\'https://www.google.com/maps/search/Hampton+Inn+Victoria\' target=\'_blank\' class=\'modal-link\'>Hampton Inn</a> o <a href=\'https://www.google.com/maps/search/iStay+Hotel+Victoria\' target=\'_blank\' class=\'modal-link\'>iStay Hotel</a> antes de la fiesta.')">
+                <div class="todo-card" onclick="openInfoModal('Descanso', 'Relájate en el hotel antes de la fiesta, o aprovecha para un retoque.')">
                     <i class="ph-light ph-bed"></i><span>Descanso</span>
                 </div>
             </div>
@@ -399,18 +399,14 @@
 
 <script>
     // ⚠️ REEMPLAZAR URL POR LA TUYA DE APPS SCRIPT ⚠️
-    const API_URL = "https://script.google.com/macros/s/AKfycbzmscG6v4WNvxS1BLO61mx8RCAzSGbwBYInQw3RB4Gmuosv72rIq2NzqbIaQrlWdtg/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbyZcB1eZa1ZtK_E863gnjnL62-aLIp78H_VokUgexalyJvVflMRzpOyu4VB6-V13zI/exec"; 
     
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
     let currentMembersData = [];
 
     window.onload = async () => {
-        const today = new Date();
-        const weddingDay = new Date("2026-03-14T00:00:00");
-        if (today.toDateString() === weddingDay.toDateString()) {
-            document.getElementById('uber-btn').classList.remove('hidden');
-        }
+        // El botón Uber se mostrará desde el servidor si isDayB está activo
 
         if(userId) {
             try {
@@ -453,6 +449,12 @@
                     if(data.hideRegistry) {
                         const registryContent = document.getElementById('registry-content');
                         if(registryContent) registryContent.style.display = 'none';
+                    }
+
+                    // 3. MODO DÍA B - Mostrar botón Uber si está activo
+                    if(data.isDayB) {
+                        const uberBtn = document.getElementById('uber-btn');
+                        if(uberBtn) uberBtn.classList.remove('hidden');
                     }
 
                     currentMembersData = data.members || [];
@@ -528,12 +530,13 @@
         const mesa = confirmados[0].mesa || "Por asignar";
         const qrContent = userId || "DEMO";
 
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}`;
         document.getElementById('digital-ticket-card').innerHTML = `
             <div style="background:#1a1a1a; height:12px; width:100%;"></div>
             <div style="padding:30px 20px; text-align:center;">
                 <h2 style="font-family:var(--font-script); color:var(--gold); font-size:2.8rem; margin:0;">Pase de Acceso</h2>
-                <div style="margin:20px auto; width:150px; height:150px; border:1px solid #eee; padding:5px;">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrContent}" style="width:100%;">
+                <div style="margin:20px auto; width:150px; height:150px; border:1px solid #eee; padding:5px; background:white;">
+                    <img src="${qrUrl}" style="width:100%; height:100%; object-fit:contain; display:block;" crossorigin="anonymous" alt="QR Code">
                 </div>
                 <div style="font-size:1.2rem; font-weight:bold;">${document.getElementById('main-guest-name').innerText}</div>
                 <div style="display:flex; justify-content:space-around; margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
@@ -583,12 +586,36 @@
     }
 
     function downloadTicket() {
-        html2canvas(document.getElementById('digital-ticket-card')).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'Pase_Boda.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        });
+        const ticketCard = document.getElementById('digital-ticket-card');
+        const qrImg = ticketCard.querySelector('img');
+        
+        // Esperar a que la imagen del QR se cargue completamente
+        if (qrImg && !qrImg.complete) {
+            qrImg.onload = () => generateTicketImage();
+            qrImg.onerror = () => {
+                alert('Error al cargar el código QR. Intenta de nuevo.');
+            };
+        } else {
+            generateTicketImage();
+        }
+        
+        function generateTicketImage() {
+            html2canvas(ticketCard, {
+                useCORS: true,
+                allowTaint: false,
+                scale: 2,
+                logging: false,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Pase_Boda.png';
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+            }).catch(err => {
+                console.error('Error al generar imagen:', err);
+                alert('Error al generar la imagen. Intenta de nuevo.');
+            });
+        }
     }
 
     const targetDate = new Date("2026-03-14T14:30:00").getTime();

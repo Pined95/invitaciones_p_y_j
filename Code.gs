@@ -97,7 +97,9 @@ function doPost(e) {
     else if (action === 'CHECKIN') result = executeCheckIn([payload.id], payload.mode || 'rec');
     else if (action === 'BATCH_CHECKIN') result = executeCheckIn(payload.ids, payload.mode || 'rec'); // Nuevo: Lote offline
     else if (action === 'SAVE_TABLES') result = saveTableAssignments(payload.assignments);
-    else if (action === 'setDayB') result = setDayBStatus(payload.value);
+    else if (action === 'setDayB') {
+      result = setDayBStatus(payload.value);
+    }
 
     // Limpiar caché global al hacer cambios
     const cache = CacheService.getScriptCache();
@@ -105,6 +107,8 @@ function doPost(e) {
     cache.remove('getAllConfirmed_ALL');
     cache.remove('getAllGuestsForCheckin_ALL');
     cache.remove('getStats_ALL');
+    
+    // Nota: getInvite no se cachea (línea 58-59), por lo que siempre obtiene datos frescos
     
     return createResponse(result);
 
@@ -227,7 +231,9 @@ function saveGroupRsvp(responses, song, msg) {
 
   // 3. GUARDADO
   responses.forEach((resp, idx) => {
-    cache.remove('getInvite_' + resp.id); 
+    // Limpiar caché de esta invitación específica
+    const inviteCacheKey = 'getInvite_' + String(resp.id).trim();
+    cache.remove(inviteCacheKey); 
     
     const row = idMap.get(String(resp.id).trim());
     if (row) {
