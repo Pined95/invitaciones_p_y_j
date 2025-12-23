@@ -14,7 +14,8 @@
             --novio: #2196f3; --novia: #e91e63;
             --nino: #ffc107; --adolescente: #9c27b0;
             --joven: #ff5722; --adulto: #607d8b;
-            --ex: #795548; --vegano: #4caf50;
+            --vegano: #4caf50;
+            --salon-border: #333;
         }
         body { font-family: 'Montserrat', sans-serif; margin: 0; height: 100vh; overflow: hidden; display: flex; background: #e0e0e0; overscroll-behavior: none; }
         
@@ -34,13 +35,21 @@
         .type-adolescente { border-left-color: var(--adolescente); }
         .type-joven { border-left-color: var(--joven); }
         .type-adulto { border-left-color: var(--adulto); }
-        .type-ex { border-left-color: var(--ex); }
 
         .family-tag { font-size: 0.65rem; color: #888; display: block; margin-top: 2px;}
         .icon-container { display: flex; gap: 3px; font-size: 0.9rem; }
 
         /* CANVAS */
-        #canvas-area { flex: 1; position: relative; overflow: hidden; background-image: radial-gradient(#aaa 1px, transparent 1px); background-size: 20px 20px; touch-action: none; user-select: none; }
+        #canvas-area { flex: 1; position: relative; overflow: auto; background-image: radial-gradient(#aaa 1px, transparent 1px); background-size: 20px 20px; touch-action: none; user-select: none; }
+        #canvas-content { position: relative; width: 3000px; height: 2000px; transform-origin: 0 0; transition: transform 0.1s ease-out; }
+        #salon-border { position: absolute; border: 4px solid var(--salon-border); background: rgba(255,255,255,0.05); pointer-events: stroke; cursor: move; }
+        
+        /* ZOOM CONTROLS */
+        .zoom-controls { position: absolute; bottom: 20px; right: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 150; display: flex; flex-direction: column; }
+        .zoom-btn { width: 40px; height: 40px; border: none; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border-bottom: 1px solid #eee; }
+        .zoom-btn:last-child { border-bottom: none; }
+        .zoom-btn:hover { background: #f0f0f0; }
+        .zoom-level { padding: 8px; text-align: center; font-size: 0.75rem; color: #666; border-top: 1px solid #eee; }
 
         /* OBJETOS MAPA */
         .map-obj { position: absolute; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.15); cursor: grab; touch-action: none; border: 3px solid white; font-weight: bold; font-size: 0.8rem; color: #333; transition: border-color 0.3s, box-shadow 0.2s; }
@@ -92,7 +101,7 @@
             <button class="t-btn" onclick="groupByFamily()" title="Agrupar"><i class="fa-solid fa-users"></i></button>
         </div>
         <div style="padding:5px 10px; font-size:0.7rem; display:flex; gap:5px; flex-wrap:wrap; background:#eee;">
-            <span style="color:var(--nino)">● Niño</span> <span style="color:var(--ex)">● EX</span> <span style="color:var(--vegano)">● Vegano</span>
+            <span style="color:var(--nino)">● Niño</span> <span style="color:var(--vegano)">● Vegano</span>
         </div>
         <div id="guest-pool"></div>
     </div>
@@ -112,11 +121,24 @@
             <button class="t-btn" onclick="addObj('fixed', 'novios')" title="Novios">💑</button>
             <button class="t-btn" onclick="addObj('fixed', 'exit')" title="Entrada">🚪</button>
         </div>
+        <div class="tool-group">
+            <button class="t-btn" onclick="editSalonBorder()" title="Editar Bordes del Salón"><i class="fa-solid fa-crop"></i> Bordes</button>
+        </div>
         <button class="t-btn btn-save" onclick="saveData()"><i class="fa-solid fa-floppy-disk"></i> GUARDAR</button>
         <button class="t-btn" onclick="clearLocalLayout()" style="color:red; border:none; margin-left:10px;" title="Reiniciar Mapa"><i class="fa-solid fa-trash"></i></button>
     </div>
 
-    <div id="canvas-area"></div>
+    <div id="canvas-area">
+        <div id="canvas-content">
+            <div id="salon-border" style="left: 100px; top: 100px; width: 2800px; height: 1800px;"></div>
+        </div>
+        <div class="zoom-controls">
+            <button class="zoom-btn" onclick="zoomIn()" title="Acercar">+</button>
+            <div class="zoom-level" id="zoom-level">100%</div>
+            <button class="zoom-btn" onclick="zoomOut()" title="Alejar">−</button>
+            <button class="zoom-btn" onclick="resetZoom()" title="Restablecer">⌂</button>
+        </div>
+    </div>
 
     <div id="edit-modal">
         <div class="edit-card">
@@ -173,6 +195,8 @@
     
     let guests = [], mapElements = [], isGroupedByFamily = false;
     let editingTableId = null;
+    let currentZoom = 1;
+    let salonBorder = { x: 100, y: 100, width: 2800, height: 1800 };
 
     window.onload = async () => {
         // --- SEGURIDAD ---
@@ -182,7 +206,8 @@
         }
         // -----------------
 
-        loadLocalLayout(); 
+        loadLocalLayout();
+        applyZoom(); // Aplicar zoom inicial
         try {
             const res = await fetchWithRetry(`${API_URL}?action=getAllConfirmed`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -213,22 +238,77 @@
     function loadLocalLayout() {
         const saved = localStorage.getItem('pj_floorplan');
         if(saved) {
-            mapElements = JSON.parse(saved);
+            const data = JSON.parse(saved);
+            mapElements = data.elements || data || [];
+            if(data.salonBorder) salonBorder = data.salonBorder;
+            updateSalonBorder();
             mapElements.forEach(el => renderElement(el, true)); 
+        } else {
+            updateSalonBorder();
+        }
+    }
+    
+    function updateSalonBorder() {
+        const borderEl = document.getElementById('salon-border');
+        if(borderEl) {
+            borderEl.style.left = salonBorder.x + 'px';
+            borderEl.style.top = salonBorder.y + 'px';
+            borderEl.style.width = salonBorder.width + 'px';
+            borderEl.style.height = salonBorder.height + 'px';
+        }
+    }
+    
+    function editSalonBorder() {
+        const newX = prompt('Posición X del borde (px):', salonBorder.x);
+        const newY = prompt('Posición Y del borde (px):', salonBorder.y);
+        const newW = prompt('Ancho del salón (px):', salonBorder.width);
+        const newH = prompt('Alto del salón (px):', salonBorder.height);
+        
+        if(newX !== null && newY !== null && newW !== null && newH !== null) {
+            salonBorder.x = parseInt(newX) || salonBorder.x;
+            salonBorder.y = parseInt(newY) || salonBorder.y;
+            salonBorder.width = parseInt(newW) || salonBorder.width;
+            salonBorder.height = parseInt(newH) || salonBorder.height;
+            updateSalonBorder();
+            saveLocalLayout();
+        }
+    }
+    
+    function zoomIn() {
+        currentZoom = Math.min(currentZoom * 1.2, 3);
+        applyZoom();
+    }
+    
+    function zoomOut() {
+        currentZoom = Math.max(currentZoom / 1.2, 0.2);
+        applyZoom();
+    }
+    
+    function resetZoom() {
+        currentZoom = 1;
+        applyZoom();
+    }
+    
+    function applyZoom() {
+        const content = document.getElementById('canvas-content');
+        if(content) {
+            content.style.transform = `scale(${currentZoom})`;
+            document.getElementById('zoom-level').innerText = Math.round(currentZoom * 100) + '%';
         }
     }
     
     function autoCreateTablesFromExcel() {
         const mesas = [...new Set(guests.map(g => g.mesa).filter(m => m && m !== "Por asignar"))];
-        mesas.forEach((m, i) => {
-            const cols = 5;
-            const x = 100 + (i % cols) * 180;
-            const y = 100 + Math.floor(i / cols) * 180;
-            
-            const el = {
-                id: 'tbl_auto_' + m, type: 'table', subtype: 'round', x: x, y: y, 
-                guests: [], name: m, capacity: 10, width: 130, height: 130, rotation: 0
-            };
+            mesas.forEach((m, i) => {
+                const cols = 10;
+                const spacing = 150; // Espaciado entre mesas en cm
+                const x = salonBorder.x + 50 + (i % cols) * spacing;
+                const y = salonBorder.y + 50 + Math.floor(i / cols) * spacing;
+                
+                const el = {
+                    id: 'tbl_auto_' + m, type: 'table', subtype: 'round', x: x, y: y, 
+                    guests: [], name: m, capacity: 10, width: 120, height: 120, rotation: 0
+                };
             mapElements.push(el);
             renderElement(el, true);
         });
@@ -267,10 +347,8 @@
 
             if (tags.includes('NIÑO') || vibra === 'NIÑOS') typeClass = 'type-nino';
             else if (vibra === 'ADOLESCENTES') typeClass = 'type-adolescente';
-            else if (tags.includes('EX') || vibra === 'EX') typeClass = 'type-ex';
 
             if (tags.includes('NIÑO')) icons += '<i class="fa-solid fa-baby" title="Niño"></i> ';
-            if (tags.includes('EX')) icons += '<i class="fa-solid fa-heart-crack" style="color:brown"></i> ';
             if (tags.includes('VEGANO') || tags.includes('VEGETARIANO')) icons += '<i class="fa-solid fa-leaf" style="color:green"></i> ';
             if (g.movilidad === 'SILLA_RUEDAS') icons += '<i class="fa-solid fa-wheelchair"></i> ';
 
@@ -296,13 +374,21 @@
     function addObj(type, subtype) {
         const id = 'el_' + Date.now();
         let w=100, h=100;
-        if(subtype==='round') { w=130; h=130; }
-        if(subtype==='rect') { w=180; h=100; }
-        if(subtype==='novios') { w=180; h=60; }
-        if(subtype==='dance') { w=250; h=200; }
+        // Escala realista: 1px ≈ 1cm
+        if(subtype==='round') { w=120; h=120; } // Mesa redonda ~1.2m
+        if(subtype==='rect') { w=180; h=90; } // Mesa rectangular ~1.8m x 0.9m
+        if(subtype==='square') { w=120; h=120; } // Mesa cuadrada ~1.2m
+        if(subtype==='novios') { w=200; h=80; } // Mesa novios ~2m x 0.8m
+        if(subtype==='dance') { w=600; h=600; } // Pista de baile ~6m x 6m
+        if(subtype==='dj') { w=200; h=100; } // Área DJ ~2m x 1m
+        if(subtype==='wc') { w=150; h=150; } // Baños ~1.5m x 1.5m
+        if(subtype==='exit') { w=120; h=200; } // Entrada ~1.2m x 2m
 
         const elData = {
-            id: id, type: type, subtype: subtype, x: 200, y: 200, guests: [],
+            id: id, type: type, subtype: subtype, 
+            x: salonBorder.x + salonBorder.width / 2 - w/2, 
+            y: salonBorder.y + salonBorder.height / 2 - h/2, 
+            guests: [],
             name: type === 'table' ? `Mesa ${countTables()+1}` : subtype.toUpperCase(),
             capacity: 10, width: w, height: h, rotation: 0
         };
@@ -344,7 +430,7 @@
             if(data.type === 'table') openEditModal(data.id);
             else if(confirm("¿Borrar elemento?")) deleteObj(data.id);
         });
-        document.getElementById('canvas-area').appendChild(div);
+        document.getElementById('canvas-content').appendChild(div);
         
         if(data.type === 'table' && !isLoading) analyzeTableRules(data);
         if(isLoading && data.type === 'table') setTimeout(()=>analyzeTableRules(data), 100); 
@@ -420,8 +506,6 @@
         veganBadge.style.display = veganCount > 0 ? 'block' : 'none';
         veganBadge.innerText = `🥗 ${veganCount}`;
 
-        const hasEx = table.guests.some(g => (g.tags||"").includes('EX'));
-        if (hasEx) warnings.push("💔 ALERTA: EX en la mesa.");
 
         const kids = table.guests.filter(g => (g.tags||"").includes('NIÑO'));
         kids.forEach(kid => {
@@ -465,7 +549,18 @@
     function setupDraggable(el) {
         interact(el).draggable({
             inertia: true,
-            modifiers: [ interact.modifiers.restrictRect({ restriction: 'parent', endOnly: true }) ],
+            modifiers: [ interact.modifiers.restrictRect({ 
+                restriction: function() {
+                    // Restringir dentro de los bordes del salón
+                    return {
+                        left: salonBorder.x,
+                        top: salonBorder.y,
+                        right: salonBorder.x + salonBorder.width,
+                        bottom: salonBorder.y + salonBorder.height
+                    };
+                },
+                endOnly: true 
+            }) ],
             listeners: {
                 move(event) {
                     const t = event.target;
@@ -473,8 +568,8 @@
                     const obj = mapElements.find(e => e.id === id);
                     
                     if(obj) {
-                        obj.x += event.dx;
-                        obj.y += event.dy;
+                        obj.x += event.dx / currentZoom;
+                        obj.y += event.dy / currentZoom;
                         t.style.transform = `translate(${obj.x}px, ${obj.y}px) rotate(${obj.rotation||0}deg)`;
                     }
                 },
@@ -486,6 +581,54 @@
             }
         });
     }
+    
+    // Hacer los bordes del salón editables después de que el DOM esté listo
+    function setupSalonBorderInteraction() {
+        const borderEl = document.getElementById('salon-border');
+        if(!borderEl) return;
+        
+        interact('#salon-border').draggable({
+            modifiers: [
+                interact.modifiers.restrict({
+                    restriction: 'parent',
+                    endOnly: true
+                })
+            ],
+            listeners: {
+                move(event) {
+                    salonBorder.x += event.dx / currentZoom;
+                    salonBorder.y += event.dy / currentZoom;
+                    updateSalonBorder();
+                },
+                end() {
+                    saveLocalLayout();
+                }
+            }
+        }).resizable({
+            edges: { left: true, right: true, bottom: true, top: true },
+            modifiers: [
+                interact.modifiers.restrict({
+                    restriction: 'parent'
+                })
+            ],
+            listeners: {
+                move(event) {
+                    const rect = event.rect;
+                    salonBorder.width = Math.max(500, rect.width / currentZoom);
+                    salonBorder.height = Math.max(500, rect.height / currentZoom);
+                    salonBorder.x = rect.left / currentZoom;
+                    salonBorder.y = rect.top / currentZoom;
+                    updateSalonBorder();
+                },
+                end() {
+                    saveLocalLayout();
+                }
+            }
+        });
+    }
+    
+    // Inicializar interacción de bordes después de cargar
+    setTimeout(setupSalonBorderInteraction, 200);
 
     function setupDropzone(el) {
         interact(el).dropzone({
@@ -537,7 +680,10 @@
 
     // --- PERSISTENCIA LOCAL Y REMOTA ---
     function saveLocalLayout() {
-        localStorage.setItem('pj_floorplan', JSON.stringify(mapElements));
+        localStorage.setItem('pj_floorplan', JSON.stringify({ 
+            elements: mapElements, 
+            salonBorder: salonBorder 
+        }));
     }
     
     function clearLocalLayout() {
@@ -614,9 +760,10 @@
                 const el = {
                     id: 'tbl_sync_' + m + '_' + Date.now(), 
                     type: 'table', subtype: 'round', 
-                    x: 100 + (i * 150), y: 50, 
+                    x: salonBorder.x + 50 + (i % 10) * 150, 
+                    y: salonBorder.y + 50 + Math.floor(i / 10) * 150, 
                     guests: [], name: m, capacity: 10, 
-                    width: 130, height: 130, rotation: 0
+                    width: 120, height: 120, rotation: 0
                 };
                 mapElements.push(el);
                 renderElement(el);
