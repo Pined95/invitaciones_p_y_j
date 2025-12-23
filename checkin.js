@@ -82,19 +82,28 @@ async function fetchGroupInfo(id) {
     
     try {
         const res = await fetchWithRetry(`${API_URL}?action=scanQR&id=${encodeURIComponent(id)}`);
-        const data = await res.json();
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const text = await res.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (parseErr) {
+            console.error("Error al parsear JSON:", text);
+            throw new Error("Respuesta no es JSON válido");
+        }
         
         if(data.status === 'success' || data.status === 'SUCCESS') {
-            showSelectionModal(data.groupName || data.mainName, data.members, data.mesa); // Ajuste para leer nombres correctamente
+            showSelectionModal(data.groupName || data.mainName || data.nombreGrupo, data.members, data.mesa);
             statusText.innerText = "";
         } else {
             alert("⛔ Código no encontrado o sin confirmación.");
-            html5QrcodeScanner.resume();
+            if(html5QrcodeScanner) html5QrcodeScanner.resume();
             statusText.innerText = "Listo para escanear...";
         }
     } catch(e) { 
         console.error(e);
-        alert("Error de conexión"); 
+        alert("Error de conexión: " + e.message); 
         if(html5QrcodeScanner) html5QrcodeScanner.resume(); 
     }
 }
@@ -169,15 +178,27 @@ async function confirmEntry() {
             body: JSON.stringify(payload)
         });
 
-        if (response.ok) {
+        const text = await response.text();
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (parseErr) {
+            // Si no es JSON, verificar si la respuesta fue exitosa por el status code
+            if (response.ok) {
+                result = { status: 'success' };
+            } else {
+                throw new Error("El servidor no respondió correctamente.");
+            }
+        }
+        
+        if (response.ok && (result.status === 'success' || result.status === 'SUCCESS')) {
             closeModal();
             playAudio(true);
             
             addToHistory(payload._groupName, selectedIds.length, mode);
             showFloatingNotification(payload._groupName, payload._mesa, payload._selectedNames);
         } else {
-            // If the server responds with an error, we'll also save it for later.
-            throw new Error("El servidor no respondió correctamente.");
+            throw new Error(result.message || "El servidor no respondió correctamente.");
         }
 
     } catch(e) { 
@@ -219,7 +240,16 @@ async function manualSearch() {
     
     try {
         const res = await fetchWithRetry(`${API_URL}?action=search&q=${encodeURIComponent(q)}`);
-        const data = await res.json();
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const text = await res.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (parseErr) {
+            console.error("Error al parsear JSON:", text);
+            throw new Error("Respuesta no es JSON válido");
+        }
         
         if(data.results && data.results.length > 0) {
             // Usamos el ID del primer resultado para obtener el grupo completo
@@ -228,7 +258,11 @@ async function manualSearch() {
             alert("No encontrado");
             statusText.innerText = "";
         }
-    } catch(e) { alert("Error busqueda"); }
+    } catch(e) { 
+        console.error(e);
+        alert("Error en búsqueda: " + e.message); 
+        statusText.innerText = "";
+    }
 }
 
 // --- UTILS (Audio & History) ---

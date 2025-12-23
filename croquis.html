@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Planner P&J</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js" defer></script>
 
     <style>
         :root {
@@ -168,7 +169,7 @@
 
 <script>
     // 👇 URL DEL APPS SCRIPT (ACTUALIZADA)
-    const API_URL = "https://script.google.com/macros/s/AKfycbymKVluAzH8VNN7IRsiPGZhVQVMeMvim4ICQRaG-4GroFu873x1g1zji1WtD-DWwUY/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbzmscG6v4WNvxS1BLO61mx8RCAzSGbwBYInQw3RB4Gmuosv72rIq2NzqbIaQrlWdtg/exec"; 
     
     let guests = [], mapElements = [], isGroupedByFamily = false;
     let editingTableId = null;
@@ -183,7 +184,9 @@
 
         loadLocalLayout(); 
         try {
-            const res = await fetch(`${API_URL}?action=getAllConfirmed`);
+            const res = await fetchWithRetry(`${API_URL}?action=getAllConfirmed`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            
             const text = await res.text();
             let data;
             try {
@@ -201,7 +204,10 @@
                 
                 if(mapElements.length === 0) autoCreateTablesFromExcel();
             }
-        } catch(e) { alert("Error cargando datos: " + e); }
+        } catch(e) { 
+            console.error(e);
+            alert("Error cargando datos: " + e.message); 
+        }
     };
     
     function loadLocalLayout() {
@@ -541,6 +547,25 @@
         }
     }
 
+    async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok && retries > 0) {
+                console.warn(`Reintentando... intentos restantes: ${retries}`);
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchWithRetry(url, options, retries - 1, backoff * 2);
+            }
+            return response;
+        } catch (error) {
+            if (retries > 0) {
+                console.warn(`Error de red. Reintentando... ${retries}`);
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchWithRetry(url, options, retries - 1, backoff * 2);
+            }
+            throw error;
+        }
+    }
+
     // --- FUNCIÓN CORREGIDA (API) ---
     async function saveData() {
         const btn = document.querySelector('.btn-save'); 
@@ -554,9 +579,9 @@
         });
 
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetchWithRetry(API_URL, {
                 method: 'POST',
-                redirect: 'follow', // <--- CAMBIADO A 'FOLLOW' PARA PODER LEER RESPUESTA
+                redirect: 'follow',
                 headers: {'Content-Type': 'text/plain;charset=utf-8'},
                 body: JSON.stringify({
                     action: 'SAVE_TABLES', 
@@ -571,7 +596,7 @@
             }
         } catch(e) { 
             console.error(e);
-            alert("Error al guardar. Verifica tu conexión."); 
+            alert("Error al guardar. Verifica tu conexión: " + e.message); 
         } finally {
             btn.innerHTML = originalText;
             btn.disabled = false;

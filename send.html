@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Envíos P&J</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -110,7 +111,9 @@ Aquí les dejo su invitación digital y pase de acceso:
 
         loadSentStatus(); 
         try {
-            const res = await fetch(`${API_URL}?action=getSendList`);
+            const res = await fetchWithRetry(`${API_URL}?action=getSendList`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            
             const text = await res.text();
             let data;
             try {
@@ -126,7 +129,10 @@ Aquí les dejo su invitación digital y pase de acceso:
                 renderList();
                 updateStats();
             }
-        } catch(e) { alert("Error cargando datos"); }
+        } catch(e) { 
+            console.error(e);
+            alert("Error cargando datos: " + e.message); 
+        }
     };
 
     function processGroups(guests) {
@@ -263,6 +269,25 @@ Aquí les dejo su invitación digital y pase de acceso:
         if(confirm("¿Borrar todo el historial de envíos de este dispositivo?")) {
             localStorage.removeItem('pj_sent_list');
             location.reload();
+        }
+    }
+
+    async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok && retries > 0) {
+                console.warn(`Reintentando... intentos restantes: ${retries}`);
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchWithRetry(url, options, retries - 1, backoff * 2);
+            }
+            return response;
+        } catch (error) {
+            if (retries > 0) {
+                console.warn(`Error de red. Reintentando... ${retries}`);
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchWithRetry(url, options, retries - 1, backoff * 2);
+            }
+            throw error;
         }
     }
 

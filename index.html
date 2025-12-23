@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Invitación digital a la boda de Paola y Jorge - 14 de Marzo 2026">
+    <meta name="theme-color" content="#C59D5F">
     <title>Boda Paola & Jorge</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
+    <link rel="preload" href="img/portada.webp" as="image">
+    <link rel="preload" href="img/logo2.png" as="image">
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
     
     <style>
         /* --- TIPOGRAFÍAS --- */
@@ -29,7 +34,7 @@
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #E8E4D9; font-family: var(--font-body); margin: 0; color: var(--text-dark); overflow-x: hidden; padding-bottom: 70px; overscroll-behavior: none; }
+        body { background-color: #E8E4D9; font-family: var(--font-body); margin: 0; color: var(--text-dark); overflow-x: hidden; padding-bottom: 70px; overscroll-behavior: none; will-change: scroll-position; }
         .app-container { max-width: 480px; margin: 0 auto; background: var(--bg-cream); min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative; padding-bottom: 80px; }
 
         /* --- HERO --- */
@@ -58,8 +63,8 @@
         .personal-note:not(:empty)::after { content: '”'; font-family: var(--font-display); font-size: 3rem; color: #ddd; position: absolute; right: -5px; bottom: -20px; }
 
         /* --- CARRUSEL --- */
-        .carousel { position: relative; width: 100%; height: 450px; overflow: hidden; margin: 40px 0; }
-        .carousel img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 1.5s ease-in-out; -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); }
+        .carousel { position: relative; width: 100%; height: 450px; overflow: hidden; margin: 40px 0; contain: layout style paint; }
+        .carousel img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 1.5s ease-in-out; -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%); will-change: opacity; }
         .carousel img.active { opacity: 1; }
 
         /* --- ITINERARIO CON ACUARELAS --- */
@@ -136,9 +141,9 @@
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
         /* --- ACUARELAS FONDO --- */
-        .watercolor-container { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
-        .wc-group { position: absolute; opacity: 0.6; mix-blend-mode: multiply; transition: transform 0.1s linear; will-change: transform; }
-        .wc-img { width: 300px; height: auto; display: block; position: absolute; }
+        .watercolor-container { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; contain: layout style paint; }
+        .wc-group { position: absolute; opacity: 0.6; mix-blend-mode: multiply; transition: transform 0.1s linear; will-change: transform; transform: translateZ(0); }
+        .wc-img { width: 300px; height: auto; display: block; position: absolute; image-rendering: -webkit-optimize-contrast; }
         .wc-g1 { top: -50px; left: -50px; }
         .wc-g2 { top: 40%; right: -80px; }
         .wc-g3 { bottom: -60px; left: -20px; }
@@ -147,9 +152,9 @@
 <body>
 
     <div class="watercolor-container">
-        <div class="wc-group wc-g1" data-speed="0.05" data-limit="30"><img src="img/watercolor-1.png" class="wc-img" alt=""></div>
-        <div class="wc-group wc-g2" data-speed="-0.08" data-limit="50"><img src="img/watercolor-3.png" class="wc-img" alt=""></div>
-        <div class="wc-group wc-g3" data-speed="0.03" data-limit="20"><img src="img/watercolor-4.png" class="wc-img" alt=""></div>
+        <div class="wc-group wc-g1" data-speed="0.05" data-limit="30"><img src="img/watercolor-1.png" class="wc-img" alt="" loading="lazy" decoding="async"></div>
+        <div class="wc-group wc-g2" data-speed="-0.08" data-limit="50"><img src="img/watercolor-3.png" class="wc-img" alt="" loading="lazy" decoding="async"></div>
+        <div class="wc-group wc-g3" data-speed="0.03" data-limit="20"><img src="img/watercolor-4.png" class="wc-img" alt="" loading="lazy" decoding="async"></div>
     </div>
 
     <div id="welcome-overlay">
@@ -161,7 +166,7 @@
         <button id="enter-btn" class="welcome-btn" onclick="enterSite()" style="display:none;">ENTRAR</button>
     </div>
 
-    <audio id="bg-music" loop preload="auto">
+    <audio id="bg-music" loop preload="none">
         <source src="audio/beautiful-romantic-piano-valentinex27s-day-music-257048.mp3" type="audio/mpeg">
     </audio>
     <div class="music-btn" onclick="toggleMusic()"><i class="ph-light ph-music-note"></i></div>
@@ -169,7 +174,7 @@
     <div class="app-container" id="main-content">
         
         <div class="hero">
-            <div class="hero-logo"><img src="img/logo2.png" width="180"></div>
+            <div class="hero-logo"><img src="img/logo2.png" width="180" loading="eager" fetchpriority="high" decoding="sync"></div>
             <div class="hero-text">
                 <div class="hero-names">Paola & Jorge</div>
                 <div class="hero-date">SÁBADO 14 DE MARZO, 2026</div>
@@ -203,9 +208,9 @@
         </div>
 
         <div class="carousel reveal">
-            <img src="img/foto1.webp" class="active" style="object-position: center;"> 
-            <img src="img/foto2.webp" style="object-position: center 80%;" loading="lazy">
-            <img src="img/foto3.webp" style="object-position: center;" loading="lazy">
+            <img src="img/foto1.webp" class="active" style="object-position: center;" loading="eager" fetchpriority="high"> 
+            <img src="img/foto2.webp" style="object-position: center 80%;" loading="lazy" decoding="async">
+            <img src="img/foto3.webp" style="object-position: center;" loading="lazy" decoding="async">
         </div>
 
         <div class="section reveal" style="background:white;">
@@ -410,36 +415,53 @@
         if(userId) {
             try {
                 const res = await fetchWithRetry(`${API_URL}?action=getInvite&id=${userId}`);
-                const data = await res.json();
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (parseErr) {
+                    console.error("Error al parsear JSON:", text);
+                    throw new Error("Respuesta no es JSON válido");
+                }
+                
                 if(data.status === 'success') {
                     // Texto Saludo
-                    document.getElementById('main-guest-name').innerText = data.nombreGrupo || data.mainName;
-                    if(data.nombreGrupo) document.getElementById('greeting-label').innerText = "HOLA FAMILIA";
+                    const nameEl = document.getElementById('main-guest-name');
+                    const greetingEl = document.getElementById('greeting-label');
+                    if(nameEl) nameEl.innerText = data.nombreGrupo || data.mainName || "Invitado";
+                    if(data.nombreGrupo && greetingEl) greetingEl.innerText = "HOLA FAMILIA";
 
                     // Mensaje Personal
-                    const msgs = data.members.map(m => m.mensaje).filter(x => x && x.trim() !== "");
+                    const msgs = (data.members || []).map(m => m.mensaje).filter(x => x && x.trim() !== "");
                     if(msgs.length > 0) {
                         const box = document.getElementById('personal-msg-box');
-                        box.innerText = msgs.join(" / ");
-                        box.style.display = 'block';
+                        if(box) {
+                            box.innerText = msgs.join(" / ");
+                            box.style.display = 'block';
+                        }
                     }
 
                     // 1. CIVIL VISIBLE (Si aplica)
                     if(data.showCivil) {
-                        document.getElementById('civil-card').classList.remove('hidden');
+                        const civilCard = document.getElementById('civil-card');
+                        if(civilCard) civilCard.classList.remove('hidden');
                     }
 
                     // 2. REGALOS OCULTOS (Si aplica)
                     if(data.hideRegistry) {
-                        document.getElementById('registry-content').style.display = 'none';
+                        const registryContent = document.getElementById('registry-content');
+                        if(registryContent) registryContent.style.display = 'none';
                     }
 
-                    currentMembersData = data.members;
+                    currentMembersData = data.members || [];
                     renderGuestList();
 
-                    document.getElementById('loading-msg').style.display = 'none';
-                    document.getElementById('enter-btn').style.display = 'block';
+                    const loadingMsg = document.getElementById('loading-msg');
+                    const enterBtn = document.getElementById('enter-btn');
+                    if(loadingMsg) loadingMsg.style.display = 'none';
+                    if(enterBtn) enterBtn.style.display = 'block';
                 }
             } catch(e) { console.error(e); }
         } else {
@@ -476,8 +498,10 @@
         const responses = currentMembersData.map(m => ({ id: m.id, rsvp: m.estado, alergias: '' })); 
 
         try {
-            await fetch(API_URL, {
+            await fetchWithRetry(API_URL, {
                 method: 'POST',
+                redirect: 'follow',
+                headers: {'Content-Type': 'text/plain;charset=utf-8'},
                 body: JSON.stringify({ action: 'RSVP_GROUP', responses: responses, song: song, msg: msg })
             });
             
@@ -568,14 +592,22 @@
     }
 
     const targetDate = new Date("2026-03-14T14:30:00").getTime();
-    setInterval(() => {
+    function updateCountdown() {
         const dist = targetDate - new Date().getTime();
         if(dist < 0) return;
-        document.getElementById("d").innerText = Math.floor(dist / 86400000).toString().padStart(2,'0');
-        document.getElementById("h").innerText = Math.floor((dist % 86400000) / 3600000).toString().padStart(2,'0');
-        document.getElementById("m").innerText = Math.floor((dist % 3600000) / 60000).toString().padStart(2,'0');
-        document.getElementById("s").innerText = Math.floor((dist % 60000) / 1000).toString().padStart(2,'0');
-    }, 1000);
+        const d = document.getElementById("d");
+        const h = document.getElementById("h");
+        const m = document.getElementById("m");
+        const s = document.getElementById("s");
+        if(d && h && m && s) {
+            d.innerText = Math.floor(dist / 86400000).toString().padStart(2,'0');
+            h.innerText = Math.floor((dist % 86400000) / 3600000).toString().padStart(2,'0');
+            m.innerText = Math.floor((dist % 3600000) / 60000).toString().padStart(2,'0');
+            s.innerText = Math.floor((dist % 60000) / 1000).toString().padStart(2,'0');
+        }
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => { if(entry.isIntersecting) entry.target.classList.add('active'); });
@@ -592,24 +624,42 @@
         }, 4000);
     }
 
+    let ticking = false;
     document.addEventListener('scroll', () => {
-        const y = window.scrollY;
-        document.querySelectorAll('.wc-group').forEach(group => {
-            const speed = parseFloat(group.getAttribute('data-speed'));
-            const limit = parseFloat(group.getAttribute('data-limit'));
-            let move = y * speed;
-            if (move > limit) move = limit;
-            if (move < -limit) move = -limit;
-            group.style.transform = `translate3d(0, ${move}px, 0)`;
-        });
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const y = window.scrollY;
+                document.querySelectorAll('.wc-group').forEach(group => {
+                    const speed = parseFloat(group.getAttribute('data-speed'));
+                    const limit = parseFloat(group.getAttribute('data-limit'));
+                    let move = y * speed;
+                    if (move > limit) move = limit;
+                    if (move < -limit) move = -limit;
+                    group.style.transform = `translate3d(0, ${move}px, 0)`;
+                });
+                ticking = false;
+            });
+            ticking = true;
+        }
     });
 
-    async function fetchWithRetry(url, retries = 3) {
+    async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
         try {
-            const response = await fetch(url);
-            if (!response.ok && retries > 0) return fetchWithRetry(url, retries - 1);
+            const response = await fetch(url, options);
+            if (!response.ok && retries > 0) {
+                console.warn(`Reintentando... intentos restantes: ${retries}`);
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchWithRetry(url, options, retries - 1, backoff * 2);
+            }
             return response;
-        } catch (error) { if (retries > 0) return fetchWithRetry(url, retries - 1); throw error; }
+        } catch (error) {
+            if (retries > 0) {
+                console.warn(`Error de red. Reintentando... ${retries}`);
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchWithRetry(url, options, retries - 1, backoff * 2);
+            }
+            throw error;
+        }
     }
 </script>
 </body>

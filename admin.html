@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Boda P&J</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 
     <style>
         :root { --gold: #C59D5F; --dark: #1a1a1a; --light: #f4f4f9; }
@@ -167,8 +168,17 @@
         }
 
         try {
-            const res = await fetch(`${API_URL}?action=getAdminData`);
-            const data = await res.json();
+            const res = await fetchWithRetry(`${API_URL}?action=getAdminData`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            
+            const text = await res.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (parseErr) {
+                console.error("Error al parsear JSON:", text);
+                throw new Error("Respuesta no es JSON válido");
+            }
             
             if(data.status === 'success') {
                 processData(data.guests);
@@ -180,7 +190,7 @@
         } catch(e) { 
             console.error(e);
             if(!cachedData) {
-                alert("Error de conexión"); 
+                alert("Error de conexión: " + e.message); 
                 statusEl.innerText = "Error de conexión";
             } else {
                 statusEl.innerText = "Sin conexión (Viendo versión offline)";
@@ -255,6 +265,25 @@
     }
 
     let chartS, chartV; 
+
+    async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok && retries > 0) {
+                console.warn(`Reintentando... intentos restantes: ${retries}`);
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchWithRetry(url, options, retries - 1, backoff * 2);
+            }
+            return response;
+        } catch (error) {
+            if (retries > 0) {
+                console.warn(`Error de red. Reintentando... ${retries}`);
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchWithRetry(url, options, retries - 1, backoff * 2);
+            }
+            throw error;
+        }
+    }
 
     function renderCharts(guests) {
         if(chartS) chartS.destroy();
