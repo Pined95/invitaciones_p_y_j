@@ -4,71 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Envíos P&J</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root { --gold: #C59D5F; --dark: #1a1a1a; --light: #f4f4f9; --whatsapp: #25D366; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; overscroll-behavior: none; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* SIDEBAR (Panel de Mensaje) */
-        #sidebar { width: 350px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
-        h2 { color: var(--gold); margin-top: 0; }
+        /* SIDEBAR */
+        #sidebar { width: 350px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; padding: 20px; z-index: 10; }
+        h2 { color: var(--gold); margin-top: 0; font-size: 1.5rem; }
         
         .template-box { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-        textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; resize: none; box-sizing: border-box;}
-        .variables { font-size: 0.8rem; color: #666; }
-        .variable-tag { background: #eee; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #ccc; }
+        textarea { width: 100%; height: 180px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; resize: none; }
+        
+        .toolbar { display: flex; gap: 5px; margin-bottom: 5px; }
+        .tool-btn { background: #eee; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        .tool-btn:hover { background: #ddd; }
+
+        .variables { font-size: 0.75rem; color: #666; margin-top: 5px; }
+        .variable-tag { background: #eef; color: var(--gold); padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px dashed var(--gold); font-weight: bold; }
+
+        /* SAFETY TIMER */
+        #safety-lock {
+            background: #fff3cd; color: #856404; padding: 10px; border-radius: 6px; border: 1px solid #ffeeba;
+            text-align: center; font-size: 0.9rem; margin-top: 15px; display: none;
+        }
         
         .stats { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; font-size: 0.9rem; }
+        .progress-container { width: 100%; background: #ddd; height: 8px; border-radius: 4px; margin: 10px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--gold); width: 0%; transition: width 0.3s; }
 
-        /* LISTA DE ENVÍOS */
-        #main-area { flex: 1; padding: 20px; overflow-y: auto; }
+        /* LISTA */
+        #main-area { flex: 1; padding: 20px; overflow-y: auto; position: relative; }
         
         .group-card { 
             background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #ddd; transition: 0.3s;
-            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #ddd; 
+            display: flex; justify-content: space-between; align-items: flex-start; /* Alineación superior */
         }
-        .group-card.sent { border-left-color: var(--whatsapp); opacity: 0.7; }
-        .group-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .group-card.sent { border-left-color: var(--whatsapp); background: #f0fff4; opacity: 0.8; }
+        
+        .group-info { max-width: 40%; }
+        
+        .actions-col { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+        .btn-row { display: flex; gap: 5px; align-items: center; }
 
-        .group-info h3 { margin: 0; font-size: 1.1rem; color: var(--dark); }
-        .group-members { font-size: 0.8rem; color: #666; margin-top: 5px; }
+        .btn { border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.2s; text-decoration: none; font-size: 0.85rem;}
         
-        .actions { display: flex; gap: 10px; }
-        .btn { border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
-        
-        .btn-wa { background: var(--whatsapp); color: white; text-decoration: none; }
+        .btn-wa { background: var(--whatsapp); color: white; }
         .btn-wa:hover { background: #128C7E; }
-        .btn-copy { background: #eee; color: #333; }
-        .btn-copy:hover { background: #ddd; }
+        .btn-wa.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; }
         
-        .btn-mark { background: transparent; border: 1px solid #ccc; color: #999; }
+        .btn-copy { background: #eee; color: #333; }
+        .btn-mark { background: transparent; border: 1px solid #ccc; color: #999; height: 30px; width: 30px; justify-content: center; }
         .btn-mark.active { background: var(--gold); color: white; border-color: var(--gold); }
-
-        /* Search */
-        .search-bar { margin-bottom: 20px; }
-        .search-bar input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
-
+        
+        .search-bar input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; }
+        
+        /* Etiqueta pequeña sobre el botón */
+        .phone-label { font-size: 0.7rem; color: #666; margin-right: 5px; }
     </style>
 </head>
 <body>
 
     <div id="sidebar">
-        <h2>📢 Centro de Envíos</h2>
+        <h2>🛡️ Envíos Seguros</h2>
         
         <div class="template-box">
-            <label><strong>Plantilla de Mensaje:</strong></label>
-            <textarea id="msg-template">¡Hola {nombre}! 👋
+            <label><strong>Mensaje:</strong></label>
+            <div class="toolbar">
+                <button class="tool-btn" onclick="insertText('*', '*')"><b>B</b></button>
+                <button class="tool-btn" onclick="insertText('_', '_')"><i>I</i></button>
+            </div>
+            <textarea id="msg-template" oninput="saveTemplate()">¡Hola {nombre}! 👋
 
 Nos encantaría que nos acompañaran en nuestra boda. 👰🤵
 
 Aquí les dejo su invitación digital y pase de acceso:
 {link}
 
-¡Esperamos contar con ustedes!</textarea>
+*¿Me confirmas si pudiste abrir el link?*</textarea>
             
             <div class="variables">
                 Variables: 
@@ -77,11 +93,23 @@ Aquí les dejo su invitación digital y pase de acceso:
             </div>
         </div>
 
+        <div id="safety-lock">
+            ⏳ Espera <strong id="timer-count">20</strong>s para el siguiente...
+        </div>
+
         <div class="stats">
-            <div>Total Grupos: <strong id="stat-total">0</strong></div>
-            <div>Enviados: <strong id="stat-sent" style="color:var(--whatsapp)">0</strong></div>
-            <div>Pendientes: <strong id="stat-pending">0</strong></div>
-            <button onclick="resetSentStatus()" style="margin-top:10px; font-size:0.7rem; color:red; border:none; background:none; cursor:pointer; text-decoration:underline;">Reiniciar estatus</button>
+            <div style="display:flex; justify-content:space-between;">
+                <span>Progreso:</span>
+                <strong id="percent-text">0%</strong>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-fill"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                <span>Enviados: <strong id="stat-sent" style="color:var(--whatsapp)">0</strong></span>
+                <span>Total: <strong id="stat-total">0</strong></span>
+            </div>
+            <button onclick="resetSentStatus()" style="margin-top:15px; font-size:0.7rem; color:#999; border:none; background:none; cursor:pointer;">Reiniciar todo</button>
         </div>
     </div>
 
@@ -90,49 +118,36 @@ Aquí les dejo su invitación digital y pase de acceso:
             <input type="text" id="search" placeholder="Buscar familia o invitado..." onkeyup="filterList()">
         </div>
         <div id="groups-list">
-            <p style="text-align:center; color:#999;">Cargando invitados...</p>
+            <p style="text-align:center; color:#999; margin-top:50px;">Cargando invitados...</p>
         </div>
     </div>
 
 <script>
-    // 👇 URL DEL APPS SCRIPT (ACTUALIZADA)
     const API_URL = "https://script.google.com/macros/s/AKfycbyZcB1eZa1ZtK_E863gnjnL62-aLIp78H_VokUgexalyJvVflMRzpOyu4VB6-V13zI/exec"; 
-
-    let groups = [];
     
+    let groups = [];
+    let cooldownActive = false;
+    const COOLDOWN_SECONDS = 20; 
+
     window.onload = async () => {
-        // --- BLOQUEO DE SEGURIDAD ---
-        // Asegúrate de poner la misma contraseña que usaste en los otros archivos
-        if(prompt("🔐 Contraseña de Envíos:") !== "PYJ310524") { 
-            document.body.innerHTML = "<div style='display:flex;height:100vh;justify-content:center;align-items:center;'><h1>⛔ Acceso Denegado</h1></div>"; 
+        const savedMsg = localStorage.getItem('pj_template_msg');
+        if(savedMsg) document.getElementById('msg-template').value = savedMsg;
+
+        if(prompt("🔐 Contraseña:") !== "PYJ310524") { 
+            document.body.innerHTML = "<h1 style='text-align:center;margin-top:20%'>⛔ Acceso Denegado</h1>"; 
             return; 
         }
-        // -----------------------------
 
-        loadSentStatus(); 
         try {
-            const res = await fetchWithRetry(`${API_URL}?action=getSendList`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            
-            const text = await res.text();
-            let data;
-            try {
-                data = JSON.parse(text);
-            } catch (err) {
-                alert("El servidor devolvió un error inesperado (probablemente HTML).");
-                console.error("Error al parsear JSON:", text);
-                throw new Error("Respuesta no es JSON.");
-            }
+            const res = await fetch(`${API_URL}?action=getSendList`);
+            const data = await res.json();
             
             if(data.status === 'success') {
                 processGroups(data.guests);
                 renderList();
                 updateStats();
             }
-        } catch(e) { 
-            console.error(e);
-            alert("Error cargando datos: " + e.message); 
-        }
+        } catch(e) { alert("Error cargando datos."); }
     };
 
     function processGroups(guests) {
@@ -145,15 +160,29 @@ Aquí les dejo su invitación digital y pase de acceso:
                 grouped[gid] = {
                     id: gid,
                     mainName: g.nombreGrupo || g.nombre, 
-                    phone: g.telefono, 
                     link: g.link,
                     members: [],
+                    phones: [], // Array para guardar múltiples teléfonos
                     isSent: isMarkedSent(gid)
                 };
             }
-            if(!grouped[gid].phone && g.telefono) grouped[gid].phone = g.telefono;
             
+            // Agregamos miembro al texto
             grouped[gid].members.push(g.nombre.split(' ')[0]); 
+
+            // LOGICA MULTI-TELEFONO:
+            // Si el invitado tiene teléfono, lo agregamos a la lista de teléfonos de este grupo
+            // Evitamos duplicados por si el excel tiene el mismo número repetido
+            if(g.telefono) {
+                const phoneClean = g.telefono.replace(/\D/g, '');
+                const exists = grouped[gid].phones.some(p => p.number === phoneClean);
+                if(!exists && phoneClean.length > 5) {
+                    grouped[gid].phones.push({
+                        number: phoneClean,
+                        ownerName: g.nombre.split(' ')[0] // Guardamos de quién es el número (Juan)
+                    });
+                }
+            }
         });
 
         groups = Object.values(grouped);
@@ -166,13 +195,32 @@ Aquí les dejo su invitación digital y pase de acceso:
 
         groups.forEach(g => {
             if(g.mainName.toLowerCase().includes(filter)) {
-                const membersText = g.members.join(', ');
-                const phoneClean = g.phone ? g.phone.replace(/\D/g, '') : ''; 
                 
-                let msg = document.getElementById('msg-template').value;
-                msg = msg.replace('{nombre}', g.mainName).replace('{link}', g.link);
-                const waLink = `https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}`;
+                // Generar botones de WhatsApp (uno por cada número encontrado)
+                let waButtonsHtml = '';
+                
+                if(g.phones.length > 0) {
+                    g.phones.forEach(phone => {
+                        // Preparamos mensaje
+                        let msgRaw = document.getElementById('msg-template').value;
+                        let msgFinal = msgRaw.replace('{nombre}', g.mainName).replace('{link}', g.link);
+                        const waLink = `https://wa.me/${phone.number}?text=${encodeURIComponent(msgFinal)}`;
+                        
+                        waButtonsHtml += `
+                            <div class="btn-row">
+                                <span class="phone-label">${phone.ownerName}:</span>
+                                <a href="${waLink}" target="_blank" class="btn btn-wa ${cooldownActive ? 'disabled' : ''}" 
+                                   onclick="handleSendClick('${g.id}', event)">
+                                   <i class="fa-brands fa-whatsapp"></i> Enviar
+                                </a>
+                            </div>
+                        `;
+                    });
+                } else {
+                    waButtonsHtml = `<button class="btn btn-wa" style="opacity:0.5; cursor:not-allowed">Sin Teléfono</button>`;
+                }
 
+                // Estructura de la tarjeta
                 const card = document.createElement('div');
                 card.className = `group-card ${g.isSent ? 'sent' : ''}`;
                 card.id = `card-${g.id}`;
@@ -180,22 +228,18 @@ Aquí les dejo su invitación digital y pase de acceso:
                 card.innerHTML = `
                     <div class="group-info">
                         <h3>${g.mainName}</h3>
-                        <div class="group-members">${membersText}</div>
-                        ${!g.phone ? '<small style="color:red">Sin teléfono</small>' : `<small style="color:#666">📱 ${g.phone}</small>`}
+                        <div style="font-size:0.8rem; color:#666">${g.members.join(', ')}</div>
                     </div>
-                    <div class="actions">
-                        <button class="btn btn-copy" onclick="copyLink('${g.link}')" title="Copiar Link"><i class="fa-regular fa-copy"></i></button>
+                    
+                    <div class="actions-col">
+                        ${waButtonsHtml}
                         
-                        ${g.phone ? 
-                                `<a href="${waLink}" target="_blank" class="btn btn-wa" onclick="wppLinkClicked('${g.id}')">
-                                    <i class="fa-brands fa-whatsapp"></i> Enviar
-                                </a>` : 
-                                `<button class="btn btn-wa" style="opacity:0.5; cursor:not-allowed">Sin Tel</button>`
-                            }
-                        
-                        <button class="btn btn-mark ${g.isSent ? 'active' : ''}" onclick="toggleSent('${g.id}')" title="Marcar como enviado">
-                            <i class="fa-solid fa-check"></i>
-                        </button>
+                        <div class="btn-row" style="margin-top:5px; border-top:1px solid #eee; padding-top:5px; width:100%; justify-content:flex-end;">
+                            <button class="btn btn-copy" onclick="copyToClip('${g.link}')" title="Copiar Link"><i class="fa-regular fa-copy"></i></button>
+                            <button class="btn btn-mark ${g.isSent ? 'active' : ''}" onclick="toggleSent('${g.id}')" title="Marcar grupo como completo">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -203,103 +247,82 @@ Aquí les dejo su invitación digital y pase de acceso:
         });
     }
 
-    function filterList() { renderList(); }
-
-    function insertVar(text) {
-        const textarea = document.getElementById('msg-template');
-        textarea.setRangeText(text, textarea.selectionStart, textarea.selectionEnd, 'end');
+    // --- LÓGICA DE SEGURIDAD (Igual que antes) ---
+    
+    function handleSendClick(id, event) {
+        if(cooldownActive) { event.preventDefault(); return; }
+        activateCooldown();
+        // Marcamos como enviado automáticamente tras 1s
+        setTimeout(() => markAsSent(id), 1000);
     }
 
-    function copyLink(link) {
-        navigator.clipboard.writeText(link);
-        alert("Link copiado");
-    }
+    function activateCooldown() {
+        cooldownActive = true;
+        const lockDiv = document.getElementById('safety-lock');
+        const timerSpan = document.getElementById('timer-count');
+        let timeLeft = COOLDOWN_SECONDS;
 
-    function loadSentStatus() { }
+        lockDiv.style.display = 'block';
+        timerSpan.innerText = timeLeft;
+        document.querySelectorAll('.btn-wa').forEach(b => b.classList.add('disabled'));
 
-    function isMarkedSent(id) {
-        const sentList = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
-        return sentList.includes(id);
-    }
-
-    function markAsSent(id) {
-        let sentList = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
-        if(!sentList.includes(id)) {
-            sentList.push(id);
-            localStorage.setItem('pj_sent_list', JSON.stringify(sentList));
-            
-            const group = groups.find(g => g.id === id);
-            if(group) group.isSent = true;
-            
-            const card = document.getElementById(`card-${id}`);
-            if(card) {
-                card.classList.add('sent');
-                card.querySelector('.btn-mark').classList.add('active');
+        const interval = setInterval(() => {
+            timeLeft--;
+            timerSpan.innerText = timeLeft;
+            if(timeLeft <= 0) {
+                clearInterval(interval);
+                cooldownActive = false;
+                lockDiv.style.display = 'none';
+                renderList(); 
             }
+        }, 1000);
+    }
+
+    // --- UTILIDADES ---
+    function saveTemplate() {
+        localStorage.setItem('pj_template_msg', document.getElementById('msg-template').value);
+        renderList();
+    }
+    function insertText(before, after) {
+        const ta = document.getElementById('msg-template');
+        ta.setRangeText(before + ta.value.substring(ta.selectionStart, ta.selectionEnd) + after, ta.selectionStart, ta.selectionEnd, 'select');
+        saveTemplate();
+    }
+    function insertVar(t) { insertText(t, ''); }
+    function isMarkedSent(id) { return JSON.parse(localStorage.getItem('pj_sent_list') || '[]').includes(id); }
+    
+    function markAsSent(id) {
+        let list = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
+        if(!list.includes(id)) {
+            list.push(id);
+            localStorage.setItem('pj_sent_list', JSON.stringify(list));
             updateStats();
+            const card = document.getElementById(`card-${id}`);
+            if(card) { card.classList.add('sent'); card.querySelector('.btn-mark').classList.add('active'); }
         }
     }
 
     function toggleSent(id) {
-        let sentList = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
-        const group = groups.find(g => g.id === id);
-        
-        if(sentList.includes(id)) {
-            sentList = sentList.filter(x => x !== id);
-            if(group) group.isSent = false;
-        } else {
-            sentList.push(id);
-            if(group) group.isSent = true;
-        }
-        
-        localStorage.setItem('pj_sent_list', JSON.stringify(sentList));
-        renderList(); 
-        updateStats();
+        let list = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
+        if(list.includes(id)) list = list.filter(x => x !== id);
+        else list.push(id);
+        localStorage.setItem('pj_sent_list', JSON.stringify(list));
+        renderList(); updateStats();
     }
 
     function updateStats() {
         const total = groups.length;
-        const sent = groups.filter(g => g.isSent).length;
+        const sent = groups.filter(g => isMarkedSent(g.id)).length;
+        const p = total === 0 ? 0 : Math.round((sent / total) * 100);
         document.getElementById('stat-total').innerText = total;
         document.getElementById('stat-sent').innerText = sent;
-        document.getElementById('stat-pending').innerText = total - sent;
-    }
-    
-    function resetSentStatus() {
-        if(confirm("¿Borrar todo el historial de envíos de este dispositivo?")) {
-            localStorage.removeItem('pj_sent_list');
-            location.reload();
-        }
+        document.getElementById('percent-text').innerText = p + "%";
+        document.getElementById('progress-fill').style.width = p + "%";
     }
 
-    async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
-        try {
-            const response = await fetch(url, options);
-            if (!response.ok && retries > 0) {
-                console.warn(`Reintentando... intentos restantes: ${retries}`);
-                await new Promise(r => setTimeout(r, backoff));
-                return fetchWithRetry(url, options, retries - 1, backoff * 2);
-            }
-            return response;
-        } catch (error) {
-            if (retries > 0) {
-                console.warn(`Error de red. Reintentando... ${retries}`);
-                await new Promise(r => setTimeout(r, backoff));
-                return fetchWithRetry(url, options, retries - 1, backoff * 2);
-            }
-            throw error;
-        }
-    }
-
-    function wppLinkClicked(id) {
-        setTimeout(() => {
-            if (confirm("¿Lograste enviar el mensaje por WhatsApp? \n\n(Presiona 'Aceptar' para marcarlo como enviado)")) {
-                markAsSent(id);
-            }
-        }, 3000);
-    }
+    function filterList() { renderList(); }
+    function copyToClip(t) { navigator.clipboard.writeText(t); }
+    function resetSentStatus() { if(confirm("¿Borrar historial?")) { localStorage.removeItem('pj_sent_list'); location.reload(); } }
 </script>
-
 </body>
-
 </html>
