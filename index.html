@@ -232,10 +232,36 @@
         /* --- RSVP --- */
         .guest-row { background: white; padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; text-align: left; }
         .toggle-group { display: flex; gap: 5px; margin-top: 10px; }
-        .toggle-btn { flex:1; padding: 12px; border:1px solid #ccc; background:white; cursor:pointer; font-size:0.75rem; font-family:'Montserrat'; text-transform:uppercase; transition:0.3s; font-weight: 600; text-align: center; border-radius: 4px; }
-        .toggle-btn.selected { background: var(--gold); color: white; border-color: var(--gold); }
-        .toggle-btn.reject.selected { background: #999; border-color: #999; }
-        .script-title { font-family: var(--font-script); font-size: 3.5rem; color: var(--text-dark); margin: 15px 0; line-height: 1.1; font-weight: normal; }
+        
+        /* Botón en estado normal (sin seleccionar) */
+        .toggle-btn { 
+            flex:1; 
+            padding: 12px; 
+            border: 1px solid var(--gold); /* Borde Dorado */
+            color: var(--gold);            /* Texto Dorado */
+            background: white; 
+            cursor: pointer; 
+            font-size: 0.75rem; 
+            font-family: 'Montserrat'; 
+            text-transform: uppercase; 
+            transition: 0.3s; 
+            font-weight: 600; 
+            text-align: center; 
+            border-radius: 4px; 
+        }
+
+        /* Botón seleccionado (Cualquiera de los dos) */
+        .toggle-btn.selected { 
+            background: var(--gold); 
+            color: white; 
+            border-color: var(--gold); 
+        }
+
+        /* Eliminamos el color gris del botón de rechazo para que también sea dorado */
+        .toggle-btn.reject.selected { 
+            background: var(--gold); /* Ahora es dorado */
+            border-color: var(--gold); 
+        }
 
         /* --- TICKET & RECORTES --- */
         .ticket-cutout-side-l { background:#E8E4D9; width:24px; height:24px; border-radius:50%; position:absolute; top: -12px; left:-12px; box-shadow:inset -2px 0 5px rgba(0,0,0,0.05); z-index: 5;}
