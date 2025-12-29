@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Envíos P&J</title>
+    <title>Panel de Control Híbrido P&J</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --gold: #C59D5F; --dark: #1a1a1a; --light: #f4f4f9; --whatsapp: #25D366; }
+        :root { --gold: #C59D5F; --dark: #1a1a1a; --light: #f4f4f9; --whatsapp: #25D366; --bot-color: #3498db; }
         body { font-family: 'Montserrat', sans-serif; background: var(--light); margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
         /* SIDEBAR */
@@ -16,7 +16,7 @@
         h2 { color: var(--gold); margin-top: 0; font-size: 1.5rem; }
         
         .template-box { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-        textarea { width: 100%; height: 180px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; resize: none; }
+        textarea { width: 100%; height: 180px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; resize: none; font-size: 0.9rem; }
         
         .toolbar { display: flex; gap: 5px; margin-bottom: 5px; }
         .tool-btn { background: #eee; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
@@ -31,9 +31,15 @@
             text-align: center; font-size: 0.9rem; margin-top: 15px; display: none;
         }
         
-        .stats { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; font-size: 0.9rem; }
+        /* ESTADÍSTICAS */
+        .stats { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; font-size: 0.85rem; }
+        .stats-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
         .progress-container { width: 100%; background: #ddd; height: 8px; border-radius: 4px; margin: 10px 0; overflow: hidden; }
         .progress-bar { height: 100%; background: var(--gold); width: 0%; transition: width 0.3s; }
+        
+        /* LEYENDA */
+        .legend { font-size: 0.75rem; color: #666; margin-bottom: 10px; display: flex; gap: 10px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
 
         /* LISTA */
         #main-area { flex: 1; padding: 20px; overflow-y: auto; position: relative; }
@@ -41,11 +47,15 @@
         .group-card { 
             background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #ddd; 
-            display: flex; justify-content: space-between; align-items: flex-start; /* Alineación superior */
+            display: flex; justify-content: space-between; align-items: flex-start;
+            transition: all 0.3s ease;
         }
-        .group-card.sent { border-left-color: var(--whatsapp); background: #f0fff4; opacity: 0.8; }
         
-        .group-info { max-width: 40%; }
+        /* ESTADOS DE LA TARJETA */
+        .group-card.sent { border-left-color: var(--whatsapp); background: #f0fff4; opacity: 0.9; } /* Manual */
+        .group-card.sent-bot { border-left-color: var(--bot-color); background: #ecf8ff; opacity: 0.9; } /* Robot */
+        
+        .group-info { max-width: 50%; }
         
         .actions-col { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
         .btn-row { display: flex; gap: 5px; align-items: center; }
@@ -57,20 +67,26 @@
         .btn-wa.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; }
         
         .btn-copy { background: #eee; color: #333; }
-        .btn-mark { background: transparent; border: 1px solid #ccc; color: #999; height: 30px; width: 30px; justify-content: center; }
-        .btn-mark.active { background: var(--gold); color: white; border-color: var(--gold); }
         
-        .search-bar input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; }
+        .btn-mark { background: transparent; border: 1px solid #ccc; color: #999; height: 30px; width: 30px; justify-content: center; border-radius: 50%; display: flex; align-items: center;}
+        .btn-mark:hover { background: #f5f5f5; }
+        .group-card.sent .btn-mark.active { background: var(--whatsapp); color: white; border-color: var(--whatsapp); }
+        .group-card.sent-bot .btn-mark.active { background: var(--bot-color); color: white; border-color: var(--bot-color); }
         
-        /* Etiqueta pequeña sobre el botón */
+        .search-bar input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
         .phone-label { font-size: 0.7rem; color: #666; margin-right: 5px; }
     </style>
 </head>
 <body>
 
     <div id="sidebar">
-        <h2>🛡️ Envíos Seguros</h2>
+        <h2>🎛️ Panel Híbrido</h2>
         
+        <div class="legend">
+            <span><span class="dot" style="background: var(--whatsapp)"></span>Manual</span>
+            <span><span class="dot" style="background: var(--bot-color)"></span>Robot (Python)</span>
+        </div>
+
         <div class="template-box">
             <label><strong>Mensaje:</strong></label>
             <div class="toolbar">
@@ -84,7 +100,7 @@ Nos encantaría que nos acompañaran en nuestra boda. 👰🤵
 Aquí les dejo su invitación digital y pase de acceso:
 {link}
 
-*¿Me confirmas si pudiste abrir el link?*</textarea>
+*¿Me confirman si pudieron abrir el link?*</textarea>
             
             <div class="variables">
                 Variables: 
@@ -98,18 +114,21 @@ Aquí les dejo su invitación digital y pase de acceso:
         </div>
 
         <div class="stats">
-            <div style="display:flex; justify-content:space-between;">
-                <span>Progreso:</span>
-                <strong id="percent-text">0%</strong>
+            <div class="stats-row"><span>Progreso Total:</span><strong id="percent-text">0%</strong></div>
+            <div class="progress-container"><div class="progress-bar" id="progress-fill"></div></div>
+            
+            <div class="stats-row" style="margin-top: 10px; font-size: 0.8rem;">
+                <span>👤 Manuales:</span> <strong id="stat-manual" style="color:var(--whatsapp)">0</strong>
             </div>
-            <div class="progress-container">
-                <div class="progress-bar" id="progress-fill"></div>
+            <div class="stats-row" style="font-size: 0.8rem;">
+                <span>🤖 Robot:</span> <strong id="stat-robot" style="color:var(--bot-color)">0</strong>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
-                <span>Enviados: <strong id="stat-sent" style="color:var(--whatsapp)">0</strong></span>
-                <span>Total: <strong id="stat-total">0</strong></span>
+            <hr>
+            <div class="stats-row">
+                <span>Total Enviados:</span> <strong id="stat-total-sent">0</strong>
             </div>
-            <button onclick="resetSentStatus()" style="margin-top:15px; font-size:0.7rem; color:#999; border:none; background:none; cursor:pointer;">Reiniciar todo</button>
+            
+            <button onclick="resetSentStatus()" style="margin-top:15px; font-size:0.7rem; color:#999; border:none; background:none; cursor:pointer; text-decoration: underline;">Reiniciar historial local</button>
         </div>
     </div>
 
@@ -122,22 +141,26 @@ Aquí les dejo su invitación digital y pase de acceso:
         </div>
     </div>
 
+<script src="historial_data.js" onerror="console.log('Aún no hay historial del robot')"></script>
+
 <script>
+    // ================= CONFIGURACIÓN =================
     const API_URL = "https://script.google.com/macros/s/AKfycbyZcB1eZa1ZtK_E863gnjnL62-aLIp78H_VokUgexalyJvVflMRzpOyu4VB6-V13zI/exec"; 
     
+    // TU URL REAL AQUÍ (SIN barra al final)
+    const BASE_URL = "https://tudominio.com"; 
+    // =================================================
+
     let groups = [];
     let cooldownActive = false;
     const COOLDOWN_SECONDS = 20; 
 
     window.onload = async () => {
+        // Cargar template guardado
         const savedMsg = localStorage.getItem('pj_template_msg');
         if(savedMsg) document.getElementById('msg-template').value = savedMsg;
 
-        if(prompt("🔐 Contraseña:") !== "PYJ310524") { 
-            document.body.innerHTML = "<h1 style='text-align:center;margin-top:20%'>⛔ Acceso Denegado</h1>"; 
-            return; 
-        }
-
+        // Cargar datos
         try {
             const res = await fetch(`${API_URL}?action=getSendList`);
             const data = await res.json();
@@ -147,7 +170,9 @@ Aquí les dejo su invitación digital y pase de acceso:
                 renderList();
                 updateStats();
             }
-        } catch(e) { alert("Error cargando datos."); }
+        } catch(e) { 
+            document.getElementById('groups-list').innerHTML = "<h3 style='text-align:center; color:#999'>Error cargando datos.</h3>"; 
+        }
     };
 
     function processGroups(guests) {
@@ -157,29 +182,31 @@ Aquí les dejo su invitación digital y pase de acceso:
             const gid = g.groupId || g.id;
             
             if(!grouped[gid]) {
+                // Generar Link Dinámico
+                const realLink = `${BASE_URL}?id=${gid}`;
+
                 grouped[gid] = {
                     id: gid,
                     mainName: g.nombreGrupo || g.nombre, 
-                    link: g.link,
+                    link: realLink,
                     members: [],
-                    phones: [], // Array para guardar múltiples teléfonos
-                    isSent: isMarkedSent(gid)
+                    phones: [],
+                    // Estado inicial
+                    sentManual: isSentManual(gid),
+                    sentBot: isSentBot(gid)
                 };
             }
             
-            // Agregamos miembro al texto
             grouped[gid].members.push(g.nombre.split(' ')[0]); 
 
-            // LOGICA MULTI-TELEFONO:
-            // Si el invitado tiene teléfono, lo agregamos a la lista de teléfonos de este grupo
-            // Evitamos duplicados por si el excel tiene el mismo número repetido
             if(g.telefono) {
-                const phoneClean = g.telefono.replace(/\D/g, '');
+                const phoneClean = g.telefono.toString().replace(/\D/g, '');
+                // Filtro para evitar duplicados y números rotos
                 const exists = grouped[gid].phones.some(p => p.number === phoneClean);
-                if(!exists && phoneClean.length > 5) {
+                if(!exists && phoneClean.length > 6) {
                     grouped[gid].phones.push({
                         number: phoneClean,
-                        ownerName: g.nombre.split(' ')[0] // Guardamos de quién es el número (Juan)
+                        ownerName: g.nombre.split(' ')[0]
                     });
                 }
             }
@@ -196,15 +223,33 @@ Aquí les dejo su invitación digital y pase de acceso:
         groups.forEach(g => {
             if(g.mainName.toLowerCase().includes(filter)) {
                 
-                // Generar botones de WhatsApp (uno por cada número encontrado)
+                // Determinar estado y clases
+                let cardClass = "group-card";
+                let statusBadge = "";
+                let isSent = false;
+
+                if (g.sentBot) {
+                    cardClass += " sent-bot";
+                    statusBadge = `<i class="fa-solid fa-robot" style="color:var(--bot-color); margin-left:5px;" title="Enviado por Robot"></i>`;
+                    isSent = true;
+                } else if (g.sentManual) {
+                    cardClass += " sent";
+                    statusBadge = `<i class="fa-solid fa-check" style="color:var(--whatsapp); margin-left:5px;" title="Enviado Manualmente"></i>`;
+                    isSent = true;
+                }
+
+                // Generar botones WA
                 let waButtonsHtml = '';
-                
                 if(g.phones.length > 0) {
                     g.phones.forEach(phone => {
-                        // Preparamos mensaje
                         let msgRaw = document.getElementById('msg-template').value;
                         let msgFinal = msgRaw.replace('{nombre}', g.mainName).replace('{link}', g.link);
-                        const waLink = `https://wa.me/${phone.number}?text=${encodeURIComponent(msgFinal)}`;
+                        
+                        // Prefijo 52 si es necesario
+                        let cel = phone.number;
+                        if(cel.length === 10) cel = "52" + cel;
+
+                        const waLink = `https://wa.me/${cel}?text=${encodeURIComponent(msgFinal)}`;
                         
                         waButtonsHtml += `
                             <div class="btn-row">
@@ -217,26 +262,27 @@ Aquí les dejo su invitación digital y pase de acceso:
                         `;
                     });
                 } else {
-                    waButtonsHtml = `<button class="btn btn-wa" style="opacity:0.5; cursor:not-allowed">Sin Teléfono</button>`;
+                    waButtonsHtml = `<button class="btn btn-wa" style="opacity:0.5; cursor:not-allowed">Sin Tel</button>`;
                 }
 
-                // Estructura de la tarjeta
+                // Renderizar Tarjeta
                 const card = document.createElement('div');
-                card.className = `group-card ${g.isSent ? 'sent' : ''}`;
+                card.className = cardClass;
                 card.id = `card-${g.id}`;
                 
                 card.innerHTML = `
                     <div class="group-info">
-                        <h3>${g.mainName}</h3>
+                        <h3>${g.mainName} ${statusBadge}</h3>
                         <div style="font-size:0.8rem; color:#666">${g.members.join(', ')}</div>
+                        <a href="${g.link}" target="_blank" style="font-size:0.75rem; color:var(--gold); text-decoration:none; display:inline-block; margin-top:5px;">Ver invitación</a>
                     </div>
                     
                     <div class="actions-col">
                         ${waButtonsHtml}
                         
-                        <div class="btn-row" style="margin-top:5px; border-top:1px solid #eee; padding-top:5px; width:100%; justify-content:flex-end;">
+                        <div class="btn-row" style="margin-top:8px; border-top:1px solid #eee; padding-top:5px; width:100%; justify-content:flex-end;">
                             <button class="btn btn-copy" onclick="copyToClip('${g.link}')" title="Copiar Link"><i class="fa-regular fa-copy"></i></button>
-                            <button class="btn btn-mark ${g.isSent ? 'active' : ''}" onclick="toggleSent('${g.id}')" title="Marcar grupo como completo">
+                            <button class="btn btn-mark ${isSent ? 'active' : ''}" onclick="toggleManual('${g.id}')" title="Marcar manual">
                                 <i class="fa-solid fa-check"></i>
                             </button>
                         </div>
@@ -247,15 +293,75 @@ Aquí les dejo su invitación digital y pase de acceso:
         });
     }
 
-    // --- LÓGICA DE SEGURIDAD (Igual que antes) ---
+    // --- MANEJO DE ESTADOS (HÍBRIDO) ---
     
+    // 1. ¿Enviado por Robot? (Lee variable global del archivo .js)
+    function isSentBot(id) {
+        if (window.BOT_ENVIADOS && Array.isArray(window.BOT_ENVIADOS)) {
+            return window.BOT_ENVIADOS.includes(String(id));
+        }
+        return false;
+    }
+
+    // 2. ¿Enviado Manualmente? (Lee LocalStorage)
+    function isSentManual(id) {
+        return JSON.parse(localStorage.getItem('pj_sent_list') || '[]').includes(String(id));
+    }
+
+    // --- ACCIONES ---
+
     function handleSendClick(id, event) {
         if(cooldownActive) { event.preventDefault(); return; }
         activateCooldown();
-        // Marcamos como enviado automáticamente tras 1s
-        setTimeout(() => markAsSent(id), 1000);
+        // Marcar como enviado manual tras 1s
+        setTimeout(() => markAsManual(id), 1000);
     }
 
+    function markAsManual(id) {
+        id = String(id);
+        let list = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
+        if(!list.includes(id)) {
+            list.push(id);
+            localStorage.setItem('pj_sent_list', JSON.stringify(list));
+            
+            // Actualizar memoria interna
+            const item = groups.find(g => g.id == id);
+            if(item) item.sentManual = true;
+            
+            // Actualizar visualmente SOLO esa tarjeta (más eficiente)
+            const card = document.getElementById(`card-${id}`);
+            if(card) {
+                card.classList.add('sent');
+                // Quitar clase bot si la tuviera para priorizar verde
+                card.classList.remove('sent-bot');
+                const badge = card.querySelector('.btn-mark');
+                if(badge) badge.classList.add('active');
+            }
+            updateStats();
+        }
+    }
+
+    function toggleManual(id) {
+        id = String(id);
+        let list = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
+        const item = groups.find(g => g.id == id);
+
+        if(list.includes(id)) {
+            // Desmarcar
+            list = list.filter(x => x !== id);
+            if(item) item.sentManual = false;
+        } else {
+            // Marcar
+            list.push(id);
+            if(item) item.sentManual = true;
+        }
+        localStorage.setItem('pj_sent_list', JSON.stringify(list));
+        renderList(); // Re-renderizar completo para limpiar estilos si es necesario
+        updateStats();
+    }
+
+    // --- UTILIDADES ---
+    
     function activateCooldown() {
         cooldownActive = true;
         const lockDiv = document.getElementById('safety-lock');
@@ -273,56 +379,42 @@ Aquí les dejo su invitación digital y pase de acceso:
                 clearInterval(interval);
                 cooldownActive = false;
                 lockDiv.style.display = 'none';
-                renderList(); 
+                document.querySelectorAll('.btn-wa').forEach(b => b.classList.remove('disabled'));
             }
         }, 1000);
     }
 
-    // --- UTILIDADES ---
-    function saveTemplate() {
-        localStorage.setItem('pj_template_msg', document.getElementById('msg-template').value);
-        renderList();
+    function updateStats() {
+        let manual = 0;
+        let bot = 0;
+        
+        groups.forEach(g => {
+            if(g.sentManual) manual++;
+            if(g.sentBot) bot++;
+        });
+
+        // Calculamos únicos (si uno fue enviado por bot Y manual, cuenta como 1 enviado total)
+        const totalSent = groups.filter(g => g.sentManual || g.sentBot).length;
+        const total = groups.length;
+        const percent = total === 0 ? 0 : Math.round((totalSent / total) * 100);
+
+        document.getElementById('stat-manual').innerText = manual;
+        document.getElementById('stat-robot').innerText = bot;
+        document.getElementById('stat-total-sent').innerText = `${totalSent} / ${total}`;
+        document.getElementById('percent-text').innerText = percent + "%";
+        document.getElementById('progress-fill').style.width = percent + "%";
     }
+
+    function saveTemplate() { localStorage.setItem('pj_template_msg', document.getElementById('msg-template').value); }
     function insertText(before, after) {
         const ta = document.getElementById('msg-template');
         ta.setRangeText(before + ta.value.substring(ta.selectionStart, ta.selectionEnd) + after, ta.selectionStart, ta.selectionEnd, 'select');
         saveTemplate();
     }
     function insertVar(t) { insertText(t, ''); }
-    function isMarkedSent(id) { return JSON.parse(localStorage.getItem('pj_sent_list') || '[]').includes(id); }
-    
-    function markAsSent(id) {
-        let list = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
-        if(!list.includes(id)) {
-            list.push(id);
-            localStorage.setItem('pj_sent_list', JSON.stringify(list));
-            updateStats();
-            const card = document.getElementById(`card-${id}`);
-            if(card) { card.classList.add('sent'); card.querySelector('.btn-mark').classList.add('active'); }
-        }
-    }
-
-    function toggleSent(id) {
-        let list = JSON.parse(localStorage.getItem('pj_sent_list') || '[]');
-        if(list.includes(id)) list = list.filter(x => x !== id);
-        else list.push(id);
-        localStorage.setItem('pj_sent_list', JSON.stringify(list));
-        renderList(); updateStats();
-    }
-
-    function updateStats() {
-        const total = groups.length;
-        const sent = groups.filter(g => isMarkedSent(g.id)).length;
-        const p = total === 0 ? 0 : Math.round((sent / total) * 100);
-        document.getElementById('stat-total').innerText = total;
-        document.getElementById('stat-sent').innerText = sent;
-        document.getElementById('percent-text').innerText = p + "%";
-        document.getElementById('progress-fill').style.width = p + "%";
-    }
-
     function filterList() { renderList(); }
     function copyToClip(t) { navigator.clipboard.writeText(t); }
-    function resetSentStatus() { if(confirm("¿Borrar historial?")) { localStorage.removeItem('pj_sent_list'); location.reload(); } }
+    function resetSentStatus() { if(confirm("¿Borrar historial manual?")) { localStorage.removeItem('pj_sent_list'); location.reload(); } }
 </script>
 </body>
 </html>

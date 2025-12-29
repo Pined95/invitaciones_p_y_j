@@ -1,0 +1,1 @@
+window.BOT_ENVIADOS = ["76ME"];
