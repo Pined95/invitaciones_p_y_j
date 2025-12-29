@@ -305,6 +305,19 @@
         /* Superposición de acuarelas */
         .wc-g1, .wc-g3, .wc-g5 { z-index: -1; }
         .wc-g2, .wc-g4, .wc-g6 { z-index: -2; }
+
+        /* --- SPINNER DE CARGA CSS PURO (Nuevo) --- */
+        .custom-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(197, 157, 95, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--gold);
+            animation: spin 1s ease-in-out infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -337,9 +350,11 @@
     <div id="welcome-overlay">
         <h1 style="font-family: var(--font-script); font-size: 5rem; color: var(--gold); margin-bottom: 0; line-height: 1; font-weight: normal;">P & J</h1>
         <p style="font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 3px; color: var(--text-dark);">14 . 03 . 2026</p>
+        
         <div id="loading-msg" style="margin-top: 30px; font-size: 0.9rem; color: #666; letter-spacing: 1px;">
-            <i class="ph-light ph-spinner" style="animation: spin 1s linear infinite;"></i> CARGANDO INVITACIÓN...
+            <div class="custom-spinner"></div> CARGANDO INVITACIÓN...
         </div>
+        
         <button id="enter-btn" class="welcome-btn" onclick="enterSite()" style="display:none;">ENTRAR</button>
     </div>
 
@@ -364,7 +379,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN PRINCIPAL DÍA B - CÓDIGO QR -->
         <div id="day-b-qr-section" class="day-b-qr-main day-b-only hidden">
             <h2 style="font-family: var(--font-script); font-size: 2.8rem; margin: 0 0 15px 0; color: var(--text-dark);">Tu Acceso</h2>
             <div id="day-b-qr-container" class="day-b-qr-container">
@@ -388,12 +402,10 @@
             </button>
         </div>
 
-        <!-- TICKET AUTOMÁTICO SI YA CONFIRMÓ -->
         <div id="auto-ticket-section" class="section hidden">
             <div class="gold-frame" style="padding:0; border-radius:10px; border:none; position:relative; overflow:hidden; width:90%; max-width:350px; margin:auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
                 <div id="auto-ticket-content">
-                    <!-- Se llenará automáticamente con JavaScript -->
-                </div>
+                    </div>
             </div>
             <button onclick="downloadAutoTicket()" class="btn-app" style="width:100%; justify-content:center; background:var(--gold); color:white; border:none; margin-top:20px;">
                 <i class="ph-light ph-download"></i> Descargar Boleto
@@ -453,7 +465,15 @@
                 <div class="event-time">6:00 PM</div>
                 <div class="event-name">Boda Civil</div>
                 <div class="event-place">Candilejas Eventos</div>
-                <div class="event-address">Gaspar de la Garza, Valle de Aguayo. <br><strong>(Solo Familia Cercana)</strong></div>
+                <div class="event-address">
+                    Gaspar de la Garza, Valle de Aguayo.
+                    <div id="civil-guest-details" style="margin-top: 15px; border-top: 1px dashed var(--gold); padding-top: 10px; display: none;">
+                        <p style="font-size: 0.8rem; color: #888; margin-bottom: 8px; font-style: italic;">
+                            Por cuestión de espacios solo invitamos a:
+                        </p>
+                        <div id="civil-names-list" style="font-weight: 600; color: var(--text-dark); font-size: 0.95rem; line-height: 1.6;"></div>
+                    </div>
+                </div>
                 <div class="map-actions">
                     <a href="https://www.google.com/maps/search/?api=1&query=Salón+Candilejas+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Ubicación</a>
                 </div>
@@ -475,7 +495,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN FOTOS DÍA B -->
         <div class="day-b-photos-section day-b-only hidden">
             <h2 class="title">Comparte tus Fotos</h2>
             <p style="font-size: 0.9rem; color: #666; margin-bottom: 25px;">¡Ayúdanos a capturar los mejores momentos del día!</p>
@@ -609,7 +628,6 @@
 
     </div>
 
-    <!-- MODAL PARA SUBIR FOTOS -->
     <div id="photo-upload-modal" class="modal" onclick="closePhotoUploadModal(event)">
         <div class="modal-content">
             <span class="close-modal" onclick="closePhotoUploadModalForce()">×</span>
@@ -644,7 +662,6 @@
         </div>
     </div>
 
-    <!-- MODAL HASHTAG -->
     <div id="hashtag-modal" class="modal" onclick="closeHashtagModal(event)">
         <div class="modal-content">
             <span class="close-modal" onclick="closeHashtagModalForce()">×</span>
@@ -1013,10 +1030,16 @@
         if(e.target.id === 'hashtag-modal') closeHashtagModalForce(); 
     }
 
+    // --- LÓGICA DE CARGA Y DATOS (ACTUALIZADA) ---
     window.onload = async () => {
-        // Verificar si debemos activar el modo Día B
         let shouldActivateDayB = forceDayB;
         
+        // Aseguramos que el botón de entrar esté oculto al iniciar
+        const loadingMsg = document.getElementById('loading-msg');
+        const enterBtn = document.getElementById('enter-btn');
+        if(enterBtn) enterBtn.style.display = 'none'; 
+        if(loadingMsg) loadingMsg.style.display = 'block';
+
         if(userId) {
             try {
                 const res = await fetchWithRetry(`${API_URL}?action=getInvite&id=${userId}`);
@@ -1027,12 +1050,14 @@
                 try {
                     data = JSON.parse(text);
                 } catch (parseErr) {
-                    console.error("Error al parsear JSON:", text);
-                    throw new Error("Respuesta no es JSON válido");
+                    console.error("Error JSON:", text);
+                    throw new Error("Datos corruptos");
                 }
                 
                 if(data.status === 'success') {
-                    // Texto Saludo
+                    // --- LLENADO DE DATOS ---
+                    
+                    // Nombres principales
                     const nameEl = document.getElementById('main-guest-name');
                     const greetingEl = document.getElementById('greeting-label');
                     if(nameEl) nameEl.innerText = data.nombreGrupo || data.mainName || "Invitado";
@@ -1048,53 +1073,64 @@
                         }
                     }
 
-                    // 1. CIVIL VISIBLE (Si aplica)
+                    // --- NUEVO CÓDIGO CIVIL (MODIFICADO) ---
                     if(data.showCivil) {
                         const civilCard = document.getElementById('civil-card');
-                        if(civilCard) civilCard.classList.remove('hidden');
+                        if(civilCard) {
+                            civilCard.classList.remove('hidden');
+                            
+                            // Lógica para mostrar nombres específicos en el civil
+                            const civilDetails = document.getElementById('civil-guest-details');
+                            const civilList = document.getElementById('civil-names-list');
+                            
+                            if(civilDetails && civilList) {
+                                // Tomamos los miembros del grupo
+                                const namesHTML = (data.members || [])
+                                    .map(m => `<div>• ${m.nombre}</div>`)
+                                    .join('');
+                                
+                                civilList.innerHTML = namesHTML;
+                                civilDetails.style.display = 'block';
+                            }
+                        }
                     }
 
-                    // 2. REGALOS OCULTOS (Si aplica)
+                    // Regalos
                     if(data.hideRegistry) {
                         const registryContent = document.getElementById('registry-content');
                         if(registryContent) registryContent.style.display = 'none';
                     }
 
-                    // 3. MODO DÍA B - Activar si el servidor lo indica
-                    if(data.isDayB) {
-                        shouldActivateDayB = true;
-                    }
+                    // Día B
+                    if(data.isDayB) shouldActivateDayB = true;
 
+                    // Lista de invitados
                     currentMembersData = data.members || [];
                     renderGuestList();
 
-                    const loadingMsg = document.getElementById('loading-msg');
-                    const enterBtn = document.getElementById('enter-btn');
+                    // --- FINALIZAR CARGA (EXITOSO) ---
+                    // Solo aquí mostramos el botón de entrar
                     if(loadingMsg) loadingMsg.style.display = 'none';
                     if(enterBtn) enterBtn.style.display = 'block';
                     
-                    // Verificar si ya está confirmado
+                    // Lógica extra (tickets, dia B, etc)
                     const alreadyConfirmed = showAutoTicketIfConfirmed();
-                    
-                    // Si no se activó por servidor, verificar por fecha
-                    if (!shouldActivateDayB && isWeddingDay()) {
-                        shouldActivateDayB = true;
-                    }
-                    
-                    // Activar modo Día B si corresponde
-                    if (shouldActivateDayB) {
-                        activateDayBMode();
-                    }
+                    if (!shouldActivateDayB && isWeddingDay()) shouldActivateDayB = true;
+                    if (shouldActivateDayB) activateDayBMode();
+
+                } else {
+                    throw new Error("Estado no exitoso en respuesta");
                 }
             } catch(e) { 
                 console.error(e);
-                // Mostrar botón de entrada incluso si hay error
-                document.getElementById('loading-msg').style.display = 'none';
-                document.getElementById('enter-btn').style.display = 'block';
+                // Si falla, mostramos un mensaje de error claro
+                if(loadingMsg) loadingMsg.innerHTML = "<span style='color:#D32F2F'>Error al cargar invitación.<br>Por favor recarga la página.</span>";
+                // NO mostramos el botón enterBtn si falló la carga crítica
             }
         } else {
-             document.getElementById('loading-msg').style.display = 'none';
-             document.getElementById('enter-btn').style.display = 'block';
+             // Modo demo o sin ID
+             if(loadingMsg) loadingMsg.style.display = 'none';
+             if(enterBtn) enterBtn.style.display = 'block';
         }
     };
 
