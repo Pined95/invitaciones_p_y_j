@@ -486,17 +486,24 @@
 
                     <script>
                     function openUber(name, address) {
-                        var url;
-                        // Si es la Parroquia, usamos coordenadas exactas para que no haya error
-                        if (name.includes('Buen Pastor')) {
-                            var lat = '23.7508087';
-                            var lng = '-99.1446364';
-                            url = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${lat}&dropoff[longitude]=${lng}&dropoff[nickname]=${encodeURIComponent(name)}`;
-                        } else {
-                            // Para otros lugares, intentamos búsqueda por dirección (menos preciso)
-                            url = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${encodeURIComponent(address)}&dropoff[nickname]=${encodeURIComponent(name)}`;
-                        }
-                        window.open(url, '_blank');
+                        // Coordenadas exactas de la Parroquia
+                        var lat = '23.7508087';
+                        var lng = '-99.1446364';
+                        
+                        // Usamos 'uber://' para forzar la app
+                        // Y agregamos 'formatted_address' como respaldo
+                        var deepLink = `uber://?action=setPickup&pickup=my_location&dropoff[latitude]=${lat}&dropoff[longitude]=${lng}&dropoff[nickname]=${encodeURIComponent(name)}&dropoff[formatted_address]=${encodeURIComponent(address)}`;
+                        
+                        // Enlace web de respaldo por si no tienen la app instalada (opcional)
+                        var webLink = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${lat}&dropoff[longitude]=${lng}&dropoff[nickname]=${encodeURIComponent(name)}`;
+
+                        // Intentamos abrir la app directa
+                        window.location.href = deepLink;
+
+                        // Pequeño truco: si en 500ms no ha pasado nada, redirigir a la web
+                        setTimeout(function() {
+                            window.location.href = webLink;
+                        }, 500);
                     }
                     </script>
                 </div>
@@ -508,7 +515,7 @@
                 <div class="event-name">Boda Civil</div>
                 <div class="event-place">Camelía Bistró</div>
                 <div class="event-address">
-                    Vicente Guerrero 737, Zona Centro.
+                    Vicente Guerrero 737, Zona Centro, Cd. Victoria.
                     <div id="civil-guest-details" style="margin-top: 15px; border-top: 1px dashed var(--gold); padding-top: 10px; display: none;">
                         <p style="font-size: 0.8rem; color: #888; margin-bottom: 8px; font-style: italic;">
                             Por aforo limitado, hemos reservado estos lugares para:
