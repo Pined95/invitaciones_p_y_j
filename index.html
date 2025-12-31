@@ -790,7 +790,8 @@
     
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
-    const forceDayB = params.get('dayB') === 'true'; // Para pruebas manuales
+    // Aceptamos el parámetro manual O el modo de previsualización del Admin
+    const forceDayB = params.get('dayB') === 'true' || params.get('mode') === 'dayb_preview';
     let currentMembersData = [];
     let isDayBMode = false;
 
@@ -1109,9 +1110,37 @@
                         }
                     }
 
+                    // Definimos si es prueba (usamos la misma variable que definimos arriba o la leemos directo)
+                    const esPruebaCivil = params.get('mode') === 'dayb_preview';
+
                     // --- NUEVO CÓDIGO CIVIL (MODIFICADO) ---
-                    if(data.showCivil) {
+                    // La condición ahora es: Si la base de datos dice SI -O- si es modo prueba
+                    if(data.showCivil || esPruebaCivil) {
                         const civilCard = document.getElementById('civil-card');
+                        if(civilCard) {
+                            civilCard.classList.remove('hidden');
+                            
+                            // Lógica para mostrar nombres específicos en el civil
+                            const civilDetails = document.getElementById('civil-guest-details');
+                            const civilList = document.getElementById('civil-names-list');
+                            
+                            if(civilDetails && civilList) {
+                                // Si es prueba y no hay miembros cargados, mostramos unos falsos para que veas el diseño
+                                const miembrosParaMostrar = (data.members && data.members.length > 0) 
+                                                            ? data.members 
+                                                            : (esPruebaCivil ? [{nombre: "Nombre de Prueba 1"}, {nombre: "Nombre de Prueba 2"}] : []);
+
+                                const namesHTML = miembrosParaMostrar
+                                    .map(m => `<div>• ${m.nombre}</div>`)
+                                    .join('');
+                                
+                                if(namesHTML) {
+                                    civilList.innerHTML = namesHTML;
+                                    civilDetails.style.display = 'block';
+                                }
+                            }
+                        }
+                    }
                         if(civilCard) {
                             civilCard.classList.remove('hidden');
                             

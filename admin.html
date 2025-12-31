@@ -71,12 +71,16 @@
     <div class="header">
         <h1>Dashboard Boda</h1>
         <p id="last-update" style="font-size:0.8rem; color:#999;">Actualizando...</p>
-        <div style="margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <span id="dayb-status" style="font-size: 0.85rem; color: #666;">Modo Día B: <strong id="dayb-status-text">Verificando...</strong></span>
+        <div style="margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
             <button id="dayb-toggle" onclick="toggleDayB()" style="padding: 8px 15px; border: 2px solid var(--gold); background: white; color: var(--gold); border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.3s;">
-                <i class="fa-solid fa-calendar-day"></i> Activar Día B
+                <i class="fa-solid fa-calendar-day"></i> Activar Global
             </button>
+            
+            <a href="index.html?mode=dayb_preview" target="_blank" style="padding: 8px 15px; border: 2px solid #2196f3; background: #e3f2fd; color: #1565c0; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 0.85rem; transition: 0.3s;">
+                <i class="fa-solid fa-eye"></i> Ver Prueba
+            </a>
         </div>
+        <p id="dayb-status" style="font-size: 0.85rem; color: #666; text-align:center; margin-top:5px;">Estado Real: <strong id="dayb-status-text">...</strong></p>
     </div>
 
     <div class="admin-nav">
