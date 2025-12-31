@@ -1,5 +1,5 @@
 // 👇 URL DEL APPS SCRIPT (ACTUALIZADA)
-const API_URL = "https://script.google.com/macros/s/AKfycbyZcB1eZa1ZtK_E863gnjnL62-aLIp78H_VokUgexalyJvVflMRzpOyu4VB6-V13zI/exec"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbwEsd_nMqoQW2ZwHTTp-iwUMu5n6nh7IMpJgxDPd0BmA4ep-zY-gW-ZFG1QTFKWqMU/exec"; 
 
 // Función auxiliar para reintentar si Google falla
 async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
