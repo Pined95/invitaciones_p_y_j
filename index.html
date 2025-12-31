@@ -480,32 +480,9 @@
                 <div class="event-address">Baja California 729, Fracc. San José, Cd. Victoria.</div>
                 <div class="map-actions">
                     <a href="https://maps.app.goo.gl/3mFX9Tb62KdVFrHN9" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Ubicación</a>
-                    <button onclick="openUber('Parroquia del Buen Pastor', 'Baja California 729, Fracc. San José, Cd. Victoria')" class="btn-app uber day-b-only" style="background: #000; color: white; border: none; display: none;">
+                    <button onclick="openUber('Parroquia del Buen Pastor', 'Baja California 729, Cd. Victoria', '23.7508087', '-99.1446364')" class="btn-app uber day-b-only" style="background: #000; color: white; border: none; cursor: pointer;">
                         <i class="ph-light ph-car"></i> Pedir Uber
                     </button>
-
-                    <script>
-                    function openUber(name, address) {
-                        // Coordenadas exactas de la Parroquia
-                        var lat = '23.7508087';
-                        var lng = '-99.1446364';
-                        
-                        // Usamos 'uber://' para forzar la app
-                        // Y agregamos 'formatted_address' como respaldo
-                        var deepLink = `uber://?action=setPickup&pickup=my_location&dropoff[latitude]=${lat}&dropoff[longitude]=${lng}&dropoff[nickname]=${encodeURIComponent(name)}&dropoff[formatted_address]=${encodeURIComponent(address)}`;
-                        
-                        // Enlace web de respaldo por si no tienen la app instalada (opcional)
-                        var webLink = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${lat}&dropoff[longitude]=${lng}&dropoff[nickname]=${encodeURIComponent(name)}`;
-
-                        // Intentamos abrir la app directa
-                        window.location.href = deepLink;
-
-                        // Pequeño truco: si en 500ms no ha pasado nada, redirigir a la web
-                        setTimeout(function() {
-                            window.location.href = webLink;
-                        }, 500);
-                    }
-                    </script>
                 </div>
             </div>
 
@@ -1430,6 +1407,24 @@
     
     // Agregar botón de prueba para desarrollo (solo en consola)
     console.log("Para probar el modo Día B manualmente, ejecuta: toggleDayBModeForTesting()");
+</script>
+
+<script>
+function openUber(name, address, lat, lng) {
+    var url = '';
+    
+    // Si el botón tiene coordenadas, usamos el modo preciso
+    if (lat && lng) {
+        url = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${lat}&dropoff[longitude]=${lng}&dropoff[nickname]=${encodeURIComponent(name)}`;
+    } 
+    // Si no tiene coordenadas, buscamos por dirección (menos preciso pero funciona)
+    else {
+        url = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${encodeURIComponent(address)}&dropoff[nickname]=${encodeURIComponent(name)}`;
+    }
+
+    // Abrir el enlace
+    window.location.href = url;
+}
 </script>
 </body>
 </html>
