@@ -765,7 +765,7 @@
                 </p>
                 
                 <div style="margin: 20px 0;">
-                    <input type="file" id="photo-file-input" accept="image/*" capture="environment" style="display: none;">
+                    <input type="file" id="photo-file-input" accept="image/*" style="display: none;">
                     <button onclick="document.getElementById('photo-file-input').click()" class="btn-app" style="width:100%; justify-content:center; background:var(--gold); color:white; border: none; padding: 15px;">
                         <i class="ph-light ph-folder-open"></i> Seleccionar Foto
                     </button>
@@ -961,7 +961,7 @@
         });
     }
 
-    // --- 2. SUBIDA DE FOTOS ---
+// --- 2. SUBIDA DE FOTOS (CORREGIDA) ---
     async function uploadPhoto() {
         const fileInput = document.getElementById('photo-file-input');
         const caption = document.getElementById('photo-caption').value;
@@ -972,13 +972,17 @@
         const file = fileInput.files[0];
         const originalText = btn.innerHTML;
         
+        // Cambiar estado del botón
         btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Procesando...';
         btn.disabled = true;
 
         try {
-            // Optimizamos antes de enviar
-            const optimizedBase64 = await optimizeImage(file);
+            // 1. Optimizamos la imagen
+            const fullBase64 = await optimizeImage(file);
             
+            // ⚠️ CORRECCIÓN CRÍTICA: Separar la cabecera "data:image/jpeg;base64," del contenido real
+            const base64Content = fullBase64.split(',')[1];
+
             btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Subiendo...';
 
             const res = await fetch(API_URL, {
@@ -987,9 +991,10 @@
                 headers: {'Content-Type': 'text/plain;charset=utf-8'},
                 body: JSON.stringify({
                     action: 'uploadPhoto', 
-                    image: optimizedBase64,
+                    image: base64Content, // Enviamos solo la cadena limpia
                     message: caption,
-                    mimeType: 'image/jpeg'
+                    mimeType: 'image/jpeg',
+                    filename: `foto_${new Date().getTime()}.jpg` // Añadí esto para asegurar nombre único
                 })
             });
             
@@ -999,12 +1004,16 @@
                 alert('¡Foto recibida correctamente! Gracias.');
                 closePhotoUploadModalForce();
             } else {
-                throw new Error(data.message || "Error desconocido");
+                throw new Error(data.message || "Error en el servidor");
             }
             
         } catch (error) {
-            console.error(error);
-            if(confirm('Hubo un error de conexión. ¿Quieres abrir Drive para subirla manualmente?')) {
+            console.error("Error detallado:", error);
+            // Mensaje más descriptivo si falla
+            alert('Hubo un problema al subir la foto. Intenta de nuevo o verifica tu conexión.');
+            
+            // Opcional: Si falla mucho, ofrecer subir directo a Drive (tu código original lo tenía)
+            if(confirm('¿Quieres intentar subirla manualmente a la carpeta de Google Drive?')) {
                 window.open("https://drive.google.com/drive/folders/180_eflp3ZO2XpH5--YcSWKTC9QMuo-b7?usp=drive_link", "_blank");
             }
         } finally {
