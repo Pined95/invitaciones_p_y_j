@@ -1106,7 +1106,36 @@
         }).catch(() => openHashtagModal());
     }
 
-    // --- FUNCIÓN DE SUBIDA (CALIDAD ORIGINAL) ---
+    // --- FUNCIÓN AUXILIAR: OPTIMIZACIÓN INTELIGENTE ---
+    // Mantiene la resolución original pero optimiza el peso del archivo
+    function optimizeImage(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = event => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const elem = document.createElement('canvas');
+                    
+                    // 1. USAMOS LAS DIMENSIONES ORIGINALES (No reducimos píxeles)
+                    elem.width = img.width;
+                    elem.height = img.height;
+                    
+                    const ctx = elem.getContext('2d');
+                    ctx.drawImage(img, 0, 0, img.width, img.height);
+                    
+                    // 2. EXPORTAMOS CON CALIDAD 0.85 (Alta calidad para impresión, pero menos peso)
+                    // Esto reduce un archivo de 8MB a aprox 3MB sin cambiar el tamaño de impresión.
+                    resolve(elem.toDataURL('image/jpeg', 0.85));
+                };
+                img.onerror = error => reject(error);
+            };
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    // --- FUNCIÓN DE SUBIDA ACTUALIZADA ---
     async function uploadPhoto() {
         const fileInput = document.getElementById('photo-file-input');
         const caption = document.getElementById('photo-caption').value;
@@ -1118,62 +1147,50 @@
         }
 
         const file = fileInput.files[0];
-
-        // ⚠️ VALIDACIÓN DE TAMAÑO PARA CALIDAD ORIGINAL ⚠️
-        // Si pesa más de 6MB, es arriesgado subirla por script (límite de Google).
-        // 6MB es suficiente para una foto de 12MP-16MP en alta calidad.
-        if (file.size > 6 * 1024 * 1024) { 
-            if(!confirm("Esta foto es muy pesada (" + (file.size/1024/1024).toFixed(1) + "MB) para subirla por aquí.\n\n¿Quieres intentar subirla de todas formas?\n(Si falla, te sugeriremos usar la App de Drive).")) {
-                return;
-            }
-        }
-
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Subiendo Original...';
+        
+        // Cambio de texto para indicar proceso
+        btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Procesando...';
         btn.disabled = true;
 
-        const reader = new FileReader();
-
-        reader.onload = async function(e) {
-            const base64Image = e.target.result; 
+        try {
+            // PASO 1: Optimizamos la imagen (mismos píxeles, menos peso)
+            const optimizedBase64 = await optimizeImage(file);
             
-            try {
-                // Enviamos a tu Script (Mismo de siempre)
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    redirect: 'follow',
-                    headers: {'Content-Type': 'text/plain;charset=utf-8'},
-                    body: JSON.stringify({
-                        action: 'uploadPhoto', 
-                        image: base64Image, // Enviamos ORIGINAL
-                        message: caption,
-                        mimeType: file.type || 'image/jpeg'
-                    })
-                });
-                
-                const data = await res.json();
+            btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Subiendo...';
 
-                if(data.status === 'success') {
-                    alert('¡Foto recibida en alta calidad! Gracias.');
-                    closePhotoUploadModalForce();
-                } else {
-                    throw new Error(data.message || "Error desconocido");
-                }
-                
-            } catch (error) {
-                console.error(error);
-                // Si falla, sugerimos la alternativa segura
-                if(confirm('Hubo un error al subir (probablemente por el tamaño de la foto).\n\n¿Quieres abrir la carpeta de Drive para subirla directamente ahí?')) {
-                    window.open("https://drive.google.com/drive/folders/180_eflp3ZO2XpH5--YcSWKTC9QMuo-b7?usp=drive_link", "_blank");
-                }
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+            // PASO 2: Enviamos a Google Apps Script
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: {'Content-Type': 'text/plain;charset=utf-8'},
+                body: JSON.stringify({
+                    action: 'uploadPhoto', 
+                    image: optimizedBase64, // Enviamos la versión optimizada
+                    message: caption,
+                    mimeType: 'image/jpeg'
+                })
+            });
+            
+            const data = await res.json();
+
+            if(data.status === 'success') {
+                alert('¡Foto recibida correctamente! Gracias.');
+                closePhotoUploadModalForce();
+            } else {
+                throw new Error(data.message || "Error desconocido");
             }
-        };
-        
-        // LEEMOS EL ARCHIVO ORIGINAL SIN COMPRIMIR
-        reader.readAsDataURL(file);
+            
+        } catch (error) {
+            console.error(error);
+            // Si falla incluso optimizada, ofrecemos la carpeta
+            if(confirm('Hubo un error de conexión al subir la foto.\n\n¿Quieres abrir la carpeta de Drive para subirla directamente ahí?')) {
+                window.open("https://drive.google.com/drive/folders/180_eflp3ZO2XpH5--YcSWKTC9QMuo-b7?usp=drive_link", "_blank");
+            }
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     }
 
 // --- LÓGICA DE CARGA Y DATOS (FINAL V4 - UBER FIX + QR DEMO) ---
