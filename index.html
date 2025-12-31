@@ -345,6 +345,43 @@
             vertical-align: middle;
             margin-right: 10px;
         }
+
+        /* --- NUEVOS ESTILOS: HASHTAG Y GALERÍA --- */
+        /* Botón Hashtag "Flashy" */
+        .btn-hashtag-flashy {
+            background: linear-gradient(45deg, var(--gold), #d4af37);
+            color: white;
+            border: none;
+            font-size: 0.9rem;
+            padding: 12px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(197, 157, 95, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            animation: pulseGold 2.5s infinite;
+            text-decoration: none;
+        }
+        .btn-hashtag-flashy:hover { transform: scale(1.05); }
+        .btn-hashtag-flashy i { font-size: 1.2rem; }
+
+        @keyframes pulseGold {
+            0% { box-shadow: 0 0 0 0 rgba(197, 157, 95, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(197, 157, 95, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(197, 157, 95, 0); }
+        }
+
+        /* Modal Galería (Iframe) */
+        .gallery-iframe {
+            width: 100%;
+            height: 70vh; /* Ocupa 70% del alto de la pantalla */
+            border: none;
+            border-radius: 8px;
+            background: #f0f0f0;
+        }
     </style>
 </head>
 <body>
@@ -431,26 +468,32 @@
 
         <div class="day-b-photos-section day-b-only hidden">
             <h2 class="title">Galería de Invitados</h2>
-            <p style="font-size: 0.9rem; color: #666; margin-bottom: 25px;">¡Ayúdanos a capturar los mejores momentos!</p>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 25px;">
+                ¡Ayúdanos a capturar los mejores momentos!<br>
+                <span style="font-size:0.75rem; color:#888;">(Sube tus fotos en calidad original para impresión)</span>
+            </p>
             
             <div class="photo-upload-grid">
                 <div onclick="openPhotoUploadModal()" class="photo-option-card">
                     <i class="ph-light ph-camera-plus"></i>
                     <span>Subir Foto + Mensaje</span>
-                    <small>Directo a nuestro Google Drive</small>
+                    <small>Directo a nuestro álbum</small>
                 </div>
                 
-                <a href="https://drive.google.com/drive/folders/180_eflp3ZO2XpH5--YcSWKTC9QMuo-b7?usp=drive_link" target="_blank" class="photo-option-card">
+                <div onclick="openGalleryModal()" class="photo-option-card">
                     <i class="ph-light ph-images"></i>
                     <span>Ver Álbum</span>
-                    <small>Ver fotos de todos</small>
-                </a>
+                    <small>Explorar fotos de todos</small>
+                </div>
             </div>
 
-            <div style="margin-top:20px; text-align:center;">
-                <button onclick="openHashtagModal()" class="btn-app" style="background:transparent; border:1px dashed var(--gold); font-size: 0.8rem;">
-                    <i class="ph-light ph-hash"></i> Prefiero usar Instagram (#BodaP&J)
+            <div style="margin-top:35px; text-align:center;">
+                <button onclick="copyHashtagAndOpenModal()" class="btn-hashtag-flashy">
+                    <i class="ph-bold ph-instagram-logo"></i> 
+                    <span>#BodaP&J</span>
+                    <i class="ph-bold ph-copy"></i>
                 </button>
+                <p style="font-size:0.75rem; color:#888; margin-top:8px;">Clic para copiar hashtag</p>
             </div>
         </div>
 
@@ -769,6 +812,25 @@
         </div>
     </div>
 
+    <div id="gallery-modal" class="modal" onclick="closeGalleryModal(event)">
+        <div class="modal-content" style="max-width: 600px; width: 95%; padding: 15px;">
+            <span class="close-modal" onclick="closeGalleryModalForce()">×</span>
+            <h3 style="font-family: var(--font-display); color:var(--gold); margin-bottom:15px;">Álbum Compartido</h3>
+            
+            <iframe 
+                src="https://drive.google.com/embeddedfolderview?id=180_eflp3ZO2XpH5--YcSWKTC9QMuo-b7#grid" 
+                class="gallery-iframe"
+                allow="autoplay">
+            </iframe>
+            
+            <div style="margin-top:10px;">
+                <a href="https://drive.google.com/drive/folders/180_eflp3ZO2XpH5--YcSWKTC9QMuo-b7?usp=drive_link" target="_blank" class="btn-app" style="background:var(--text-dark); color:white; font-size:0.8rem;">
+                    <i class="ph-light ph-arrow-square-out"></i> Abrir en App de Google Drive
+                </a>
+            </div>
+        </div>
+    </div>
+
 <script>
     // ⚠️ REEMPLAZAR URL POR LA TUYA DE APPS SCRIPT ⚠️
     const API_URL = "https://script.google.com/macros/s/AKfycbwEsd_nMqoQW2ZwHTTp-iwUMu5n6nh7IMpJgxDPd0BmA4ep-zY-gW-ZFG1QTFKWqMU/exec"; 
@@ -1025,7 +1087,26 @@
         }
     });
     
-    // --- FUNCIÓN REAL: SUBIR A TU GOOGLE DRIVE ---
+// --- FUNCIONES NUEVAS: GALERÍA Y HASHTAG ---
+    
+    function openGalleryModal() {
+        document.getElementById('gallery-modal').style.display = 'flex';
+    }
+    function closeGalleryModalForce() {
+        document.getElementById('gallery-modal').style.display = 'none';
+    }
+    function closeGalleryModal(e) {
+        if(e.target.id === 'gallery-modal') closeGalleryModalForce();
+    }
+
+    function copyHashtagAndOpenModal() {
+        navigator.clipboard.writeText('#BodaP&J').then(() => {
+            alert('Hashtag #BodaP&J copiado. ¡Pégalo en tu historia!');
+            openHashtagModal(); 
+        }).catch(() => openHashtagModal());
+    }
+
+    // --- FUNCIÓN DE SUBIDA (CALIDAD ORIGINAL) ---
     async function uploadPhoto() {
         const fileInput = document.getElementById('photo-file-input');
         const caption = document.getElementById('photo-caption').value;
@@ -1036,35 +1117,44 @@
             return;
         }
 
-        // Feedback de carga
+        const file = fileInput.files[0];
+
+        // ⚠️ VALIDACIÓN DE TAMAÑO PARA CALIDAD ORIGINAL ⚠️
+        // Si pesa más de 6MB, es arriesgado subirla por script (límite de Google).
+        // 6MB es suficiente para una foto de 12MP-16MP en alta calidad.
+        if (file.size > 6 * 1024 * 1024) { 
+            if(!confirm("Esta foto es muy pesada (" + (file.size/1024/1024).toFixed(1) + "MB) para subirla por aquí.\n\n¿Quieres intentar subirla de todas formas?\n(Si falla, te sugeriremos usar la App de Drive).")) {
+                return;
+            }
+        }
+
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Subiendo...';
+        btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Subiendo Original...';
         btn.disabled = true;
 
-        const file = fileInput.files[0];
         const reader = new FileReader();
 
         reader.onload = async function(e) {
             const base64Image = e.target.result; 
             
             try {
-                // Enviamos a tu Script
+                // Enviamos a tu Script (Mismo de siempre)
                 const res = await fetch(API_URL, {
                     method: 'POST',
                     redirect: 'follow',
                     headers: {'Content-Type': 'text/plain;charset=utf-8'},
                     body: JSON.stringify({
                         action: 'uploadPhoto', 
-                        image: base64Image,
+                        image: base64Image, // Enviamos ORIGINAL
                         message: caption,
-                        mimeType: file.type
+                        mimeType: file.type || 'image/jpeg'
                     })
                 });
                 
                 const data = await res.json();
 
                 if(data.status === 'success') {
-                    alert('¡Foto recibida! Gracias por el detalle.');
+                    alert('¡Foto recibida en alta calidad! Gracias.');
                     closePhotoUploadModalForce();
                 } else {
                     throw new Error(data.message || "Error desconocido");
@@ -1072,13 +1162,17 @@
                 
             } catch (error) {
                 console.error(error);
-                alert('Hubo un pequeño error al subir. Intenta con una foto más ligera.');
+                // Si falla, sugerimos la alternativa segura
+                if(confirm('Hubo un error al subir (probablemente por el tamaño de la foto).\n\n¿Quieres abrir la carpeta de Drive para subirla directamente ahí?')) {
+                    window.open("https://drive.google.com/drive/folders/180_eflp3ZO2XpH5--YcSWKTC9QMuo-b7?usp=drive_link", "_blank");
+                }
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         };
         
+        // LEEMOS EL ARCHIVO ORIGINAL SIN COMPRIMIR
         reader.readAsDataURL(file);
     }
 
