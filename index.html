@@ -402,6 +402,46 @@
             margin: 0 auto 20px auto;
             display: block;
         }
+
+        /* --- MENÚ DE NAVEGACIÓN INFERIOR --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(197, 157, 95, 0.3);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 4000; /* Por encima de todo */
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            text-align: center;
+            text-decoration: none;
+            color: #888;
+            font-size: 0.7rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .nav-item i {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+            color: var(--text-dark);
+        }
+
+        .nav-item.active { color: var(--gold); font-weight: bold; }
+        .nav-item.active i { color: var(--gold); }
+
+        /* Ajuste para que el contenido no quede tapado por el menú */
+        body { padding-bottom: 80px; }
     </style>
 </head>
 <body>
@@ -464,7 +504,7 @@
         </div>
 
         <div id="day-b-qr-section" class="day-b-qr-main day-b-only hidden">
-            <img src="img/logo2.png" class="day-b-logo" alt="Logo P&J">
+            <img src="img/logo2.png" style="width: 120px; margin: 0 auto 20px auto; display: block;" alt="Logo">
             
             <h2 style="font-family: var(--font-script); font-size: 2.8rem; margin: 0 0 15px 0; color: var(--text-dark);">Tu Acceso</h2>
             <div id="day-b-qr-container" class="day-b-qr-container">
@@ -652,7 +692,7 @@
             <img src="img/foto3.webp" style="object-position: center;" loading="lazy" decoding="async">
         </div>
 
-        <div class="section reveal day-b-priority">
+        <div id="itinerario" class="section reveal day-b-priority">
             <h2 class="title">Itinerario <span class="urgent-badge day-b-only">HOY</span></h2>
             
             <div style="background: rgba(197, 157, 95, 0.1); border-radius: 10px; padding: 15px; margin: 20px 0; display: none;" class="day-b-only">
@@ -844,27 +884,47 @@
                 class="gallery-iframe"
                 allow="autoplay">
             </iframe>
-            
-            <div style="margin-top:10px;">
-                <a href="https://drive.google.com/drive/folders/180_eflp3ZO2XpH5--YcSWKTC9QMuo-b7?usp=drive_link" target="_blank" class="btn-app" style="background:var(--text-dark); color:white; font-size:0.8rem;">
-                    <i class="ph-light ph-arrow-square-out"></i> Abrir en App de Google Drive
-                </a>
             </div>
-        </div>
     </div>
 
+    <nav class="bottom-nav">
+        <a href="#main-content" class="nav-item" onclick="scrollToSection('main-content')">
+            <i class="ph-light ph-house"></i>Inicio
+        </a>
+        <a href="#itinerario" class="nav-item" onclick="scrollToSection('itinerario')">
+            <i class="ph-light ph-clock"></i>Itinerario
+        </a>
+        <a href="#gift-registry-section" class="nav-item" onclick="scrollToSection('gift-registry-section')">
+            <i class="ph-light ph-gift"></i>Regalos
+        </a>
+        <a href="#rsvp-section" class="nav-item" onclick="scrollToSection('rsvp-section')">
+            <i class="ph-light ph-check-circle"></i>Confirmar
+        </a>
+    </nav>
+
 <script>
-    // ⚠️ URL DE APPS SCRIPT (Asegúrate que sea la correcta)
+    // ⚠️ URL DE APPS SCRIPT
     const API_URL = "https://script.google.com/macros/s/AKfycbwEsd_nMqoQW2ZwHTTp-iwUMu5n6nh7IMpJgxDPd0BmA4ep-zY-gW-ZFG1QTFKWqMU/exec"; 
     
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
-    // Detectamos si es modo prueba desde el link del Admin
     const forceDayB = params.get('dayB') === 'true' || params.get('mode') === 'dayb_preview';
     let currentMembersData = [];
     let isDayBMode = false;
 
-    // --- 1. FUNCIÓN DE OPTIMIZACIÓN DE IMAGEN (SOLUCIÓN AL ERROR DE SUBIDA) ---
+    // --- FUNCIÓN DE NAVEGACIÓN (MENÚ) ---
+    function scrollToSection(id) {
+        const el = document.getElementById(id);
+        if(el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+            // Quitar clase activa de todos y ponerla en el actual (si se clickeó)
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            // Intentar marcar el botón clickeado (si fue evento de click)
+            if(event && event.currentTarget) event.currentTarget.classList.add('active');
+        }
+    }
+
+    // --- 1. OPTIMIZACIÓN DE IMAGEN (SOLUCIÓN DEFINITIVA) ---
     function optimizeImage(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -875,33 +935,25 @@
                 img.onload = () => {
                     const elem = document.createElement('canvas');
                     
-                    // LÓGICA: Redimensionar solo si es gigante (>1920px)
-                    // Esto mantiene calidad de impresión (HD) pero baja el peso drásticamente
+                    // TAMAÑO HD (1920px): Excelente para imprimir 4x6" o ver en pantallas 4K
+                    // pero lo suficientemente ligero para subir sin errores.
                     let width = img.width;
                     let height = img.height;
-                    const MAX_WIDTH = 1920; 
-                    const MAX_HEIGHT = 1920;
+                    const MAX_SIDE = 1920; 
 
                     if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
+                        if (width > MAX_SIDE) { height *= MAX_SIDE / width; width = MAX_SIDE; }
                     } else {
-                        if (height > MAX_HEIGHT) {
-                            width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT;
-                        }
+                        if (height > MAX_SIDE) { width *= MAX_SIDE / height; height = MAX_SIDE; }
                     }
 
                     elem.width = width;
                     elem.height = height;
-                    
                     const ctx = elem.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // Calidad 0.9 = Excelente calidad, archivo ligero
-                    resolve(elem.toDataURL('image/jpeg', 0.9));
+                    // Calidad 0.8: Reduce el peso a la mitad sin perder nitidez visible.
+                    resolve(elem.toDataURL('image/jpeg', 0.8));
                 };
                 img.onerror = error => reject(error);
             };
@@ -909,26 +961,22 @@
         });
     }
 
-    // --- 2. FUNCIÓN DE SUBIDA CONECTADA A LA OPTIMIZACIÓN ---
+    // --- 2. SUBIDA DE FOTOS ---
     async function uploadPhoto() {
         const fileInput = document.getElementById('photo-file-input');
         const caption = document.getElementById('photo-caption').value;
         const btn = document.querySelector('#photo-upload-modal button[onclick="uploadPhoto()"]');
         
-        if (!fileInput.files[0]) {
-            alert('Por favor selecciona una foto primero.');
-            return;
-        }
+        if (!fileInput.files[0]) { alert('Selecciona una foto primero.'); return; }
 
         const file = fileInput.files[0];
         const originalText = btn.innerHTML;
         
-        // Feedback visual
         btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Procesando...';
         btn.disabled = true;
 
         try {
-            // AQUI OCURRE LA MAGIA: Optimizamos antes de enviar
+            // Optimizamos antes de enviar
             const optimizedBase64 = await optimizeImage(file);
             
             btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Subiendo...';
@@ -956,8 +1004,7 @@
             
         } catch (error) {
             console.error(error);
-            // Si falla aun optimizada, damos la opción de Drive
-            if(confirm('Hubo un error de conexión al subir. ¿Quieres abrir la carpeta de Drive para intentarlo allá?')) {
+            if(confirm('Hubo un error de conexión. ¿Quieres abrir Drive para subirla manualmente?')) {
                 window.open("https://drive.google.com/drive/folders/180_eflp3ZO2XpH5--YcSWKTC9QMuo-b7?usp=drive_link", "_blank");
             }
         } finally {
@@ -969,48 +1016,69 @@
     // --- 3. LÓGICA DÍA B (VISUALIZACIÓN Y ORDEN) ---
     function activateDayBMode() {
         isDayBMode = true;
-        document.body.classList.add('day-b-mode'); // Esto oculta el Hero via CSS
+        document.body.classList.add('day-b-mode'); // Oculta el Hero (Portada) via CSS
         
         // Mostrar banner
         document.querySelector('.day-b-banner').style.display = 'block';
         
-        // Manejo de clases visuales
+        // Mostrar elementos Día B
         document.querySelectorAll('.day-b-hidden').forEach(el => el.style.display = 'none');
         document.querySelectorAll('.day-b-only').forEach(el => el.style.display = 'block');
         document.querySelectorAll('.uber.day-b-only').forEach(el => el.style.display = 'flex');
         
         document.title = "HOY: Boda Paola & Jorge - Acceso Rápido";
         
-        // Verificar confirmación para saber qué mostrar
+        // Asegurar que la galería se vea y esté centrada
+        const photosSection = document.querySelector('.day-b-photos-section');
+        if(photosSection) {
+            photosSection.classList.remove('hidden');
+            photosSection.style.textAlign = 'center';
+        }
+
+        // Lógica de QR vs RSVP
         const confirmedMembers = currentMembersData.filter(m => m.estado === 'SI');
         
         if (confirmedMembers.length > 0) {
-            // SI YA CONFIRMÓ: Muestra QR y oculta lo innecesario
+            // SI YA CONFIRMÓ: Muestra QR
             showDayBQR(confirmedMembers);
             document.getElementById('rsvp-section').style.display = 'none';
             document.getElementById('auto-ticket-section').style.display = 'none';
         } else {
-            // SI NO HA CONFIRMADO: Muestra QR (para acceso rápido) y deja RSVP abajo
-            // (El QR se mostrará arriba por defecto por el orden del HTML nuevo)
+            // SI NO HA CONFIRMADO:
+            // 1. Muestra el QR genérico o de invitado (acceso rápido)
+            // 2. Muestra la galería
+            // 3. Muestra el formulario de RSVP abajo (para que confirmen)
             
             // Aseguramos que el RSVP sea visible
             const rsvpSection = document.getElementById('rsvp-section');
             if (rsvpSection) {
-                rsvpSection.classList.remove('day-b-hidden'); // Quitamos la clase que lo oculta
+                rsvpSection.classList.remove('day-b-hidden');
                 rsvpSection.style.display = 'block';
             }
             
-            // Si quieres ver el QR aunque no hayan confirmado (opcional, pero útil el día del evento)
-            // puedes llamar a showDayBQR con datos temporales o dejarlo oculto hasta que confirmen.
-            // Por ahora, dejemos que confirmen primero para obtener su mesa.
+            // Opcional: Mostrar QR de "Familia" o ocultarlo hasta confirmar. 
+            // Si quieres mostrarlo siempre en Día B (para facilitar entrada):
+            const sectionQR = document.getElementById('day-b-qr-section');
+            if(sectionQR) {
+                // Inyectar logo si no existe (Fix visual)
+                if(!sectionQR.querySelector('.day-b-logo-img')) {
+                    const img = document.createElement('img');
+                    img.src = 'img/logo2.png';
+                    img.className = 'day-b-logo-img';
+                    img.style.width = '120px';
+                    img.style.margin = '0 auto 20px auto';
+                    img.style.display = 'block';
+                    sectionQR.insertBefore(img, sectionQR.firstChild);
+                }
+                
+                // Mover QR al principio (arriba de todo)
+                const content = document.getElementById('main-content');
+                // Insertar después del banner (si existe) o al principio
+                content.insertBefore(sectionQR, content.children[1]); // Index 1 asume que Hero es 0
+                sectionQR.classList.remove('hidden');
+            }
         }
-        
-        // IMPORTANTE: Asegurar que la galería se vea
-        const photosSection = document.querySelector('.day-b-photos-section');
-        if(photosSection) photosSection.classList.remove('hidden');
     }
-
-    // --- 4. FUNCIONES AUXILIARES Y DE CARGA ---
 
     function showDayBQR(confirmedMembers) {
         const section = document.getElementById('day-b-qr-section');
@@ -1025,92 +1093,23 @@
         document.getElementById('day-b-guest-count').innerText = count;
         document.getElementById('day-b-table-number').innerText = mesa;
         
-        // Mover QR arriba (justo después del banner/hero oculto)
-        const hero = document.querySelector('.hero'); 
-        if(hero.parentNode) {
-             hero.parentNode.insertBefore(section, hero.nextSibling);
+        // --- INYECCIÓN DE LOGO (FIX AUTOMÁTICO) ---
+        // Si no pusiste el logo en el HTML, esto lo agrega automáticamente por Javascript
+        if(!section.querySelector('img[src*="logo2.png"]')) {
+            const logo = document.createElement('img');
+            logo.src = 'img/logo2.png';
+            logo.style.width = '120px';
+            logo.style.margin = '0 auto 20px auto';
+            logo.style.display = 'block';
+            section.insertBefore(logo, section.firstChild);
         }
-        section.classList.remove('hidden');
+
+        // Mover sección QR al principio del contenedor principal
+        const content = document.getElementById('main-content');
+        // Insertamos antes del primer hijo visible (para que quede arriba)
+        content.insertBefore(section, content.firstChild.nextSibling); 
         
-        // La sección de fotos ya está debajo del QR en el HTML, así que aparecerá en orden
-    }
-
-    function showAutoTicketIfConfirmed() {
-        const confirmedMembers = currentMembersData.filter(m => m.estado === 'SI');
-        if (confirmedMembers.length > 0 && !isDayBMode) {
-            const rsvpSection = document.getElementById('rsvp-section');
-            if (rsvpSection) rsvpSection.style.display = 'none';
-            showAutoTicket(confirmedMembers);
-            return true;
-        }
-        return false;
-    }
-
-    // Resto de funciones estándar (NO MODIFICAR)
-    function showAutoTicket(confirmedMembers) {
-        const section = document.getElementById('auto-ticket-section');
-        const count = confirmedMembers.length;
-        const mesa = confirmedMembers[0].mesa || "Por asignar";
-        const qrContent = userId || "DEMO";
-        const guestName = document.getElementById('main-guest-name').innerText;
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}`;
-        const ticketContent = `
-            <div style="background:#1a1a1a; height:12px; width:100%;"></div>
-            <div style="padding:30px 20px; text-align:center;">
-                <h2 style="font-family:var(--font-script); color:var(--gold); font-size:2.8rem; margin:0;">Ya estás confirmado</h2>
-                <div style="margin:20px auto; width:150px; height:150px; border:1px solid #eee; padding:5px; background:white;">
-                    <img src="${qrUrl}" style="width:100%; height:100%; object-fit:contain; display:block;" crossorigin="anonymous" alt="QR Code">
-                </div>
-                <div style="font-size:1.2rem; font-weight:bold;">${guestName}</div>
-                <div style="display:flex; justify-content:space-around; margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
-                    <div><small style="color:#999; text-transform:uppercase;">Adultos</small><div style="font-size:1.5rem; font-weight:bold;">${count}</div></div>
-                    <div><small style="color:#999; text-transform:uppercase;">Mesa</small><div style="font-size:1.5rem; font-weight:bold; color:var(--gold);">${mesa}</div></div>
-                </div>
-            </div>
-            <div style="position:relative; height:20px; border-top:2px dashed #ccc; margin-top:10px;">
-                <div class="ticket-cutout-side-l"></div><div class="ticket-cutout-side-r"></div>
-            </div>
-            <div style="background:#1a1a1a; height:8px; width:100%;"></div>
-        `;
-        document.getElementById('auto-ticket-content').innerHTML = ticketContent;
-        const hero = document.querySelector('.hero');
-        hero.parentNode.insertBefore(section, hero.nextSibling);
         section.classList.remove('hidden');
-        section.style.display = 'block';
-    }
-
-    function downloadAutoTicket() {
-        const ticketCard = document.querySelector('#auto-ticket-section .gold-frame');
-        const qrImg = ticketCard.querySelector('img');
-        if (qrImg && !qrImg.complete) {
-            qrImg.onload = () => generateAutoTicketImage();
-            qrImg.onerror = () => alert('Error al cargar QR');
-        } else {
-            generateAutoTicketImage();
-        }
-        function generateAutoTicketImage() {
-            html2canvas(ticketCard, { useCORS: true, scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'Pase_Boda.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            });
-        }
-    }
-
-    function openUber(locationName, address) {
-        const encodedAddress = encodeURIComponent(address);
-        const encodedName = encodeURIComponent(locationName);
-        window.open(`https://m.uber.com/ul/?action=setPickup&dropoff[address]=${encodedAddress}&dropoff[nickname]=${encodedName}`, '_blank');
-    }
-
-    function downloadDayBQRTicket() {
-        html2canvas(document.getElementById('day-b-qr-section'), { useCORS: true, scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'QR_Acceso_Boda.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        });
     }
 
     function isWeddingDay() {
@@ -1121,7 +1120,7 @@
                today.getFullYear() === weddingDate.getFullYear();
     }
 
-    // LÓGICA DE CARGA PRINCIPAL
+    // --- CARGA DE DATOS ---
     window.onload = async () => {
         const loadingMsg = document.getElementById('loading-msg');
         const enterBtn = document.getElementById('enter-btn');
@@ -1186,11 +1185,10 @@
                 if(loadingMsg) loadingMsg.innerHTML = "<span style='color:#D32F2F'>Error al cargar. Recarga.</span>";
             }
         } else {
-             // MODO PRUEBA / ADMIN
+             // MODO PRUEBA
              if(loadingMsg) loadingMsg.style.display = 'none';
              if(enterBtn) enterBtn.style.display = 'block';
              document.getElementById('main-guest-name').innerText = "Vista Previa Familia";
-             
              const isPreviewMode = params.get('mode') === 'dayb_preview';
              const shouldActivateDayB = (params.get('dayB') === 'true') || isPreviewMode;
 
@@ -1210,7 +1208,86 @@
         }
     };
 
-    // --- MODALES Y UTILIDADES EXTRA ---
+    // --- UTILIDADES (TICKET, UBER, MODALES, ETC) ---
+    function showAutoTicketIfConfirmed() {
+        const confirmedMembers = currentMembersData.filter(m => m.estado === 'SI');
+        if (confirmedMembers.length > 0 && !isDayBMode) {
+            const rsvpSection = document.getElementById('rsvp-section');
+            if (rsvpSection) rsvpSection.style.display = 'none';
+            showAutoTicket(confirmedMembers);
+            return true;
+        }
+        return false;
+    }
+
+    function showAutoTicket(confirmedMembers) {
+        const section = document.getElementById('auto-ticket-section');
+        const count = confirmedMembers.length;
+        const mesa = confirmedMembers[0].mesa || "Por asignar";
+        const qrContent = userId || "DEMO";
+        const guestName = document.getElementById('main-guest-name').innerText;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}`;
+        
+        document.getElementById('auto-ticket-content').innerHTML = `
+            <div style="background:#1a1a1a; height:12px; width:100%;"></div>
+            <div style="padding:30px 20px; text-align:center;">
+                <h2 style="font-family:var(--font-script); color:var(--gold); font-size:2.8rem; margin:0;">Ya estás confirmado</h2>
+                <div style="margin:20px auto; width:150px; height:150px; border:1px solid #eee; padding:5px; background:white;">
+                    <img src="${qrUrl}" style="width:100%; height:100%; object-fit:contain; display:block;" crossorigin="anonymous" alt="QR Code">
+                </div>
+                <div style="font-size:1.2rem; font-weight:bold;">${guestName}</div>
+                <div style="display:flex; justify-content:space-around; margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
+                    <div><small style="color:#999; text-transform:uppercase;">Adultos</small><div style="font-size:1.5rem; font-weight:bold;">${count}</div></div>
+                    <div><small style="color:#999; text-transform:uppercase;">Mesa</small><div style="font-size:1.5rem; font-weight:bold; color:var(--gold);">${mesa}</div></div>
+                </div>
+            </div>
+            <div style="position:relative; height:20px; border-top:2px dashed #ccc; margin-top:10px;">
+                <div class="ticket-cutout-side-l"></div><div class="ticket-cutout-side-r"></div>
+            </div>
+            <div style="background:#1a1a1a; height:8px; width:100%;"></div>
+        `;
+        
+        const hero = document.querySelector('.hero');
+        hero.parentNode.insertBefore(section, hero.nextSibling);
+        section.classList.remove('hidden');
+        section.style.display = 'block';
+    }
+
+    function downloadAutoTicket() {
+        const ticketCard = document.querySelector('#auto-ticket-section .gold-frame');
+        const qrImg = ticketCard.querySelector('img');
+        if (qrImg && !qrImg.complete) {
+            qrImg.onload = () => generateAutoTicketImage();
+            qrImg.onerror = () => alert('Error al cargar el código QR.');
+        } else {
+            generateAutoTicketImage();
+        }
+        function generateAutoTicketImage() {
+            html2canvas(ticketCard, { useCORS: true, scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Pase_Boda.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+    }
+
+    function openUber(locationName, address) {
+        const encodedAddress = encodeURIComponent(address);
+        const encodedName = encodeURIComponent(locationName);
+        window.open(`https://m.uber.com/ul/?action=setPickup&dropoff[address]=${encodedAddress}&dropoff[nickname]=${encodedName}`, '_blank');
+    }
+
+    function downloadDayBQRTicket() {
+        html2canvas(document.getElementById('day-b-qr-section'), { useCORS: true, scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'QR_Acceso_Boda.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
+    // --- MODALES ---
     function openPhotoUploadModal() { document.getElementById('photo-upload-modal').style.display = 'flex'; }
     function closePhotoUploadModalForce() { 
         document.getElementById('photo-upload-modal').style.display = 'none';
@@ -1255,6 +1332,25 @@
             el.innerText = '¡COPIADO!';
             setTimeout(()=>el.innerText='COPIAR', 2000);
         });
+    }
+
+    function downloadTicket() {
+        const ticketCard = document.getElementById('digital-ticket-card');
+        const qrImg = ticketCard.querySelector('img');
+        if (qrImg && !qrImg.complete) {
+            qrImg.onload = () => generateTicketImage();
+            qrImg.onerror = () => alert('Error al cargar QR');
+        } else {
+            generateTicketImage();
+        }
+        function generateTicketImage() {
+            html2canvas(ticketCard, { useCORS: true, scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Pase_Boda.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
     }
 
     // Configuración de Input Foto
