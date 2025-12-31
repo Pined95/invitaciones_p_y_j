@@ -485,7 +485,7 @@
                         style="background: #000; color: white; border: none; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
                             <i class="ph-light ph-car" style="margin-right: 5px;"></i> Pedir Uber
                     </a>
-                    <button onclick="openUber('Parroquia del Buen Pastor', 'Baja California 729, Cd. Victoria', '23.7508087', '-99.1446364')" class="btn-app uber day-b-only" style="background: #000; color: white; border: none; cursor: pointer;">
+                    <button onclick="openUber(23.7508087, -99.1446364, 'Parroquia del Buen Pastor')" class="btn-app uber day-b-only" style="background: #000; color: white; border: none; cursor: pointer;">
                         <i class="ph-light ph-car"></i> Pedir Uber
                     </button>
                 </div>
@@ -1413,22 +1413,14 @@
     // Agregar botón de prueba para desarrollo (solo en consola)
     console.log("Para probar el modo Día B manualmente, ejecuta: toggleDayBModeForTesting()");
 </script>
-
 <script>
-function openUber(name, address, lat, lng) {
-    var url = '';
+function openUber(lat, lng, name) {
+    // Construimos la URL Universal limpia, solo con coordenadas.
+    // 'pickup=my_location' usa el GPS actual del usuario.
+    var url = "https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=" + lat + "&dropoff[longitude]=" + lng + "&dropoff[nickname]=" + encodeURIComponent(name);
     
-    // Si el botón tiene coordenadas, usamos el modo preciso
-    if (lat && lng) {
-        url = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${lat}&dropoff[longitude]=${lng}&dropoff[nickname]=${encodeURIComponent(name)}`;
-    } 
-    // Si no tiene coordenadas, buscamos por dirección (menos preciso pero funciona)
-    else {
-        url = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${encodeURIComponent(address)}&dropoff[nickname]=${encodeURIComponent(name)}`;
-    }
-
-    // Abrir el enlace
-    window.location.href = url;
+    // Abrimos en nueva pestaña para forzar el intent de la App
+    window.open(url, '_blank');
 }
 </script>
 </body>
