@@ -382,6 +382,26 @@
             border-radius: 8px;
             background: #f0f0f0;
         }
+
+        /* --- AGREGAR AL FINAL DE TUS ESTILOS --- */
+
+        /* Centrar Galería */
+        .day-b-photos-section {
+            text-align: center; /* Esto centra el título y textos */
+        }
+
+        /* Ocultar la Portada (Hero) en modo Día B */
+        body.day-b-mode .hero {
+            display: none !important;
+        }
+
+        /* Estilo para el Logo en el Día B (que agregaremos en el HTML) */
+        .day-b-logo {
+            width: 120px;
+            height: auto;
+            margin: 0 auto 20px auto;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -444,6 +464,8 @@
         </div>
 
         <div id="day-b-qr-section" class="day-b-qr-main day-b-only hidden">
+            <img src="img/logo2.png" class="day-b-logo" alt="Logo P&J">
+            
             <h2 style="font-family: var(--font-script); font-size: 2.8rem; margin: 0 0 15px 0; color: var(--text-dark);">Tu Acceso</h2>
             <div id="day-b-qr-container" class="day-b-qr-container">
                 <img id="day-b-qr-img" src="" alt="Código QR de acceso" crossorigin="anonymous">
@@ -721,7 +743,7 @@
                 </div>
             </div>
             <p style="font-size:0.8rem; color:#999; margin-top:20px;">
-                <i class="ph-light ph-info"></i> La foto se guardará en nuestra carpeta compartida de OneDrive.
+                <i class="ph-light ph-info"></i> La foto se guardará en nuestra carpeta compartida de Drive.
             </p>
         </div>
     </div>
@@ -832,43 +854,206 @@
     </div>
 
 <script>
-    // ⚠️ REEMPLAZAR URL POR LA TUYA DE APPS SCRIPT ⚠️
+    // ⚠️ URL DE APPS SCRIPT (Asegúrate que sea la correcta)
     const API_URL = "https://script.google.com/macros/s/AKfycbwEsd_nMqoQW2ZwHTTp-iwUMu5n6nh7IMpJgxDPd0BmA4ep-zY-gW-ZFG1QTFKWqMU/exec"; 
     
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
-    // Aceptamos el parámetro manual O el modo de previsualización del Admin
+    // Detectamos si es modo prueba desde el link del Admin
     const forceDayB = params.get('dayB') === 'true' || params.get('mode') === 'dayb_preview';
     let currentMembersData = [];
     let isDayBMode = false;
 
-    // Función para mostrar ticket automáticamente si ya confirmó
+    // --- 1. FUNCIÓN DE OPTIMIZACIÓN DE IMAGEN (SOLUCIÓN AL ERROR DE SUBIDA) ---
+    function optimizeImage(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = event => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const elem = document.createElement('canvas');
+                    
+                    // LÓGICA: Redimensionar solo si es gigante (>1920px)
+                    // Esto mantiene calidad de impresión (HD) pero baja el peso drásticamente
+                    let width = img.width;
+                    let height = img.height;
+                    const MAX_WIDTH = 1920; 
+                    const MAX_HEIGHT = 1920;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    elem.width = width;
+                    elem.height = height;
+                    
+                    const ctx = elem.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Calidad 0.9 = Excelente calidad, archivo ligero
+                    resolve(elem.toDataURL('image/jpeg', 0.9));
+                };
+                img.onerror = error => reject(error);
+            };
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    // --- 2. FUNCIÓN DE SUBIDA CONECTADA A LA OPTIMIZACIÓN ---
+    async function uploadPhoto() {
+        const fileInput = document.getElementById('photo-file-input');
+        const caption = document.getElementById('photo-caption').value;
+        const btn = document.querySelector('#photo-upload-modal button[onclick="uploadPhoto()"]');
+        
+        if (!fileInput.files[0]) {
+            alert('Por favor selecciona una foto primero.');
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const originalText = btn.innerHTML;
+        
+        // Feedback visual
+        btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Procesando...';
+        btn.disabled = true;
+
+        try {
+            // AQUI OCURRE LA MAGIA: Optimizamos antes de enviar
+            const optimizedBase64 = await optimizeImage(file);
+            
+            btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Subiendo...';
+
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: {'Content-Type': 'text/plain;charset=utf-8'},
+                body: JSON.stringify({
+                    action: 'uploadPhoto', 
+                    image: optimizedBase64,
+                    message: caption,
+                    mimeType: 'image/jpeg'
+                })
+            });
+            
+            const data = await res.json();
+
+            if(data.status === 'success') {
+                alert('¡Foto recibida correctamente! Gracias.');
+                closePhotoUploadModalForce();
+            } else {
+                throw new Error(data.message || "Error desconocido");
+            }
+            
+        } catch (error) {
+            console.error(error);
+            // Si falla aun optimizada, damos la opción de Drive
+            if(confirm('Hubo un error de conexión al subir. ¿Quieres abrir la carpeta de Drive para intentarlo allá?')) {
+                window.open("https://drive.google.com/drive/folders/180_eflp3ZO2XpH5--YcSWKTC9QMuo-b7?usp=drive_link", "_blank");
+            }
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // --- 3. LÓGICA DÍA B (VISUALIZACIÓN Y ORDEN) ---
+    function activateDayBMode() {
+        isDayBMode = true;
+        document.body.classList.add('day-b-mode'); // Esto oculta el Hero via CSS
+        
+        // Mostrar banner
+        document.querySelector('.day-b-banner').style.display = 'block';
+        
+        // Manejo de clases visuales
+        document.querySelectorAll('.day-b-hidden').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.day-b-only').forEach(el => el.style.display = 'block');
+        document.querySelectorAll('.uber.day-b-only').forEach(el => el.style.display = 'flex');
+        
+        document.title = "HOY: Boda Paola & Jorge - Acceso Rápido";
+        
+        // Verificar confirmación para saber qué mostrar
+        const confirmedMembers = currentMembersData.filter(m => m.estado === 'SI');
+        
+        if (confirmedMembers.length > 0) {
+            // SI YA CONFIRMÓ: Muestra QR y oculta lo innecesario
+            showDayBQR(confirmedMembers);
+            document.getElementById('rsvp-section').style.display = 'none';
+            document.getElementById('auto-ticket-section').style.display = 'none';
+        } else {
+            // SI NO HA CONFIRMADO: Muestra QR (para acceso rápido) y deja RSVP abajo
+            // (El QR se mostrará arriba por defecto por el orden del HTML nuevo)
+            
+            // Aseguramos que el RSVP sea visible
+            const rsvpSection = document.getElementById('rsvp-section');
+            if (rsvpSection) {
+                rsvpSection.classList.remove('day-b-hidden'); // Quitamos la clase que lo oculta
+                rsvpSection.style.display = 'block';
+            }
+            
+            // Si quieres ver el QR aunque no hayan confirmado (opcional, pero útil el día del evento)
+            // puedes llamar a showDayBQR con datos temporales o dejarlo oculto hasta que confirmen.
+            // Por ahora, dejemos que confirmen primero para obtener su mesa.
+        }
+        
+        // IMPORTANTE: Asegurar que la galería se vea
+        const photosSection = document.querySelector('.day-b-photos-section');
+        if(photosSection) photosSection.classList.remove('hidden');
+    }
+
+    // --- 4. FUNCIONES AUXILIARES Y DE CARGA ---
+
+    function showDayBQR(confirmedMembers) {
+        const section = document.getElementById('day-b-qr-section');
+        const count = confirmedMembers.length;
+        const mesa = confirmedMembers[0].mesa || "Por asignar";
+        const qrContent = userId || "DEMO";
+        const guestName = document.getElementById('main-guest-name').innerText;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrContent)}&format=png&margin=10&color=1a1a1a&bgcolor=ffffff`;
+        
+        document.getElementById('day-b-qr-img').src = qrUrl;
+        document.getElementById('day-b-guest-name').innerText = guestName;
+        document.getElementById('day-b-guest-count').innerText = count;
+        document.getElementById('day-b-table-number').innerText = mesa;
+        
+        // Mover QR arriba (justo después del banner/hero oculto)
+        const hero = document.querySelector('.hero'); 
+        if(hero.parentNode) {
+             hero.parentNode.insertBefore(section, hero.nextSibling);
+        }
+        section.classList.remove('hidden');
+        
+        // La sección de fotos ya está debajo del QR en el HTML, así que aparecerá en orden
+    }
+
     function showAutoTicketIfConfirmed() {
         const confirmedMembers = currentMembersData.filter(m => m.estado === 'SI');
         if (confirmedMembers.length > 0 && !isDayBMode) {
-            // Ocultar sección de RSVP
             const rsvpSection = document.getElementById('rsvp-section');
             if (rsvpSection) rsvpSection.style.display = 'none';
-            
-            // Mostrar ticket automático
             showAutoTicket(confirmedMembers);
             return true;
         }
         return false;
     }
 
-    // Función para mostrar ticket automático
+    // Resto de funciones estándar (NO MODIFICAR)
     function showAutoTicket(confirmedMembers) {
         const section = document.getElementById('auto-ticket-section');
         const count = confirmedMembers.length;
         const mesa = confirmedMembers[0].mesa || "Por asignar";
         const qrContent = userId || "DEMO";
         const guestName = document.getElementById('main-guest-name').innerText;
-
-        // Generar URL del QR
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}`;
-        
-        // Crear contenido del ticket
         const ticketContent = `
             <div style="background:#1a1a1a; height:12px; width:100%;"></div>
             <div style="padding:30px 20px; text-align:center;">
@@ -887,328 +1072,66 @@
             </div>
             <div style="background:#1a1a1a; height:8px; width:100%;"></div>
         `;
-        
-        // Insertar contenido
         document.getElementById('auto-ticket-content').innerHTML = ticketContent;
-        
-        // Mover sección después del héroe y mostrar
         const hero = document.querySelector('.hero');
         hero.parentNode.insertBefore(section, hero.nextSibling);
         section.classList.remove('hidden');
         section.style.display = 'block';
     }
 
-    // Función para descargar ticket automático
     function downloadAutoTicket() {
         const ticketCard = document.querySelector('#auto-ticket-section .gold-frame');
         const qrImg = ticketCard.querySelector('img');
-        
         if (qrImg && !qrImg.complete) {
             qrImg.onload = () => generateAutoTicketImage();
-            qrImg.onerror = () => {
-                alert('Error al cargar el código QR. Intenta de nuevo.');
-            };
+            qrImg.onerror = () => alert('Error al cargar QR');
         } else {
             generateAutoTicketImage();
         }
-        
         function generateAutoTicketImage() {
-            html2canvas(ticketCard, {
-                useCORS: true,
-                allowTaint: false,
-                scale: 2,
-                logging: false,
-                backgroundColor: '#ffffff'
-            }).then(canvas => {
+            html2canvas(ticketCard, { useCORS: true, scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'Pase_Boda.png';
-                link.href = canvas.toDataURL('image/png', 1.0);
+                link.href = canvas.toDataURL('image/png');
                 link.click();
-            }).catch(err => {
-                console.error('Error al generar imagen:', err);
-                alert('Error al generar la imagen. Intenta de nuevo.');
             });
         }
     }
 
-    // Función para activar el modo Día B
-    function activateDayBMode() {
-        isDayBMode = true;
-        document.body.classList.add('day-b-mode');
-        
-        // Mostrar banner de modo Día B
-        document.querySelector('.day-b-banner').style.display = 'block';
-        
-        // Ocultar elementos no esenciales
-        document.querySelectorAll('.day-b-hidden').forEach(el => {
-            el.style.display = 'none';
-        });
-        
-        // Mostrar elementos específicos del Día B
-        document.querySelectorAll('.day-b-only').forEach(el => {
-            el.style.display = 'block';
-        });
-        
-        // Mostrar botones de Uber solo en Día B
-        document.querySelectorAll('.uber.day-b-only').forEach(el => {
-            el.style.display = 'flex';
-        });
-        
-        // Actualizar título de la página
-        document.title = "HOY: Boda Paola & Jorge - Acceso Rápido";
-        
-        // Verificar si ya confirmaron para mostrar QR principal
-        const confirmedMembers = currentMembersData.filter(m => m.estado === 'SI');
-        if (confirmedMembers.length > 0) {
-            showDayBQR(confirmedMembers);
-            // Ocultar secciones innecesarias
-            document.getElementById('rsvp-section').style.display = 'none';
-            document.getElementById('auto-ticket-section').style.display = 'none';
-        } else {
-            // Si no han confirmado, mostrar sección de RSVP
-            const hero = document.querySelector('.hero');
-            const rsvpSection = document.getElementById('rsvp-section');
-            if (rsvpSection) {
-                hero.parentNode.insertBefore(rsvpSection, hero.nextSibling);
-                rsvpSection.classList.remove('day-b-hidden');
-                rsvpSection.style.display = 'block';
-            }
-        }
-        
-        console.log("Modo Día B activado - Mostrando información esencial y QR");
-    }
-
-    // Función para mostrar el código QR en modo Día B
-    function showDayBQR(confirmedMembers) {
-        const section = document.getElementById('day-b-qr-section');
-        const count = confirmedMembers.length;
-        const mesa = confirmedMembers[0].mesa || "Por asignar";
-        const qrContent = userId || "DEMO";
-        const guestName = document.getElementById('main-guest-name').innerText;
-
-        // Generar URL del QR
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrContent)}&format=png&margin=10&color=1a1a1a&bgcolor=ffffff`;
-        
-        // Actualizar contenido
-        document.getElementById('day-b-qr-img').src = qrUrl;
-        document.getElementById('day-b-guest-name').innerText = guestName;
-        document.getElementById('day-b-guest-count').innerText = count;
-        document.getElementById('day-b-table-number').innerText = mesa;
-        
-        // Mover sección QR después del héroe
-        const hero = document.querySelector('.hero');
-        hero.parentNode.insertBefore(section, hero.nextSibling);
-        section.classList.remove('hidden');
-        
-        // Mostrar sección de fotos
-        const photosSection = document.querySelector('.day-b-photos-section');
-        if (photosSection) {
-            photosSection.classList.remove('hidden');
-        }
-    }
-
-    // Función para abrir Uber con destino prellenado
     function openUber(locationName, address) {
-        // Codificar la dirección para URL
         const encodedAddress = encodeURIComponent(address);
         const encodedName = encodeURIComponent(locationName);
-        
-        // Crear URL de Uber con dropoff predefinido
-        const uberUrl = `https://m.uber.com/ul/?action=setPickup&dropoff[address]=${encodedAddress}&dropoff[nickname]=${encodedName}`;
-        
-        // Abrir en nueva pestaña
-        window.open(uberUrl, '_blank');
+        window.open(`https://m.uber.com/ul/?action=setPickup&dropoff[address]=${encodedAddress}&dropoff[nickname]=${encodedName}`, '_blank');
     }
 
-    // Función para descargar el QR del modo Día B
     function downloadDayBQRTicket() {
-        const qrContainer = document.getElementById('day-b-qr-section');
-        
-        html2canvas(qrContainer, {
-            useCORS: true,
-            allowTaint: false,
-            scale: 2,
-            logging: false,
-            backgroundColor: '#ffffff'
-        }).then(canvas => {
+        html2canvas(document.getElementById('day-b-qr-section'), { useCORS: true, scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
             const link = document.createElement('a');
             link.download = 'QR_Acceso_Boda.png';
-            link.href = canvas.toDataURL('image/png', 1.0);
+            link.href = canvas.toDataURL('image/png');
             link.click();
-        }).catch(err => {
-            console.error('Error al generar imagen:', err);
-            alert('Error al generar la imagen. Intenta de nuevo.');
         });
     }
 
-    // Función para verificar si estamos en el día de la boda
     function isWeddingDay() {
         const today = new Date();
         const weddingDate = new Date('2026-03-14');
-        
-        // Comparar día, mes y año
         return today.getDate() === weddingDate.getDate() &&
                today.getMonth() === weddingDate.getMonth() &&
                today.getFullYear() === weddingDate.getFullYear();
     }
 
-    // Funciones para el modal de subir fotos
-    function openPhotoUploadModal() {
-        document.getElementById('photo-upload-modal').style.display = 'flex';
-    }
-    
-    function closePhotoUploadModalForce() { 
-        document.getElementById('photo-upload-modal').style.display = 'none';
-        document.getElementById('photo-preview-container').style.display = 'none';
-        document.getElementById('photo-file-input').value = '';
-        document.getElementById('photo-caption').value = '';
-    }
-    
-    function closePhotoUploadModal(e) { 
-        if(e.target.id === 'photo-upload-modal') closePhotoUploadModalForce(); 
-    }
-    
-    // Configurar vista previa de foto
-    document.addEventListener('DOMContentLoaded', function() {
-        const fileInput = document.getElementById('photo-file-input');
-        if (fileInput) {
-            fileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        const preview = document.getElementById('photo-preview');
-                        preview.src = event.target.result;
-                        document.getElementById('photo-preview-container').style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-    });
-    
-// --- FUNCIONES NUEVAS: GALERÍA Y HASHTAG ---
-    
-    function openGalleryModal() {
-        document.getElementById('gallery-modal').style.display = 'flex';
-    }
-    function closeGalleryModalForce() {
-        document.getElementById('gallery-modal').style.display = 'none';
-    }
-    function closeGalleryModal(e) {
-        if(e.target.id === 'gallery-modal') closeGalleryModalForce();
-    }
-
-    function copyHashtagAndOpenModal() {
-        navigator.clipboard.writeText('#BodaP&J').then(() => {
-            alert('Hashtag #BodaP&J copiado. ¡Pégalo en tu historia!');
-            openHashtagModal(); 
-        }).catch(() => openHashtagModal());
-    }
-
-    // --- FUNCIÓN AUXILIAR: OPTIMIZACIÓN INTELIGENTE ---
-    // Mantiene la resolución original pero optimiza el peso del archivo
-    function optimizeImage(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = event => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    const elem = document.createElement('canvas');
-                    
-                    // 1. USAMOS LAS DIMENSIONES ORIGINALES (No reducimos píxeles)
-                    elem.width = img.width;
-                    elem.height = img.height;
-                    
-                    const ctx = elem.getContext('2d');
-                    ctx.drawImage(img, 0, 0, img.width, img.height);
-                    
-                    // 2. EXPORTAMOS CON CALIDAD 0.85 (Alta calidad para impresión, pero menos peso)
-                    // Esto reduce un archivo de 8MB a aprox 3MB sin cambiar el tamaño de impresión.
-                    resolve(elem.toDataURL('image/jpeg', 0.85));
-                };
-                img.onerror = error => reject(error);
-            };
-            reader.onerror = error => reject(error);
-        });
-    }
-
-    // --- FUNCIÓN DE SUBIDA ACTUALIZADA ---
-    async function uploadPhoto() {
-        const fileInput = document.getElementById('photo-file-input');
-        const caption = document.getElementById('photo-caption').value;
-        const btn = document.querySelector('#photo-upload-modal button[onclick="uploadPhoto()"]');
-        
-        if (!fileInput.files[0]) {
-            alert('Por favor selecciona una foto primero.');
-            return;
-        }
-
-        const file = fileInput.files[0];
-        const originalText = btn.innerHTML;
-        
-        // Cambio de texto para indicar proceso
-        btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Procesando...';
-        btn.disabled = true;
-
-        try {
-            // PASO 1: Optimizamos la imagen (mismos píxeles, menos peso)
-            const optimizedBase64 = await optimizeImage(file);
-            
-            btn.innerHTML = '<div class="custom-spinner" style="width:15px; height:15px; border-width:2px;"></div> Subiendo...';
-
-            // PASO 2: Enviamos a Google Apps Script
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                redirect: 'follow',
-                headers: {'Content-Type': 'text/plain;charset=utf-8'},
-                body: JSON.stringify({
-                    action: 'uploadPhoto', 
-                    image: optimizedBase64, // Enviamos la versión optimizada
-                    message: caption,
-                    mimeType: 'image/jpeg'
-                })
-            });
-            
-            const data = await res.json();
-
-            if(data.status === 'success') {
-                alert('¡Foto recibida correctamente! Gracias.');
-                closePhotoUploadModalForce();
-            } else {
-                throw new Error(data.message || "Error desconocido");
-            }
-            
-        } catch (error) {
-            console.error(error);
-            // Si falla incluso optimizada, ofrecemos la carpeta
-            if(confirm('Hubo un error de conexión al subir la foto.\n\n¿Quieres abrir la carpeta de Drive para subirla directamente ahí?')) {
-                window.open("https://drive.google.com/drive/folders/180_eflp3ZO2XpH5--YcSWKTC9QMuo-b7?usp=drive_link", "_blank");
-            }
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    }
-
-// --- LÓGICA DE CARGA Y DATOS (FINAL V4 - UBER FIX + QR DEMO) ---
+    // LÓGICA DE CARGA PRINCIPAL
     window.onload = async () => {
-        const isPreviewMode = params.get('mode') === 'dayb_preview';
-        let shouldActivateDayB = (params.get('dayB') === 'true') || isPreviewMode;
-        
         const loadingMsg = document.getElementById('loading-msg');
         const enterBtn = document.getElementById('enter-btn');
         if(enterBtn) enterBtn.style.display = 'none'; 
         if(loadingMsg) loadingMsg.style.display = 'block';
 
         if(userId) {
-            // --- CASO 1: USUARIO REAL ---
             try {
                 const res = await fetchWithRetry(`${API_URL}?action=getInvite&id=${userId}`);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
                 const text = await res.text();
                 let data;
                 try { data = JSON.parse(text); } catch (e) { throw new Error("Datos corruptos"); }
@@ -1217,14 +1140,15 @@
                     const nameEl = document.getElementById('main-guest-name');
                     if(nameEl) nameEl.innerText = data.nombreGrupo || data.mainName || "Invitado";
                     if(data.nombreGrupo) document.getElementById('greeting-label').innerText = "HOLA FAMILIA";
-
+                    
                     const msgs = (data.members || []).map(m => m.mensaje).filter(x => x && x.trim() !== "");
                     if(msgs.length > 0) {
                         const box = document.getElementById('personal-msg-box');
                         if(box) { box.innerText = msgs.join(" / "); box.style.display = 'block'; }
                     }
 
-                    // Civil
+                    // CIVIL
+                    const isPreviewMode = params.get('mode') === 'dayb_preview';
                     if(data.showCivil || isPreviewMode) {
                         const civilCard = document.getElementById('civil-card');
                         if(civilCard) {
@@ -1232,9 +1156,7 @@
                             const civilDetails = document.getElementById('civil-guest-details');
                             const civilList = document.getElementById('civil-names-list');
                             if(civilDetails && civilList) {
-                                const miembros = (data.members && data.members.length > 0) 
-                                    ? data.members 
-                                    : (isPreviewMode ? [{nombre: "Nombre Demo 1"}, {nombre: "Nombre Demo 2"}] : []);
+                                const miembros = (data.members && data.members.length > 0) ? data.members : (isPreviewMode ? [{nombre: "Nombre Demo 1"}, {nombre: "Nombre Demo 2"}] : []);
                                 civilList.innerHTML = miembros.map(m => `<div>• ${m.nombre}</div>`).join('');
                                 civilDetails.style.display = 'block';
                             }
@@ -1246,14 +1168,16 @@
                         if(reg) reg.style.display = 'none';
                     }
 
+                    let shouldActivateDayB = (params.get('dayB') === 'true') || isPreviewMode;
                     if(data.isDayB) shouldActivateDayB = true;
+                    if (!shouldActivateDayB && isWeddingDay()) shouldActivateDayB = true;
+
                     currentMembersData = data.members || [];
                     renderGuestList();
 
                     if(loadingMsg) loadingMsg.style.display = 'none';
                     if(enterBtn) enterBtn.style.display = 'block';
                     
-                    if (!shouldActivateDayB && isWeddingDay()) shouldActivateDayB = true;
                     if (shouldActivateDayB) activateDayBMode();
 
                 } else { throw new Error("Error en respuesta"); }
@@ -1262,23 +1186,19 @@
                 if(loadingMsg) loadingMsg.innerHTML = "<span style='color:#D32F2F'>Error al cargar. Recarga.</span>";
             }
         } else {
-             // --- CASO 2: MODO PRUEBA (Sin ID) ---
+             // MODO PRUEBA / ADMIN
              if(loadingMsg) loadingMsg.style.display = 'none';
              if(enterBtn) enterBtn.style.display = 'block';
-             
              document.getElementById('main-guest-name').innerText = "Vista Previa Familia";
+             
+             const isPreviewMode = params.get('mode') === 'dayb_preview';
+             const shouldActivateDayB = (params.get('dayB') === 'true') || isPreviewMode;
 
              if(shouldActivateDayB) {
                  activateDayBMode();
-                 
-                 // AQUÍ GENERAMOS EL QR FALSO PARA LA PRUEBA
-                 const dummyMembers = [
-                     { nombre: "Invitado Demo 1", mesa: "A1", estado: "SI" },
-                     { nombre: "Invitado Demo 2", mesa: "A1", estado: "SI" }
-                 ];
+                 const dummyMembers = [{ nombre: "Invitado Demo 1", mesa: "A1", estado: "SI" }, { nombre: "Invitado Demo 2", mesa: "A1", estado: "SI" }];
                  showDayBQR(dummyMembers);
              }
-             
              if(isPreviewMode) {
                  const civilCard = document.getElementById('civil-card');
                  if(civilCard) {
@@ -1289,123 +1209,30 @@
              }
         }
     };
+
+    // --- MODALES Y UTILIDADES EXTRA ---
+    function openPhotoUploadModal() { document.getElementById('photo-upload-modal').style.display = 'flex'; }
+    function closePhotoUploadModalForce() { 
+        document.getElementById('photo-upload-modal').style.display = 'none';
+        document.getElementById('photo-preview-container').style.display = 'none';
+        document.getElementById('photo-file-input').value = '';
+        document.getElementById('photo-caption').value = '';
+    }
+    function closePhotoUploadModal(e) { if(e.target.id === 'photo-upload-modal') closePhotoUploadModalForce(); }
     
-    function renderGuestList() {
-        // --- LÓGICA DE FECHA LÍMITE ---
-        const today = new Date();
-        const deadline = new Date('2026-03-07T00:00:00'); // 1 semana antes del 14 Marzo 2026
-        const isClosed = today > deadline; // Verdadero si ya pasó la fecha
-        
-        const list = document.getElementById('guests-list');
-        
-        // Mensaje opcional si ya cerró
-        let closedMsg = isClosed ? `<div style="background:#f8d7da; color:#721c24; padding:10px; border-radius:5px; margin-bottom:15px; font-size:0.9rem; text-align:center;">Las confirmaciones se cerraron el 7 de Marzo.</div>` : '';
-
-        list.innerHTML = closedMsg + currentMembersData.map((m, i) => `
-            <div class="guest-row">
-                <div style="font-family: var(--font-display); font-weight:600; margin-bottom:5px; font-size:1.1rem;">${m.nombre}</div>
-                <div class="toggle-group">
-                    <button 
-                        class="toggle-btn ${m.estado==='SI'?'selected':''}" 
-                        onclick="${isClosed ? '' : `setStatus(${i}, 'SI')`}" 
-                        ${isClosed ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
-                        ASISTIRÉ
-                    </button>
-                    <button 
-                        class="toggle-btn reject ${m.estado==='NO'?'selected':''}" 
-                        onclick="${isClosed ? '' : `setStatus(${i}, 'NO')`}" 
-                        ${isClosed ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
-                        NO PODRÉ
-                    </button>
-                </div>
-            </div>
-        `).join('');
+    function openGalleryModal() { document.getElementById('gallery-modal').style.display = 'flex'; }
+    function closeGalleryModalForce() { document.getElementById('gallery-modal').style.display = 'none'; }
+    function closeGalleryModal(e) { if(e.target.id === 'gallery-modal') closeGalleryModalForce(); }
+    
+    function copyHashtagAndOpenModal() { 
+        navigator.clipboard.writeText('#BodaP&J').then(() => { 
+            alert('Hashtag copiado'); openHashtagModal(); 
+        }).catch(() => openHashtagModal()); 
     }
-
-    function setStatus(index, status) {
-        currentMembersData[index].estado = status;
-        renderGuestList();
-    }
-
-    async function sendFinalRSVP() {
-        const btn = document.querySelector('button[onclick="sendFinalRSVP()"]');
-        const originalText = btn.innerText;
-        btn.innerText = "ENVIANDO...";
-        btn.disabled = true;
-
-        const song = document.getElementById('song-suggestion').value;
-        const msg = document.getElementById('guest-message').value;
-        const responses = currentMembersData.map(m => ({ id: m.id, rsvp: m.estado, alergias: '' })); 
-
-        try {
-            await fetchWithRetry(API_URL, {
-                method: 'POST',
-                redirect: 'follow',
-                headers: {'Content-Type': 'text/plain;charset=utf-8'},
-                body: JSON.stringify({ action: 'RSVP_GROUP', responses: responses, song: song, msg: msg })
-            });
-            
-            const confirmados = currentMembersData.filter(m => m.estado === 'SI');
-            if(confirmados.length > 0) {
-                // En modo Día B, mostrar QR directamente
-                if (isDayBMode) {
-                    showDayBQR(confirmados);
-                    // Ocultar RSVP
-                    document.getElementById('rsvp-section').style.display = 'none';
-                } else {
-                    showTicket(confirmados);
-                }
-            } else {
-                alert("Gracias por avisar. Lamentamos que no puedan acompañarnos.");
-                btn.innerText = "ENVIADO";
-            }
-        } catch(e) {
-            alert("Error de conexión. Intenta de nuevo.");
-            btn.innerText = originalText;
-            btn.disabled = false;
-        }
-    }
-
-    function showTicket(confirmados) {
-        document.getElementById('rsvp-section').style.display = 'none';
-        const section = document.getElementById('ticket-section');
-        section.classList.remove('hidden');
-        
-        const count = confirmados.length;
-        const mesa = confirmados[0].mesa || "Por asignar";
-        const qrContent = userId || "DEMO";
-
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}`;
-        document.getElementById('digital-ticket-card').innerHTML = `
-            <div style="background:#1a1a1a; height:12px; width:100%;"></div>
-            <div style="padding:30px 20px; text-align:center;">
-                <h2 style="font-family:var(--font-script); color:var(--gold); font-size:2.8rem; margin:0;">Pase de Acceso</h2>
-                <div style="margin:20px auto; width:150px; height:150px; border:1px solid #eee; padding:5px; background:white;">
-                    <img src="${qrUrl}" style="width:100%; height:100%; object-fit:contain; display:block;" crossorigin="anonymous" alt="QR Code">
-                </div>
-                <div style="font-size:1.2rem; font-weight:bold;">${document.getElementById('main-guest-name').innerText}</div>
-                <div style="display:flex; justify-content:space-around; margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
-                    <div><small style="color:#999; text-transform:uppercase;">Adultos</small><div style="font-size:1.5rem; font-weight:bold;">${count}</div></div>
-                    <div><small style="color:#999; text-transform:uppercase;">Mesa</small><div style="font-size:1.5rem; font-weight:bold; color:var(--gold);">${mesa}</div></div>
-                </div>
-            </div>
-            <div style="position:relative; height:20px; border-top:2px dashed #ccc; margin-top:10px;">
-                <div class="ticket-cutout-side-l"></div><div class="ticket-cutout-side-r"></div>
-            </div>
-            <div style="background:#1a1a1a; height:8px; width:100%;"></div>
-        `;
-    }
-
-    function enterSite() {
-        document.getElementById('welcome-overlay').classList.add('fade-out');
-        setTimeout(() => document.getElementById('welcome-overlay').style.display = 'none', 800);
-        toggleMusic();
-    }
-
-    function toggleMusic() {
-        const audio = document.getElementById("bg-music");
-        if (audio.paused) audio.play(); else audio.pause();
-    }
+    
+    function openHashtagModal() { document.getElementById('hashtag-modal').style.display = 'flex'; }
+    function closeHashtagModalForce() { document.getElementById('hashtag-modal').style.display = 'none'; }
+    function closeHashtagModal(e) { if(e.target.id === 'hashtag-modal') closeHashtagModalForce(); }
 
     function openInfoModal(title, body) {
         document.getElementById('info-modal-title').innerText = title;
@@ -1430,38 +1257,124 @@
         });
     }
 
-    function downloadTicket() {
-        const ticketCard = document.getElementById('digital-ticket-card');
-        const qrImg = ticketCard.querySelector('img');
-        
-        if (qrImg && !qrImg.complete) {
-            qrImg.onload = () => generateTicketImage();
-            qrImg.onerror = () => {
-                alert('Error al cargar el código QR. Intenta de nuevo.');
-            };
-        } else {
-            generateTicketImage();
-        }
-        
-        function generateTicketImage() {
-            html2canvas(ticketCard, {
-                useCORS: true,
-                allowTaint: false,
-                scale: 2,
-                logging: false,
-                backgroundColor: '#ffffff'
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'Pase_Boda.png';
-                link.href = canvas.toDataURL('image/png', 1.0);
-                link.click();
-            }).catch(err => {
-                console.error('Error al generar imagen:', err);
-                alert('Error al generar la imagen. Intenta de nuevo.');
+    // Configuración de Input Foto
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('photo-file-input');
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const preview = document.getElementById('photo-preview');
+                        preview.src = event.target.result;
+                        document.getElementById('photo-preview-container').style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
+        }
+    });
+
+    // Render Guest List y RSVP
+    function renderGuestList() {
+        const today = new Date();
+        const deadline = new Date('2026-03-07T00:00:00');
+        const isClosed = today > deadline;
+        const list = document.getElementById('guests-list');
+        let closedMsg = isClosed ? `<div style="background:#f8d7da; color:#721c24; padding:10px; border-radius:5px; margin-bottom:15px; font-size:0.9rem; text-align:center;">Confirmaciones cerradas.</div>` : '';
+
+        list.innerHTML = closedMsg + currentMembersData.map((m, i) => `
+            <div class="guest-row">
+                <div style="font-family: var(--font-display); font-weight:600; margin-bottom:5px; font-size:1.1rem;">${m.nombre}</div>
+                <div class="toggle-group">
+                    <button class="toggle-btn ${m.estado==='SI'?'selected':''}" onclick="${isClosed ? '' : `setStatus(${i}, 'SI')`}" ${isClosed ? 'disabled' : ''}>ASISTIRÉ</button>
+                    <button class="toggle-btn reject ${m.estado==='NO'?'selected':''}" onclick="${isClosed ? '' : `setStatus(${i}, 'NO')`}" ${isClosed ? 'disabled' : ''}>NO PODRÉ</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function setStatus(index, status) {
+        currentMembersData[index].estado = status;
+        renderGuestList();
+    }
+
+    async function sendFinalRSVP() {
+        const btn = document.querySelector('button[onclick="sendFinalRSVP()"]');
+        const originalText = btn.innerText;
+        btn.innerText = "ENVIANDO...";
+        btn.disabled = true;
+        const song = document.getElementById('song-suggestion').value;
+        const msg = document.getElementById('guest-message').value;
+        const responses = currentMembersData.map(m => ({ id: m.id, rsvp: m.estado, alergias: '' })); 
+
+        try {
+            await fetchWithRetry(API_URL, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: {'Content-Type': 'text/plain;charset=utf-8'},
+                body: JSON.stringify({ action: 'RSVP_GROUP', responses: responses, song: song, msg: msg })
+            });
+            const confirmados = currentMembersData.filter(m => m.estado === 'SI');
+            if(confirmados.length > 0) {
+                if (isDayBMode) {
+                    showDayBQR(confirmados);
+                    document.getElementById('rsvp-section').style.display = 'none';
+                } else {
+                    showTicket(confirmados);
+                }
+            } else {
+                alert("Gracias por avisar.");
+                btn.innerText = "ENVIADO";
+            }
+        } catch(e) {
+            alert("Error de conexión.");
+            btn.innerText = originalText;
+            btn.disabled = false;
         }
     }
 
+    function showTicket(confirmados) {
+        document.getElementById('rsvp-section').style.display = 'none';
+        const section = document.getElementById('ticket-section');
+        section.classList.remove('hidden');
+        const count = confirmados.length;
+        const mesa = confirmados[0].mesa || "Por asignar";
+        const qrContent = userId || "DEMO";
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}`;
+        document.getElementById('digital-ticket-card').innerHTML = `
+            <div style="background:#1a1a1a; height:12px; width:100%;"></div>
+            <div style="padding:30px 20px; text-align:center;">
+                <h2 style="font-family:var(--font-script); color:var(--gold); font-size:2.8rem; margin:0;">Pase de Acceso</h2>
+                <div style="margin:20px auto; width:150px; height:150px; border:1px solid #eee; padding:5px; background:white;">
+                    <img src="${qrUrl}" style="width:100%; height:100%; object-fit:contain; display:block;" crossorigin="anonymous" alt="QR Code">
+                </div>
+                <div style="font-size:1.2rem; font-weight:bold;">${document.getElementById('main-guest-name').innerText}</div>
+                <div style="display:flex; justify-content:space-around; margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
+                    <div><small style="color:#999; text-transform:uppercase;">Adultos</small><div style="font-size:1.5rem; font-weight:bold;">${count}</div></div>
+                    <div><small style="color:#999; text-transform:uppercase;">Mesa</small><div style="font-size:1.5rem; font-weight:bold; color:var(--gold);">${mesa}</div></div>
+                </div>
+            </div>
+            <div style="position:relative; height:20px; border-top:2px dashed #ccc; margin-top:10px;">
+                <div class="ticket-cutout-side-l"></div><div class="ticket-cutout-side-r"></div>
+            </div>
+            <div style="background:#1a1a1a; height:8px; width:100%;"></div>
+        `;
+    }
+
+    // Funciones de Música y Countdown
+    function enterSite() {
+        document.getElementById('welcome-overlay').classList.add('fade-out');
+        setTimeout(() => document.getElementById('welcome-overlay').style.display = 'none', 800);
+        toggleMusic();
+    }
+    function toggleMusic() {
+        const audio = document.getElementById("bg-music");
+        if (audio.paused) audio.play(); else audio.pause();
+    }
+    
+    // Countdown
     const targetDate = new Date("2026-03-14T14:30:00").getTime();
     function updateCountdown() {
         const dist = targetDate - new Date().getTime();
@@ -1470,21 +1383,23 @@
         const h = document.getElementById("h");
         const m = document.getElementById("m");
         const s = document.getElementById("s");
-        if(d && h && m && s) {
+        if(d) {
             d.innerText = Math.floor(dist / 86400000).toString().padStart(2,'0');
             h.innerText = Math.floor((dist % 86400000) / 3600000).toString().padStart(2,'0');
             m.innerText = Math.floor((dist % 3600000) / 60000).toString().padStart(2,'0');
             s.innerText = Math.floor((dist % 60000) / 1000).toString().padStart(2,'0');
         }
     }
-    updateCountdown();
     setInterval(updateCountdown, 1000);
+    updateCountdown();
 
+    // Intersection Observer
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => { if(entry.isIntersecting) entry.target.classList.add('active'); });
     }, {threshold: 0.1});
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
+    // Carrusel
     let currentSlide = 0;
     const slides = document.querySelectorAll('.carousel img');
     if(slides.length > 0) {
@@ -1495,6 +1410,7 @@
         }, 4000);
     }
 
+    // Acuarelas scroll
     let ticking = false;
     document.addEventListener('scroll', () => {
         if (!ticking) {
@@ -1514,18 +1430,17 @@
         }
     });
 
+    // Fetch Retry
     async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
         try {
             const response = await fetch(url, options);
             if (!response.ok && retries > 0) {
-                console.warn(`Reintentando... intentos restantes: ${retries}`);
                 await new Promise(r => setTimeout(r, backoff));
                 return fetchWithRetry(url, options, retries - 1, backoff * 2);
             }
             return response;
         } catch (error) {
             if (retries > 0) {
-                console.warn(`Error de red. Reintentando... ${retries}`);
                 await new Promise(r => setTimeout(r, backoff));
                 return fetchWithRetry(url, options, retries - 1, backoff * 2);
             }
@@ -1533,62 +1448,16 @@
         }
     }
     
-    // Función para probar manualmente el modo Día B
-    function toggleDayBModeForTesting() {
-        if (isDayBMode) {
-            document.body.classList.remove('day-b-mode');
-            document.querySelector('.day-b-banner').style.display = 'none';
-            document.querySelectorAll('.day-b-hidden').forEach(el => {
-                el.style.display = '';
-            });
-            document.querySelectorAll('.day-b-only').forEach(el => {
-                el.style.display = 'none';
-            });
-            document.querySelectorAll('.uber.day-b-only').forEach(el => {
-                el.style.display = 'none';
-            });
-            isDayBMode = false;
-            console.log("Modo Día B desactivado (prueba)");
-        } else {
-            activateDayBMode();
-        }
-    }
-    
-    // Agregar botón de prueba para desarrollo (solo en consola)
-    console.log("Para probar el modo Día B manualmente, ejecuta: toggleDayBModeForTesting()");
-
-    // --- CONTROL DE MÚSICA AL MINIMIZAR/VOLVER (Lógica Inteligente) ---
-    let wasPlaying = false; // Variable para recordar el estado
-
+    // Control de audio
+    let wasPlaying = false;
     document.addEventListener("visibilitychange", () => {
         const audio = document.getElementById("bg-music");
-
         if (document.hidden) {
-            // El usuario se fue (minimizó o cambió de pestaña)
-            if (!audio.paused) {
-                wasPlaying = true; // Guardamos que SÍ estaba sonando
-                audio.pause();
-            } else {
-                wasPlaying = false; // Estaba apagada, así que no la prenderemos al volver
-            }
+            if (!audio.paused) { wasPlaying = true; audio.pause(); } else { wasPlaying = false; }
         } else {
-            // El usuario regresó
-            if (wasPlaying) {
-                // Solo reproducimos si estaba sonando antes de irse
-                audio.play().catch(e => console.log("Reproducción automática bloqueada por el navegador"));
-            }
+            if (wasPlaying) audio.play().catch(e => console.log("Audio block"));
         }
     });
-</script>
-<script>
-function openUber(lat, lng, name) {
-    // Construimos la URL Universal limpia, solo con coordenadas.
-    // 'pickup=my_location' usa el GPS actual del usuario.
-    var url = "https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=" + lat + "&dropoff[longitude]=" + lng + "&dropoff[nickname]=" + encodeURIComponent(name);
-    
-    // Abrimos en nueva pestaña para forzar el intent de la App
-    window.open(url, '_blank');
-}
 </script>
 </body>
 </html>
