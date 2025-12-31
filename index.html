@@ -504,7 +504,7 @@
         </div>
 
         <div id="day-b-qr-section" class="day-b-qr-main day-b-only hidden">
-            <img src="img/logo1.png" style="width: 120px; margin: 0 auto 20px auto; display: block;" alt="Logo">
+            <img src="img/logo.png" style="width: 120px; margin: 0 auto 20px auto; display: block;" alt="Logo">
             
             <h2 style="font-family: var(--font-script); font-size: 2.8rem; margin: 0 0 15px 0; color: var(--text-dark);">Tu Acceso</h2>
             <div id="day-b-qr-container" class="day-b-qr-container">
@@ -1093,17 +1093,6 @@
         document.getElementById('day-b-guest-count').innerText = count;
         document.getElementById('day-b-table-number').innerText = mesa;
         
-        // --- INYECCIÓN DE LOGO (FIX AUTOMÁTICO) ---
-        // Si no pusiste el logo en el HTML, esto lo agrega automáticamente por Javascript
-        if(!section.querySelector('img[src*="logo.png"]')) {
-            const logo = document.createElement('img');
-            logo.src = 'img/logo.png';
-            logo.style.width = '120px';
-            logo.style.margin = '0 auto 20px auto';
-            logo.style.display = 'block';
-            section.insertBefore(logo, section.firstChild);
-        }
-
         // Mover sección QR al principio del contenedor principal
         const content = document.getElementById('main-content');
         // Insertamos antes del primer hijo visible (para que quede arriba)
