@@ -1060,16 +1060,6 @@
             // Si quieres mostrarlo siempre en Día B (para facilitar entrada):
             const sectionQR = document.getElementById('day-b-qr-section');
             if(sectionQR) {
-                // Inyectar logo si no existe (Fix visual)
-                if(!sectionQR.querySelector('.day-b-logo-img')) {
-                    const img = document.createElement('img');
-                    img.src = 'img/logo2.png';
-                    img.className = 'day-b-logo-img';
-                    img.style.width = '120px';
-                    img.style.margin = '0 auto 20px auto';
-                    img.style.display = 'block';
-                    sectionQR.insertBefore(img, sectionQR.firstChild);
-                }
                 
                 // Mover QR al principio (arriba de todo)
                 const content = document.getElementById('main-content');
