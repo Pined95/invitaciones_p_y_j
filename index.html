@@ -482,7 +482,7 @@
                 <div class="map-actions">
                     <a href="https://maps.app.goo.gl/3mFX9Tb62KdVFrHN9" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Ubicación</a>
                     <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Fiesta+Boda+P%26J&dates=20260314T143000/20260314T153000" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
-                    <button onclick="openUber(23.7509805, -99.1446310, 'Parroquia del Buen Pastor')" class="btn-app uber day-b-only" style="background: #000; color: white; border: none; cursor: pointer;">
+                    <button onclick="openUber(23.7509805, -99.1446310, 'Parroquia del Buen Pastor')" class="btn-app uber day-b-only" style="display: none; background: #000; color: white; border: none; cursor: pointer;">
                         <i class="ph-light ph-car"></i> Pedir Uber
                     </button>
                 </div>
@@ -505,7 +505,7 @@
                 <div class="map-actions">
                     <a href="https://maps.app.goo.gl/sPPP6QuNVKpLkk6x8" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Ubicación</a>
                     <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Fiesta+Boda+P%26J&dates=20260314T163000/20260314T173000" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
-                    <button onclick="openUber(23.7344073, -99.1461735, 'Camelia Bistró')" class="btn-app uber day-b-only" style="background: #000; color: white; border: none; cursor: pointer;">
+                    <button onclick="openUber(23.7344073, -99.1461735, 'Camelia Bistró')" class="btn-app uber day-b-only" style="display: none; background: #000; color: white; border: none; cursor: pointer;">
                         <i class="ph-light ph-car"></i> Pedir Uber
                     </button>
                 </div>
@@ -520,7 +520,7 @@
                 <div class="map-actions">
                     <a href="https://www.google.com/maps/search/?api=1&query=Salón+Candilejas+Cd+Victoria" target="_blank" class="btn-app"><i class="ph-light ph-map-pin"></i> Ubicación</a>
                     <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Fiesta+Boda+P%26J&dates=20260314T190000/20260315T000000" target="_blank" class="btn-app"><i class="ph-light ph-calendar"></i> Agendar</a>
-                    <button onclick="openUber(23.7613341, -99.1461072, 'Salón Candilejas')" class="btn-app uber day-b-only" style="background: #000; color: white; border: none; cursor: pointer;">
+                    <button onclick="openUber(23.7613341, -99.1461072, 'Salón Candilejas')" class="btn-app uber day-b-only" style="display: none; background: #000; color: white; border: none; cursor: pointer;">
                         <i class="ph-light ph-car"></i> Pedir Uber
                     </button>
                 </div>
@@ -1067,20 +1067,18 @@
         if(e.target.id === 'hashtag-modal') closeHashtagModalForce(); 
     }
 
-    // --- LÓGICA DE CARGA Y DATOS (FINAL V3 - CON QR EN PRUEBA) ---
+// --- LÓGICA DE CARGA Y DATOS (FINAL V4 - UBER FIX + QR DEMO) ---
     window.onload = async () => {
-        // 1. Detectamos modo prueba
         const isPreviewMode = params.get('mode') === 'dayb_preview';
         let shouldActivateDayB = (params.get('dayB') === 'true') || isPreviewMode;
         
-        // UI Inicial
         const loadingMsg = document.getElementById('loading-msg');
         const enterBtn = document.getElementById('enter-btn');
         if(enterBtn) enterBtn.style.display = 'none'; 
         if(loadingMsg) loadingMsg.style.display = 'block';
 
         if(userId) {
-            // CASO 1: Invitado Real (Con ID)
+            // --- CASO 1: USUARIO REAL ---
             try {
                 const res = await fetchWithRetry(`${API_URL}?action=getInvite&id=${userId}`);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1090,19 +1088,17 @@
                 try { data = JSON.parse(text); } catch (e) { throw new Error("Datos corruptos"); }
                 
                 if(data.status === 'success') {
-                    // Llenar textos
                     const nameEl = document.getElementById('main-guest-name');
                     if(nameEl) nameEl.innerText = data.nombreGrupo || data.mainName || "Invitado";
                     if(data.nombreGrupo) document.getElementById('greeting-label').innerText = "HOLA FAMILIA";
 
-                    // Mensajes
                     const msgs = (data.members || []).map(m => m.mensaje).filter(x => x && x.trim() !== "");
                     if(msgs.length > 0) {
                         const box = document.getElementById('personal-msg-box');
                         if(box) { box.innerText = msgs.join(" / "); box.style.display = 'block'; }
                     }
 
-                    // Civil (Real o Preview)
+                    // Civil
                     if(data.showCivil || isPreviewMode) {
                         const civilCard = document.getElementById('civil-card');
                         if(civilCard) {
@@ -1110,10 +1106,10 @@
                             const civilDetails = document.getElementById('civil-guest-details');
                             const civilList = document.getElementById('civil-names-list');
                             if(civilDetails && civilList) {
-                                const miembrosParaMostrar = (data.members && data.members.length > 0) 
+                                const miembros = (data.members && data.members.length > 0) 
                                     ? data.members 
                                     : (isPreviewMode ? [{nombre: "Nombre Demo 1"}, {nombre: "Nombre Demo 2"}] : []);
-                                civilList.innerHTML = miembrosParaMostrar.map(m => `<div>• ${m.nombre}</div>`).join('');
+                                civilList.innerHTML = miembros.map(m => `<div>• ${m.nombre}</div>`).join('');
                                 civilDetails.style.display = 'block';
                             }
                         }
@@ -1124,45 +1120,39 @@
                         if(reg) reg.style.display = 'none';
                     }
 
-                    // Estado Real
                     if(data.isDayB) shouldActivateDayB = true;
                     currentMembersData = data.members || [];
                     renderGuestList();
 
-                    // Finalizar UI
                     if(loadingMsg) loadingMsg.style.display = 'none';
                     if(enterBtn) enterBtn.style.display = 'block';
                     
                     if (!shouldActivateDayB && isWeddingDay()) shouldActivateDayB = true;
                     if (shouldActivateDayB) activateDayBMode();
 
-                } else { throw new Error("Error en datos"); }
+                } else { throw new Error("Error en respuesta"); }
             } catch(e) { 
                 console.error(e);
-                if(loadingMsg) loadingMsg.innerHTML = "<span style='color:#D32F2F'>Error al cargar. Recarga la página.</span>";
+                if(loadingMsg) loadingMsg.innerHTML = "<span style='color:#D32F2F'>Error al cargar. Recarga.</span>";
             }
         } else {
-             // CASO 2: MODO PRUEBA / ADMIN (Sin ID)
+             // --- CASO 2: MODO PRUEBA (Sin ID) ---
              if(loadingMsg) loadingMsg.style.display = 'none';
              if(enterBtn) enterBtn.style.display = 'block';
              
-             // Aquí establecemos un nombre por defecto para la prueba
              document.getElementById('main-guest-name').innerText = "Vista Previa Familia";
 
              if(shouldActivateDayB) {
                  activateDayBMode();
                  
-                 // --- AQUÍ ESTÁ EL TRUCO PARA QUE SALGA EL QR EN PRUEBA ---
-                 // Creamos datos falsos para simular el QR
+                 // AQUÍ GENERAMOS EL QR FALSO PARA LA PRUEBA
                  const dummyMembers = [
-                     { nombre: "Invitado Prueba 1", mesa: "A1", estado: "SI" },
-                     { nombre: "Invitado Prueba 2", mesa: "A1", estado: "SI" }
+                     { nombre: "Invitado Demo 1", mesa: "A1", estado: "SI" },
+                     { nombre: "Invitado Demo 2", mesa: "A1", estado: "SI" }
                  ];
-                 // Llamamos manualmente a la función que pinta el QR
                  showDayBQR(dummyMembers);
              }
              
-             // Forzar visualización Civil en prueba
              if(isPreviewMode) {
                  const civilCard = document.getElementById('civil-card');
                  if(civilCard) {
@@ -1173,7 +1163,7 @@
              }
         }
     };
-
+    
     function renderGuestList() {
         // --- LÓGICA DE FECHA LÍMITE ---
         const today = new Date();
