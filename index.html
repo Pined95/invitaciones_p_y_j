@@ -1067,17 +1067,22 @@
         if(e.target.id === 'hashtag-modal') closeHashtagModalForce(); 
     }
 
-    // --- LÓGICA DE CARGA Y DATOS (ACTUALIZADA) ---
+// --- LÓGICA DE CARGA Y DATOS (CORREGIDA Y FINAL) ---
     window.onload = async () => {
-        let shouldActivateDayB = forceDayB;
+        // 1. Detectamos si es modo prueba desde el Admin
+        const isPreviewMode = params.get('mode') === 'dayb_preview';
         
-        // Aseguramos que el botón de entrar esté oculto al iniciar
+        // 2. Activamos Día B si es el parámetro manual O si es preview
+        let shouldActivateDayB = (params.get('dayB') === 'true') || isPreviewMode;
+        
+        // UI: Ocultar botón entrar y mostrar cargando al inicio
         const loadingMsg = document.getElementById('loading-msg');
         const enterBtn = document.getElementById('enter-btn');
         if(enterBtn) enterBtn.style.display = 'none'; 
         if(loadingMsg) loadingMsg.style.display = 'block';
 
         if(userId) {
+            // CASO 1: Es un invitado real (tiene ID en la URL)
             try {
                 const res = await fetchWithRetry(`${API_URL}?action=getInvite&id=${userId}`);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1094,13 +1099,13 @@
                 if(data.status === 'success') {
                     // --- LLENADO DE DATOS ---
                     
-                    // Nombres principales
+                    // Nombres
                     const nameEl = document.getElementById('main-guest-name');
                     const greetingEl = document.getElementById('greeting-label');
                     if(nameEl) nameEl.innerText = data.nombreGrupo || data.mainName || "Invitado";
                     if(data.nombreGrupo && greetingEl) greetingEl.innerText = "HOLA FAMILIA";
 
-                    // Mensaje Personal
+                    // Mensajes Personales
                     const msgs = (data.members || []).map(m => m.mensaje).filter(x => x && x.trim() !== "");
                     if(msgs.length > 0) {
                         const box = document.getElementById('personal-msg-box');
@@ -1110,47 +1115,23 @@
                         }
                     }
 
-                    // Definimos si es prueba (usamos la misma variable que definimos arriba o la leemos directo)
-                    const esPruebaCivil = params.get('mode') === 'dayb_preview';
-
-                    // --- NUEVO CÓDIGO CIVIL (MODIFICADO) ---
-                    // La condición ahora es: Si la base de datos dice SI -O- si es modo prueba
-                    if(data.showCivil || esPruebaCivil) {
+                    // --- LÓGICA CIVIL (Real + Prueba) ---
+                    // Se muestra si la BD dice "showCivil" O si estamos en modo preview
+                    if(data.showCivil || isPreviewMode) {
                         const civilCard = document.getElementById('civil-card');
                         if(civilCard) {
                             civilCard.classList.remove('hidden');
                             
-                            // Lógica para mostrar nombres específicos en el civil
                             const civilDetails = document.getElementById('civil-guest-details');
                             const civilList = document.getElementById('civil-names-list');
                             
                             if(civilDetails && civilList) {
-                                // Si es prueba y no hay miembros cargados, mostramos unos falsos para que veas el diseño
+                                // Si hay miembros reales, úsalos. Si es prueba y no hay, inventa nombres.
                                 const miembrosParaMostrar = (data.members && data.members.length > 0) 
-                                                            ? data.members 
-                                                            : (esPruebaCivil ? [{nombre: "Nombre de Prueba 1"}, {nombre: "Nombre de Prueba 2"}] : []);
+                                    ? data.members 
+                                    : (isPreviewMode ? [{nombre: "Nombre Demo 1"}, {nombre: "Nombre Demo 2"}] : []);
 
                                 const namesHTML = miembrosParaMostrar
-                                    .map(m => `<div>• ${m.nombre}</div>`)
-                                    .join('');
-                                
-                                if(namesHTML) {
-                                    civilList.innerHTML = namesHTML;
-                                    civilDetails.style.display = 'block';
-                                }
-                            }
-                        }
-                    }
-                        if(civilCard) {
-                            civilCard.classList.remove('hidden');
-                            
-                            // Lógica para mostrar nombres específicos en el civil
-                            const civilDetails = document.getElementById('civil-guest-details');
-                            const civilList = document.getElementById('civil-names-list');
-                            
-                            if(civilDetails && civilList) {
-                                // Tomamos los miembros del grupo
-                                const namesHTML = (data.members || [])
                                     .map(m => `<div>• ${m.nombre}</div>`)
                                     .join('');
                                 
@@ -1160,27 +1141,28 @@
                         }
                     }
 
-                    // Regalos
+                    // Ocultar Regalos si aplica
                     if(data.hideRegistry) {
                         const registryContent = document.getElementById('registry-content');
                         if(registryContent) registryContent.style.display = 'none';
                     }
 
-                    // Día B
+                    // Día B Real (desde base de datos)
                     if(data.isDayB) shouldActivateDayB = true;
 
-                    // Lista de invitados
+                    // Lista de invitados (RSVP)
                     currentMembersData = data.members || [];
                     renderGuestList();
 
-                    // --- FINALIZAR CARGA (EXITOSO) ---
-                    // Solo aquí mostramos el botón de entrar
+                    // Finalizar carga UI
                     if(loadingMsg) loadingMsg.style.display = 'none';
                     if(enterBtn) enterBtn.style.display = 'block';
                     
-                    // Lógica extra (tickets, dia B, etc)
+                    // Activar lógicas especiales
                     const alreadyConfirmed = showAutoTicketIfConfirmed();
                     if (!shouldActivateDayB && isWeddingDay()) shouldActivateDayB = true;
+                    
+                    // ACTIVAR MODO DÍA B SI CORRESPONDE
                     if (shouldActivateDayB) activateDayBMode();
 
                 } else {
@@ -1188,17 +1170,32 @@
                 }
             } catch(e) { 
                 console.error(e);
-                // Si falla, mostramos un mensaje de error claro
                 if(loadingMsg) loadingMsg.innerHTML = "<span style='color:#D32F2F'>Error al cargar invitación.<br>Por favor recarga la página.</span>";
-                // NO mostramos el botón enterBtn si falló la carga crítica
             }
         } else {
-             // Modo demo o sin ID
+             // CASO 2: Modo Demo o Admin (Sin ID en la URL)
+             // Aquí es donde entra tu botón "Ver Prueba" cuando no hay un invitado específico
+             
              if(loadingMsg) loadingMsg.style.display = 'none';
              if(enterBtn) enterBtn.style.display = 'block';
+             
+             // Si el admin pidió ver Día B, lo activamos
+             if(shouldActivateDayB) activateDayBMode();
+             
+             // Si es prueba, también forzamos ver el Civil con datos falsos
+             if(isPreviewMode) {
+                 const civilCard = document.getElementById('civil-card');
+                 if(civilCard) {
+                     civilCard.classList.remove('hidden');
+                     const civilList = document.getElementById('civil-names-list');
+                     if(civilList) civilList.innerHTML = "<div>• Nombre Demo 1</div><div>• Nombre Demo 2</div>";
+                     const civilDetails = document.getElementById('civil-guest-details');
+                     if(civilDetails) civilDetails.style.display = 'block';
+                 }
+             }
         }
     };
-
+    
     function renderGuestList() {
         // --- LÓGICA DE FECHA LÍMITE ---
         const today = new Date();
