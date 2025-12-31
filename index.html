@@ -354,22 +354,22 @@
 
     <div class="watercolor-container">
         <div class="wc-group wc-g1" data-speed="0.05" data-limit="30">
-            <img src="img/watercolor-1.png" class="wc-img" alt="" loading="lazy" decoding="async">
+            <img src="img/watercolor1.png" class="wc-img" alt="" loading="lazy" decoding="async">
         </div>
         <div class="wc-group wc-g2" data-speed="-0.08" data-limit="50">
-            <img src="img/watercolor-2.png" class="wc-img" alt="" loading="lazy" decoding="async">
+            <img src="img/watercolor2.png" class="wc-img" alt="" loading="lazy" decoding="async">
         </div>
         <div class="wc-group wc-g3" data-speed="0.03" data-limit="20">
-            <img src="img/watercolor-3.png" class="wc-img" alt="" loading="lazy" decoding="async">
+            <img src="img/watercolor3.png" class="wc-img" alt="" loading="lazy" decoding="async">
         </div>
         <div class="wc-group wc-g4" data-speed="0.04" data-limit="40">
-            <img src="img/watercolor-4.png" class="wc-img" alt="" loading="lazy" decoding="async">
+            <img src="img/watercolor4.png" class="wc-img" alt="" loading="lazy" decoding="async">
         </div>
         <div class="wc-group wc-g5" data-speed="-0.02" data-limit="35">
-            <img src="img/watercolor-1.png" class="wc-img" alt="" loading="lazy" decoding="async">
+            <img src="img/watercolor1.png" class="wc-img" alt="" loading="lazy" decoding="async">
         </div>
         <div class="wc-group wc-g6" data-speed="0.06" data-limit="25">
-            <img src="img/watercolor-3.png" class="wc-img" alt="" loading="lazy" decoding="async">
+            <img src="img/watercolor3.png" class="wc-img" alt="" loading="lazy" decoding="async">
         </div>
     </div>
 
@@ -621,11 +621,15 @@
             <p style="font-size:1.4rem; font-family: var(--font-display); letter-spacing:3px; margin-bottom:5px;">FORMAL</p>
             <div style="display:flex; justify-content:center; gap:40px; margin-top:40px;">
                 <div style="text-align:center;">
-                    <div style="font-size:3rem; color:var(--gold);"><i class="ph-light ph-dress"></i></div>
+                    <div style="width: 60px; height: 60px; margin: 0 auto;">
+                        <img src="img/traje1.svg" alt="Vestido" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
                     <p style="font-size:0.9rem; margin-top:10px;">Mujeres<br>Vestido Largo</p>
                 </div>
                 <div style="text-align:center;">
-                    <div style="font-size:3rem; color:var(--gold);"><i class="ph-light ph-user"></i></div>
+                    <div style="width: 60px; height: 60px; margin: 0 auto;">
+                        <img src="img/traje2.svg" alt="Traje" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
                     <p style="font-size:0.9rem; margin-top:10px;">Hombres<br>Traje Oscuro</p>
                 </div>
             </div>
@@ -1164,13 +1168,32 @@
     };
 
     function renderGuestList() {
+        // --- LÓGICA DE FECHA LÍMITE ---
+        const today = new Date();
+        const deadline = new Date('2026-03-07T00:00:00'); // 1 semana antes del 14 Marzo 2026
+        const isClosed = today > deadline; // Verdadero si ya pasó la fecha
+        
         const list = document.getElementById('guests-list');
-        list.innerHTML = currentMembersData.map((m, i) => `
+        
+        // Mensaje opcional si ya cerró
+        let closedMsg = isClosed ? `<div style="background:#f8d7da; color:#721c24; padding:10px; border-radius:5px; margin-bottom:15px; font-size:0.9rem; text-align:center;">Las confirmaciones se cerraron el 7 de Marzo.</div>` : '';
+
+        list.innerHTML = closedMsg + currentMembersData.map((m, i) => `
             <div class="guest-row">
                 <div style="font-family: var(--font-display); font-weight:600; margin-bottom:5px; font-size:1.1rem;">${m.nombre}</div>
                 <div class="toggle-group">
-                    <button class="toggle-btn ${m.estado==='SI'?'selected':''}" onclick="setStatus(${i}, 'SI')">ASISTIRÉ</button>
-                    <button class="toggle-btn reject ${m.estado==='NO'?'selected':''}" onclick="setStatus(${i}, 'NO')">NO PODRÉ</button>
+                    <button 
+                        class="toggle-btn ${m.estado==='SI'?'selected':''}" 
+                        onclick="${isClosed ? '' : `setStatus(${i}, 'SI')`}" 
+                        ${isClosed ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
+                        ASISTIRÉ
+                    </button>
+                    <button 
+                        class="toggle-btn reject ${m.estado==='NO'?'selected':''}" 
+                        onclick="${isClosed ? '' : `setStatus(${i}, 'NO')`}" 
+                        ${isClosed ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
+                        NO PODRÉ
+                    </button>
                 </div>
             </div>
         `).join('');
@@ -1410,6 +1433,16 @@
     
     // Agregar botón de prueba para desarrollo (solo en consola)
     console.log("Para probar el modo Día B manualmente, ejecuta: toggleDayBModeForTesting()");
+
+    // --- DETENER MÚSICA AL SALIR O MINIMIZAR ---
+    document.addEventListener("visibilitychange", () => {
+        const audio = document.getElementById("bg-music");
+        if (document.hidden && !audio.paused) {
+            audio.pause();
+            // Opcional: Si quieres que el icono deje de girar visualmente, aunque 
+            // al volver a entrar el usuario tendrá que darle play manual.
+        }
+    });
 </script>
 <script>
 function openUber(lat, lng, name) {
