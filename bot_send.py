@@ -270,7 +270,7 @@ class WeddingBotApp:
         self.save_config()
 
     def load_config(self):
-        default = "¡Hola {nombre}!, somos Paola y Jorge 👋\n\nNos encantaría que nos {verbo} en nuestra boda. 👰🤵\n\nAquí les dejo su invitación digital:\n{link}\n\n⚠️ *IMPORTANTE: Si el enlace de arriba no aparece en azul, por favor responde a este mensaje con un \"HOLA\" para activarlo.*"
+        default = "¡Hola {nombre}!, somos Paola y Jorge 👋\n\nNos encantaría que nos {verbo} en nuestra boda. 👰🤵\n\nAquí les dejo su invitación digital:\n{link}\n\n⚠️ *IMPORTANTE: Si el enlace de arriba no aparece en azul, por favor responde a este mensaje con un \"BODA\" para activarlo.*"
         if os.path.exists(ARCHIVO_CONFIG):
             try:
                 with open(ARCHIVO_CONFIG, 'r', encoding='utf-8') as f:

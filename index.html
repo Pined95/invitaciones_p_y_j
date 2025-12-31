@@ -1434,13 +1434,26 @@
     // Agregar botón de prueba para desarrollo (solo en consola)
     console.log("Para probar el modo Día B manualmente, ejecuta: toggleDayBModeForTesting()");
 
-    // --- DETENER MÚSICA AL SALIR O MINIMIZAR ---
+    // --- CONTROL DE MÚSICA AL MINIMIZAR/VOLVER (Lógica Inteligente) ---
+    let wasPlaying = false; // Variable para recordar el estado
+
     document.addEventListener("visibilitychange", () => {
         const audio = document.getElementById("bg-music");
-        if (document.hidden && !audio.paused) {
-            audio.pause();
-            // Opcional: Si quieres que el icono deje de girar visualmente, aunque 
-            // al volver a entrar el usuario tendrá que darle play manual.
+
+        if (document.hidden) {
+            // El usuario se fue (minimizó o cambió de pestaña)
+            if (!audio.paused) {
+                wasPlaying = true; // Guardamos que SÍ estaba sonando
+                audio.pause();
+            } else {
+                wasPlaying = false; // Estaba apagada, así que no la prenderemos al volver
+            }
+        } else {
+            // El usuario regresó
+            if (wasPlaying) {
+                // Solo reproducimos si estaba sonando antes de irse
+                audio.play().catch(e => console.log("Reproducción automática bloqueada por el navegador"));
+            }
         }
     });
 </script>
