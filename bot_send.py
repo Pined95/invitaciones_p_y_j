@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import requests
 import pywhatkit
+import pyautogui
+import pygetwindow as gw
 import time
 import random
 import json
@@ -32,6 +34,8 @@ class WeddingBotApp:
         self.guests_data = []
         self.checkboxes = []
         self.vars = []
+        self.search_var = tk.StringVar()
+        self.search_var.trace_add("write", self.filter_guests)
 
         # TÍTULO
         tk.Label(root, text="Panel de Envíos P&J", font=("Montserrat", 16, "bold"), bg="#f4f4f9", fg="#C59D5F").pack(pady=(10, 5))
@@ -53,9 +57,17 @@ class WeddingBotApp:
         self.load_config()
 
         # --- LISTA DE INVITADOS ---
-        # Aumentamos el tamaño de la lista para ver mejor los nombres largos
-        frame_list_container = tk.LabelFrame(root, text=" 👥 Vista Previa (Nombre corregido + Verbo) ", bg="#f4f4f9", font=("Arial", 10, "bold"))
+        frame_list_container = tk.LabelFrame(root, text=" 👥 Lista de Invitados ", bg="#f4f4f9", font=("Arial", 10, "bold"))
         frame_list_container.pack(fill="both", expand=True, padx=20, pady=5)
+
+        # --- BUSCADOR ---
+        frame_search = tk.Frame(frame_list_container, bg="#f4f4f9")
+        frame_search.pack(fill="x", padx=5, pady=(5, 10))
+        tk.Label(frame_search, text="🔍", bg="#f4f4f9", font=("Arial", 10)).pack(side="left", padx=(5, 2))
+        search_entry = tk.Entry(frame_search, textvariable=self.search_var, font=("Arial", 10), bd=1, relief="solid")
+        search_entry.pack(side="left", fill="x", expand=True)
+        btn_clear_search = tk.Button(frame_search, text="✕", command=lambda: self.search_var.set(""), bg="#ddd", font=("Arial", 8), relief="flat")
+        btn_clear_search.pack(side="left", padx=(2, 5))
 
         btn_load = tk.Button(frame_list_container, text="🔄 Actualizar Lista desde Excel", command=self.load_data, bg="#3498db", fg="white", font=("Arial", 9, "bold"))
         btn_load.pack(pady=5)
@@ -139,6 +151,31 @@ class WeddingBotApp:
 
     # =========================================================================
 
+    def filter_guests(self, *args):
+        search_term = self.search_var.get().lower()
+        
+        visible_count = 0
+        for i, guest in enumerate(self.guests_data):
+            row_widget = self.checkboxes[i]
+            
+            nombre_final, verbo = self.calcular_nombre_y_verbo(guest)
+            original_name = (guest.get('nombre') or "").lower()
+            group_name = (guest.get('nombreGrupo') or "").lower()
+            
+            if (not search_term or 
+                search_term in original_name or 
+                search_term in group_name or 
+                search_term in nombre_final.lower()):
+                row_widget.grid()
+                visible_count += 1
+            else:
+                row_widget.grid_remove()
+        
+        if search_term:
+            self.lbl_status.config(text=f"Mostrando {visible_count} resultados para '{search_term}'")
+        else:
+            self.lbl_status.config(text=f"Carga completa. {len(self.guests_data)} pendientes.")
+
     def load_data(self):
         self.lbl_status.config(text="Conectando con Excel...")
         self.root.update()
@@ -165,22 +202,18 @@ class WeddingBotApp:
                     p['_clean_id'] = gid
                     self.guests_data.append(p)
                     
-                    # Calcular nombre corregido
                     nombre_final, verbo = self.calcular_nombre_y_verbo(p)
                     
                     var = tk.BooleanVar()
                     
-                    # FRAME PARA LA FILA
                     frame_row = tk.Frame(self.inner_frame, bg="white")
                     frame_row.grid(row=row, column=0, sticky="w", padx=5, pady=2)
                     
                     cb = tk.Checkbutton(frame_row, variable=var, bg="white", command=self.update_count)
                     cb.pack(side="left")
                     
-                    # MOSTRAR EL NOMBRE ORIGINAL
                     tk.Label(frame_row, text=p.get('nombre')[:20], fg="#888", bg="white", font=("Arial", 8), width=20, anchor="w").pack(side="left")
                     
-                    # MOSTRAR LA FECHA --> AHORA MUESTRA EL NOMBRE FINAL Y VERBO
                     tk.Label(frame_row, text="➡", bg="white", fg="#ccc").pack(side="left", padx=5)
                     tk.Label(frame_row, text=f"{nombre_final}", fg="#2980b9", bg="white", font=("Arial", 9, "bold")).pack(side="left")
                     tk.Label(frame_row, text=f"({verbo})", fg="#27ae60", bg="white", font=("Arial", 8, "italic")).pack(side="left", padx=5)
@@ -189,8 +222,8 @@ class WeddingBotApp:
                     self.checkboxes.append(frame_row)
                     row += 1
             
-            self.lbl_status.config(text=f"Carga completa. {len(self.guests_data)} pendientes.")
             self.update_count()
+            self.filter_guests() # Apply filter to the newly loaded list
 
         except Exception as e:
             messagebox.showerror("Error", f"Error de conexión:\n{e}")
@@ -232,13 +265,53 @@ class WeddingBotApp:
                 self.update_ui_log(f"⚠️ Saltado: {nombre_final} (Sin cel)")
             else:
                 try:
-                    # REEMPLAZAR
+                    # --- Construcción del mensaje ---
                     msg = template.replace("{nombre}", nombre_final)\
                                   .replace("{link}", link)\
                                   .replace("{verbo}", verbo)
-                    
-                    pywhatkit.sendwhatmsg_instantly(tel, msg, 15, True, 3)
-                    
+
+                    # --- Bloque de automatización con manejo de errores específico ---
+                    try:
+                        # 1. Cargar mensaje en WhatsApp Web
+                        pywhatkit.sendwhatmsg_instantly(tel, msg, 20, False)
+                        self.update_ui_log("🌐 Pestaña abierta. Buscando ventana de WhatsApp...")
+
+                        # --- Lógica de Foco Mejorada ---
+                        whatsapp_window = None
+                        # Esperar hasta 15 segundos para que aparezca la ventana
+                        for _ in range(15):
+                            # El título puede variar, buscamos uno que contenga 'WhatsApp'
+                            possible_windows = [w for w in gw.getAllTitles() if 'WhatsApp' in w]
+                            if possible_windows:
+                                # Tomamos la primera que encuentre
+                                whatsapp_window = gw.getWindowsWithTitle(possible_windows[0])[0]
+                                break
+                            time.sleep(1)
+
+                        if whatsapp_window:
+                            self.update_ui_log("✅ Ventana encontrada. Activando...")
+                            whatsapp_window.activate()
+                            time.sleep(2) # Espera a que la ventana se active completamente
+                        else:
+                            self.update_ui_log("⚠️ No se encontró la ventana de WhatsApp. Intentando enviar de todas formas...")
+                            time.sleep(5) # Espera adicional por si acaso
+
+                        # 2. Forzar el envío con tecla ENTER
+                        self.update_ui_log("✅ Presionando ENTER...")
+                        pyautogui.press('enter')
+                        
+                        # 3. Cerrar la pestaña
+                        time.sleep(5)
+                        self.update_ui_log("🧹 Cerrando pestaña...")
+                        pyautogui.hotkey('ctrl', 'w')
+
+                    except Exception as auto_err:
+                        self.update_ui_log(f"❌ Error de automatización: {auto_err}")
+                        # Pausa para que el usuario pueda ver el error antes de continuar
+                        time.sleep(10) 
+                        continue # Salta al siguiente invitado
+
+                    # --- Registro y espera ---
                     self.registrar_envio(gid)
                     success += 1
                     
@@ -247,8 +320,10 @@ class WeddingBotApp:
                         if not self.is_running: break
                         self.update_ui_log(f"✅ Enviado a {nombre_final}. Esperando {s}s...")
                         time.sleep(1)
+
                 except Exception as e:
-                    self.update_ui_log(f"❌ Error: {e}")
+                    # Error general (ej. al registrar, etc.)
+                    self.update_ui_log(f"❌ Error general: {e}")
 
             self.progress["value"] = i + 1
             self.root.after(0, lambda v=self.vars[idx]: v.set(False))
