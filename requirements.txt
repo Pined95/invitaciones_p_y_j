@@ -1,0 +1,4 @@
+requests
+pywhatkit
+pyautogui
+pygetwindow
