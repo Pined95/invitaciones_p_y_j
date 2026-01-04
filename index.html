@@ -20,13 +20,7 @@
     <style>
         /* --- TIPOGRAFÍAS --- */
         @font-face { font-family: 'High Spirited'; src: url('fonts/High Spirited.ttf') format('truetype'); font-weight: normal; }
-        @font-face {
-            font-family: 'Wasted Vindey';
-            src: url('fonts/Wasted-Vindey.woff2') format('woff2');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
-        }
+        @font-face { font-family: 'Wasted Vindey'; src: url('fonts/Wasted-Vindey.ttf') format('truetype'); font-weight: normal; }
 
         /* --- VARIABLES --- */
         :root { 
@@ -185,7 +179,23 @@
         .gold-frame { border: 2px solid var(--gold); padding: 40px 20px; position: relative; margin: 20px 0; background: white; }
         .gold-frame::before { content: ''; position: absolute; top: -6px; bottom: -6px; left: 6px; right: 6px; border-top: 1px solid var(--gold); border-bottom: 1px solid var(--gold); pointer-events: none; }
         
-        .parents-block { font-family: var(--font-display); font-size: 1.2rem; color: #000; line-height: 1.6; margin-bottom: 25px; font-weight: 500; }
+        .parents-block { 
+            font-family: var(--font-display); 
+            font-size: 1.2rem; 
+            color: #000; 
+            line-height: 1.6; 
+            margin-bottom: 25px; 
+            font-weight: 500;
+            
+            /* ELIMINA el text-shadow anterior si no sirvió */
+            
+            /* AGREGA ESTO: */
+            -webkit-text-stroke: 0.4px #000; /* Grosor fino del mismo color */
+            text-stroke: 0.4px #000;
+            
+            /* Opcional: Ayuda a que se vea más nítido */
+            -webkit-font-smoothing: antialiased;
+        }
         .cross { font-size: 0.8rem; vertical-align: super; color: #666; }
 
         /* --- MENSAJE PERSONAL --- */
