@@ -174,12 +174,21 @@
         .time-number { font-family: var(--font-display); font-size: 1.8rem; font-weight: 600; color: white; display: block; }
         .time-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; color: #eee; }
 
-        /* --- SECCIONES Y MARCOS --- */
+/* --- SECCIONES Y MARCOS --- */
         .section { padding: 60px 25px; text-align: center; position: relative; }
         .gold-frame { border: 2px solid var(--gold); padding: 40px 20px; position: relative; margin: 20px 0; background: white; }
         .gold-frame::before { content: ''; position: absolute; top: -6px; bottom: -6px; left: 6px; right: 6px; border-top: 1px solid var(--gold); border-bottom: 1px solid var(--gold); pointer-events: none; }
         
-        .parents-block { font-family: var(--font-display); font-size: 1.2rem; color: #000; line-height: 1.6; margin-bottom: 25px; font-weight: 500; }
+        .parents-block { 
+            font-family: var(--font-display); 
+            font-size: 1.2rem; 
+            color: #000; 
+            line-height: 1.6; 
+            margin-bottom: 25px; 
+            font-weight: 500;
+            /* CORRECCIÓN VISUAL: Rellena los huecos en intersecciones de letras */
+            text-shadow: 0 0 1px #000; 
+        }
         .cross { font-size: 0.8rem; vertical-align: super; color: #666; }
 
         /* --- MENSAJE PERSONAL --- */
