@@ -1,1 +1,1 @@
-window.BOT_ENVIADOS = ["76ME", "33JY", "34AF", "350W", "35RD", "36HU", "378B", "3A67", "3AWO", "3BN5", "3DUK", "3EL1"];
+window.BOT_ENVIADOS = ["76ME", "33JY", "34AF", "350W", "35RD", "36HU", "378B", "3A67", "3AWO", "3BN5", "3DUK", "3EL1", "38P9", "39FQ", "3CDM", "3D43", "3FBI", "3G1Z", "3KGT", "3L7A", "3LXR", "3O56"];
