@@ -924,7 +924,7 @@
 
 <script>
     // ⚠️ URL DE APPS SCRIPT
-    const API_URL = "https://script.google.com/macros/s/AKfycbyqWVYL3iwtiXBkV_yXyN-ZoVS59Ro7dGaH9GcRv-Yk-qWug5ildTg7GnV8F26ELIk/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ-D0whwVWJxiREY5-yFCq0wjs9KWCEjCzPUL4Fm0DTCA/exec"; 
     
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
@@ -1162,10 +1162,34 @@
                             civilCard.classList.remove('hidden');
                             const civilDetails = document.getElementById('civil-guest-details');
                             const civilList = document.getElementById('civil-names-list');
+                            
                             if(civilDetails && civilList) {
-                                const miembros = (data.members && data.members.length > 0) ? data.members : (isPreviewMode ? [{nombre: "Nombre Demo 1"}, {nombre: "Nombre Demo 2"}] : []);
-                                civilList.innerHTML = miembros.map(m => `<div>• ${m.nombre}</div>`).join('');
-                                civilDetails.style.display = 'block';
+                                let miembrosCivil = [];
+
+                                if (isPreviewMode) {
+                                    // Datos falsos para pruebas
+                                    miembrosCivil = [{nombre: "Nombre Demo 1"}, {nombre: "Nombre Demo 2"}];
+                                } else if (data.members && data.members.length > 0) {
+                                    // --- CAMBIO CLAVE AQUÍ ---
+                                    // Filtramos la lista usando la propiedad .civil que agregamos en el .gs
+                                    miembrosCivil = data.members.filter(m => m.civil === true);
+
+                                    // SEGURIDAD: Si por error marcaste al grupo como "SI" al civil, 
+                                    // pero olvidaste poner "SI" individualmente a las personas en el Excel,
+                                    // esta línea hace que se muestren TODOS en lugar de nadie.
+                                    if (miembrosCivil.length === 0) {
+                                        miembrosCivil = data.members;
+                                    }
+                                }
+
+                                // Renderizamos la lista solo si hay gente
+                                if (miembrosCivil.length > 0) {
+                                    civilList.innerHTML = miembrosCivil.map(m => `<div>• ${m.nombre}</div>`).join('');
+                                    civilDetails.style.display = 'block';
+                                } else {
+                                    // Si no hay nadie específico, ocultamos la lista de nombres
+                                    civilDetails.style.display = 'none';
+                                }
                             }
                         }
                     }

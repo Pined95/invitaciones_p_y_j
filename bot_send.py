@@ -12,7 +12,7 @@ import threading
 
 # ================= CONFIGURACIÓN =================
 # 1. URL de tu Google Apps Script
-API_URL = "https://script.google.com/macros/s/AKfycbyZcB1eZa1ZtK_E863gnjnL62-aLIp78H_VokUgexalyJvVflMRzpOyu4VB6-V13zI/exec"
+API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ-D0whwVWJxiREY5-yFCq0wjs9KWCEjCzPUL4Fm0DTCA/exec"
 
 # 2. URL de tu Invitación (SIN barra al final)
 BASE_URL = "https://bodapaolayjorge.com.mx"
@@ -26,7 +26,7 @@ ARCHIVO_CONFIG = "bot_config.json"
 class WeddingBotApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("🤖 Robot P&J - Inteligencia Mejorada v4")
+        self.root.title("🤖 Robot P&J - Inteligencia Mejorada")
         self.root.geometry("850x900")
         self.root.configure(bg="#f4f4f9")
 
