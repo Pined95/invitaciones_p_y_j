@@ -254,83 +254,68 @@ class WeddingBotApp:
             guest = self.guests_data[idx]
             nombre_final, verbo = self.calcular_nombre_y_verbo(guest)
             
-            self.update_ui_log(f"Enviando ({i+1}/{total}): {nombre_final}...")
-            
             gid = guest['_clean_id']
             tel_raw = guest.get('telefono')
             tel = self.limpiar_telefono(tel_raw)
             link = f"{BASE_URL}?id={gid}"
 
+            # --- VALIDACIÓN DE TELÉFONO ---
             if not tel:
-                self.update_ui_log(f"⚠️ Saltado: {nombre_final} (Sin cel)")
+                self.update_ui_log(f"⚠️ Saltado: {nombre_final} (Sin número válido)")
+                # No llamamos a registrar_envio(gid), así que permanecerá en la lista
+                time.sleep(2) 
             else:
                 try:
-                    # --- Construcción del mensaje ---
+                    self.update_ui_log(f"Enviando ({i+1}/{total}): {nombre_final}...")
                     msg = template.replace("{nombre}", nombre_final)\
                                   .replace("{link}", link)\
                                   .replace("{verbo}", verbo)
 
-                    # --- Bloque de automatización con manejo de errores específico ---
+                    # --- Bloque de automatización ---
                     try:
-                        # 1. Cargar mensaje en WhatsApp Web
                         pywhatkit.sendwhatmsg_instantly(tel, msg, 20, False)
-                        self.update_ui_log("🌐 Pestaña abierta. Buscando ventana de WhatsApp...")
-
-                        # --- Lógica de Foco Mejorada ---
+                        
                         whatsapp_window = None
-                        # Esperar hasta 15 segundos para que aparezca la ventana
                         for _ in range(15):
-                            # El título puede variar, buscamos uno que contenga 'WhatsApp'
                             possible_windows = [w for w in gw.getAllTitles() if 'WhatsApp' in w]
                             if possible_windows:
-                                # Tomamos la primera que encuentre
                                 whatsapp_window = gw.getWindowsWithTitle(possible_windows[0])[0]
                                 break
                             time.sleep(1)
 
                         if whatsapp_window:
-                            self.update_ui_log("✅ Ventana encontrada. Activando...")
                             whatsapp_window.activate()
-                            time.sleep(2) # Espera a que la ventana se active completamente
-                        else:
-                            self.update_ui_log("⚠️ No se encontró la ventana de WhatsApp. Intentando enviar de todas formas...")
-                            time.sleep(5) # Espera adicional por si acaso
+                            time.sleep(2)
 
-                        # 2. Forzar el envío con tecla ENTER
-                        self.update_ui_log("✅ Presionando ENTER...")
                         pyautogui.press('enter')
-                        
-                        # 3. Cerrar la pestaña
                         time.sleep(5)
-                        self.update_ui_log("🧹 Cerrando pestaña...")
                         pyautogui.hotkey('ctrl', 'w')
+                        
+                        # --- SOLO SI LLEGA AQUÍ, SE MARCA COMO ENVIADO ---
+                        self.registrar_envio(gid)
+                        success += 1
+                        
+                        espera = random.randint(20, 45)
+                        for s in range(espera, 0, -1):
+                            if not self.is_running: break
+                            self.update_ui_log(f"✅ Enviado a {nombre_final}. Esperando {s}s...")
+                            time.sleep(1)
 
                     except Exception as auto_err:
-                        self.update_ui_log(f"❌ Error de automatización: {auto_err}")
-                        # Pausa para que el usuario pueda ver el error antes de continuar
-                        time.sleep(10) 
-                        continue # Salta al siguiente invitado
-
-                    # --- Registro y espera ---
-                    self.registrar_envio(gid)
-                    success += 1
-                    
-                    espera = random.randint(20, 45)
-                    for s in range(espera, 0, -1):
-                        if not self.is_running: break
-                        self.update_ui_log(f"✅ Enviado a {nombre_final}. Esperando {s}s...")
-                        time.sleep(1)
+                        self.update_ui_log(f"❌ Error en WhatsApp: {nombre_final}")
+                        time.sleep(5)
+                        continue 
 
                 except Exception as e:
-                    # Error general (ej. al registrar, etc.)
                     self.update_ui_log(f"❌ Error general: {e}")
 
             self.progress["value"] = i + 1
+            # Desmarcar el checkbox solo si se procesó (con o sin éxito)
             self.root.after(0, lambda v=self.vars[idx]: v.set(False))
 
         self.is_running = False
         self.root.after(0, self.reset_ui)
-        messagebox.showinfo("Fin", f"Proceso terminado. Enviados: {success}")
+        messagebox.showinfo("Fin", f"Proceso terminado.\nEnviados con éxito: {success}\nSaltados (sin tel): {total - success}")
 
     def stop_bot(self):
         self.is_running = False
