@@ -275,28 +275,45 @@
         }
 
         function openEditModal(id) {
-            const g = allGuests.find(x => x.id === id);
-            if(!g) return;
+            // Buscar al invitado asegurando que los IDs sean strings para evitar errores de tipo
+            const g = allGuests.find(x => String(x.id).trim() === String(id).trim());
             
-            // Llenar campos
+            if(!g) {
+                alert("Error: No se encontró la información del invitado en memoria.");
+                return;
+            }
+            
+            // Llenar campos ocultos (IDs técnicos)
             document.getElementById('eRow').value = g.rowIndex;
             document.getElementById('eId').value = g.id;
-            document.getElementById('eLink').value = g.link;
-            document.getElementById('eTitulo').value = g.titulo;
-            document.getElementById('eNombres').value = g.nombres;
-            document.getElementById('eApeP').value = g.apeP;
-            document.getElementById('eApeM').value = g.apeM;
-            document.getElementById('eTel').value = g.telefono;
-            document.getElementById('eCorreo').value = g.correo;
-            document.getElementById('eRsvp').value = normalize(g.rsvp);
-            document.getElementById('eMesa').value = g.mesa;
-            document.getElementById('eCivil').value = normalizeBool(g.civil);
-            document.getElementById('eMensaje').value = g.mensaje;
+            document.getElementById('eLink').value = g.link || "";
 
-            // WhatsApp Button
+            // --- SOLUCIÓN CAMPOS EN BLANCO ---
+            // Si no hay datos desglosados (cols AE, AC, AD), usamos el Nombre Completo (col C)
+            // Ponemos todo el nombre en el campo "Nombres" para que no se vea vacío.
+            const nombreVisual = g.nombres || g.nombreCompleto || "";
+            
+            document.getElementById('eTitulo').value = g.titulo || "";
+            document.getElementById('eNombres').value = nombreVisual;
+            document.getElementById('eApeP').value = g.apeP || "";
+            document.getElementById('eApeM').value = g.apeM || "";
+
+            // Contacto
+            document.getElementById('eTel').value = g.telefono || "";
+            document.getElementById('eCorreo').value = g.correo || "";
+
+            // --- SOLUCIÓN BUGS DE SELECTORES ---
+            // Usamos funciones de normalización corregidas (ver más abajo)
+            document.getElementById('eRsvp').value = normalize(g.rsvp);
+            document.getElementById('eMesa').value = g.mesa || "";
+            document.getElementById('eCivil').value = normalizeBool(g.civil);
+            document.getElementById('eMensaje').value = g.mensaje || "";
+
+            // Configuración Botón WhatsApp
             const btnWa = document.getElementById('btnWa');
             if(g.whatsapp) {
-                const msg = `Hola ${g.nombres}, aquí está tu invitación: ${g.link}`;
+                // Usamos nombreVisual para personalizar el mensaje
+                const msg = `Hola ${nombreVisual.split(" ")[0]}, aquí está tu invitación: ${g.link}`;
                 btnWa.href = `https://wa.me/${g.whatsapp}?text=${encodeURIComponent(msg)}`;
                 btnWa.style.opacity = 1; btnWa.style.pointerEvents = 'auto';
             } else {
@@ -310,12 +327,20 @@
 
         function saveData() {
             const btn = document.getElementById('btnSave');
-            btn.innerText = "Guardando..."; btn.disabled = true;
+            const originalText = btn.innerText;
+            btn.innerText = "Guardando..."; 
+            btn.disabled = true;
+
+            // 1. RECUPERAR DATOS ORIGINALES (Para no perder alergias/canciones)
+            const idActual = document.getElementById('eId').value;
+            const gOriginal = allGuests.find(x => String(x.id) === String(idActual)) || {};
 
             const payload = {
                 action: 'saveGuest',
                 rowIndex: document.getElementById('eRow').value,
-                id: document.getElementById('eId').value,
+                id: idActual,
+                
+                // Datos del Formulario
                 nombres: document.getElementById('eNombres').value,
                 apeP: document.getElementById('eApeP').value,
                 apeM: document.getElementById('eApeM').value,
@@ -326,24 +351,47 @@
                 mesa: document.getElementById('eMesa').value,
                 civil: document.getElementById('eCivil').value,
                 mensaje: document.getElementById('eMensaje').value,
-                alergias: "", cancion: "" 
+                
+                // --- LA MAGIA: PRESERVAR DATOS ---
+                // Enviamos lo que ya tenía el usuario. Si no tenía nada, enviamos string vacío.
+                alergias: gOriginal.alergias || "", 
+                cancion: gOriginal.cancion || "" 
             };
 
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
             .then(r => r.json())
             .then(res => {
                 if(res.status === 'success') {
-                    // Update local rápido
-                    const g = allGuests.find(x => x.id === payload.id);
+                    // Actualizar vista local sin recargar
+                    const g = allGuests.find(x => String(x.id) === String(payload.id));
                     if(g) {
-                         g.nombreCompleto = [payload.nombres, payload.apeP, payload.apeM].join(" ");
-                         g.rsvp = payload.rsvp; g.mesa = payload.mesa; g.civil = payload.civil;
+                        // Reconstruir nombre completo para la lista
+                        const partes = [payload.nombres, payload.apeP, payload.apeM].filter(Boolean);
+                        g.nombreCompleto = partes.length > 0 ? partes.join(" ") : g.nombreCompleto;
+                        
+                        // Actualizar otros datos en memoria
+                        g.nombres = payload.nombres;
+                        g.apeP = payload.apeP;
+                        g.apeM = payload.apeM;
+                        g.rsvp = payload.rsvp; 
+                        g.mesa = payload.mesa; 
+                        g.civil = payload.civil;
+                        g.mensaje = payload.mensaje;
                     }
-                    renderOrganizedList(allGuests);
+                    renderOrganizedList(allGuests); // Refrescar lista visual
                     closeEditModal();
-                } else alert("Error: " + res.message);
+                } else {
+                    alert("Error del servidor: " + res.message);
+                }
             })
-            .finally(() => { btn.innerText = "Guardar Cambios"; btn.disabled = false; });
+            .catch(err => {
+                console.error(err);
+                alert("Error de conexión al guardar.");
+            })
+            .finally(() => { 
+                btn.innerText = originalText; 
+                btn.disabled = false; 
+            });
         }
 
         function copyLink() {
@@ -351,8 +399,21 @@
             alert("Copiado");
         }
         
-        function normalize(v) { return (v && v.toUpperCase().includes('SI')) ? 'SI' : (v && v.toUpperCase().includes('NO') ? 'NO' : 'PENDIENTE'); }
-        function normalizeBool(v) { return (v === 'SI' || v === 'true' || v === true) ? 'SI' : 'NO'; }
+        function normalize(v) { 
+            if (!v) return 'PENDIENTE';
+            const val = String(v).toUpperCase();
+            if (val.includes('SI') || val.includes('CONFIRMADO') || val.includes('ASISTIR')) return 'SI';
+            if (val.includes('NO') || val.includes('CANCEL')) return 'NO';
+            return 'PENDIENTE';
+        }
+
+        function normalizeBool(v) { 
+            if (v === true) return 'SI'; // Caso booleano puro
+            const val = String(v).toUpperCase();
+            // Detecta: "SI", "SÍ", "TRUE", "VERDADERO"
+            if (val.includes('SI') || val.includes('SÍ') || val.includes('TRU')) return 'SI';
+            return 'NO';
+        }
 
         document.getElementById('searchInput').addEventListener('keyup', (e) => {
             const q = e.target.value.toLowerCase();
