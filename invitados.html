@@ -9,284 +9,58 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* Variables extraídas de tus archivos admin.html y send.html */
+        /* Mismos estilos que ya tenías para mantener identidad */
         :root {
-            --gold: #C59D5F;
-            --gold-hover: #b08d55;
-            --dark: #1a1a1a;
-            --light: #f4f4f9;
-            --white: #ffffff;
-            --gray: #7f8c8d;
-            --success: #2ecc71; /* Verde similar al de WhatsApp/Confirmado */
-            --danger: #e74c3c;
-            --warning: #f1c40f;
-            --shadow: 0 4px 15px rgba(0,0,0,0.05);
-            --border-radius: 12px;
+            --gold: #C59D5F; --gold-hover: #b08d55; --dark: #1a1a1a;
+            --light: #f4f4f9; --white: #ffffff; --gray: #7f8c8d;
+            --success: #2ecc71; --danger: #e74c3c; --warning: #f1c40f;
+            --shadow: 0 4px 15px rgba(0,0,0,0.05); --border-radius: 12px;
         }
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: var(--light);
-            color: var(--dark);
-            margin: 0;
-            padding-bottom: 80px; /* Espacio para no tapar el final con scroll */
-        }
-
-        /* --- HEADER (Estilo Admin) --- */
-        .header-bar {
-            background: var(--white);
-            padding: 15px 20px;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-title {
-            color: var(--gold);
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin: 0;
-        }
-
-        .header-stats {
-            font-size: 0.8rem;
-            color: var(--gray);
-            font-weight: 500;
-        }
-
-        /* --- BUSCADOR --- */
-        .search-container {
-            padding: 20px 20px 10px 20px;
-        }
-
-        .search-box {
-            position: relative;
-            background: var(--white);
-            border-radius: 30px;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-            border: 1px solid #eee;
-        }
-
-        .search-box input {
-            border: none;
-            padding: 15px 20px;
-            width: 100%;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1rem;
-            outline: none;
-            color: var(--dark);
-        }
-
-        .search-box i {
-            padding-right: 20px;
-            color: var(--gold);
-        }
-
-        /* --- LISTA DE INVITADOS --- */
-        .guest-list {
-            padding: 10px 20px;
-            list-style: none;
-            margin: 0;
-        }
-
-        .guest-card {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: var(--shadow);
-            border-left: 5px solid transparent;
-            transition: transform 0.2s ease;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .guest-card:active {
-            transform: scale(0.98);
-        }
-
-        /* Bordes de estado */
-        .status-si { border-left-color: var(--success); }
-        .status-no { border-left-color: var(--danger); }
-        .status-pendiente { border-left-color: var(--warning); }
-
-        .card-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 5px;
-        }
-
-        .guest-name {
-            font-weight: 600;
-            font-size: 1.05rem;
-            color: var(--dark);
-        }
-
-        .guest-group {
-            font-size: 0.85rem;
-            color: var(--gray);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .card-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
+        body { font-family: 'Montserrat', sans-serif; background: var(--light); color: var(--dark); margin: 0; padding-bottom: 80px; }
+        .header-bar { background: var(--white); padding: 15px 20px; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        .header-title { color: var(--gold); font-weight: 700; font-size: 1.2rem; margin: 0; }
+        .header-stats { font-size: 0.8rem; color: var(--gray); font-weight: 500; }
+        .search-container { padding: 20px 20px 10px 20px; }
+        .search-box { background: var(--white); border-radius: 30px; box-shadow: var(--shadow); display: flex; align-items: center; border: 1px solid #eee; }
+        .search-box input { border: none; padding: 15px 20px; width: 100%; outline: none; font-size: 1rem; color: var(--dark); background: transparent; }
+        .search-box i { padding-right: 20px; color: var(--gold); }
+        .guest-list { padding: 10px 20px; list-style: none; margin: 0; }
+        .guest-card { background: var(--white); border-radius: var(--border-radius); padding: 15px; margin-bottom: 15px; box-shadow: var(--shadow); border-left: 5px solid transparent; cursor: pointer; }
+        .status-si { border-left-color: var(--success); } .status-no { border-left-color: var(--danger); } .status-pendiente { border-left-color: var(--warning); }
+        .card-top { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .guest-name { font-weight: 600; font-size: 1.05rem; }
+        .guest-group { font-size: 0.85rem; color: var(--gray); margin-bottom: 8px; }
+        .card-details { display: flex; justify-content: space-between; font-size: 0.9rem; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
         .badge-si { background: rgba(46, 204, 113, 0.15); color: var(--success); }
         .badge-no { background: rgba(231, 76, 60, 0.15); color: var(--danger); }
         .badge-pend { background: rgba(241, 196, 15, 0.15); color: #d35400; }
-
-        .mesa-tag {
-            background: #f0f0f0;
-            color: var(--dark);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-        }
-
-        /* --- MODAL (Estilo Checkin/Admin) --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            display: none;
-            justify-content: center;
-            align-items: flex-end; /* Sheet style on mobile */
-        }
+        .mesa-tag { background: #f0f0f0; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; }
         
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: none; justify-content: center; align-items: flex-end; }
         .modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
-
-        .modal-content {
-            background: var(--white);
-            width: 100%;
-            max-width: 500px;
-            border-radius: 20px 20px 0 0;
-            padding: 25px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
-            animation: slideUp 0.3s;
-        }
-
-        @media(min-width: 600px) {
-            .modal-overlay { align-items: center; }
-            .modal-content { border-radius: 20px; }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        .modal-title {
-            color: var(--gold);
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--gray);
-            cursor: pointer;
-        }
-
-        /* Formularios Estilo Gold */
-        .form-group { margin-bottom: 15px; }
-        .form-label { display: block; font-size: 0.85rem; color: var(--gray); margin-bottom: 5px; font-weight: 600; }
+        .modal-content { background: var(--white); width: 100%; max-width: 500px; border-radius: 20px 20px 0 0; padding: 25px; animation: slideUp 0.3s; }
+        @media(min-width: 600px) { .modal-overlay { align-items: center; } .modal-content { border-radius: 20px; } }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .modal-title { color: var(--gold); font-weight: 700; font-size: 1.2rem; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; color: var(--gray); cursor: pointer; }
+        .form-group { margin-bottom: 15px; } .form-label { display: block; font-size: 0.85rem; color: var(--gray); margin-bottom: 5px; font-weight: 600; }
+        .form-control { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        .action-row { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { flex: 1; padding: 14px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; text-decoration: none; color: white; }
+        .btn-primary { background: var(--gold); } .btn-whatsapp { background: #25D366; } .btn-secondary { background: #f0f0f0; color: var(--dark); }
         
-        .form-control {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: border 0.3s;
-        }
-
-        .form-control:focus {
-            border-color: var(--gold);
-            outline: none;
-        }
-
-        .action-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .btn-primary { background: var(--gold); color: white; }
-        .btn-primary:active { background: var(--gold-hover); }
-        
-        .btn-whatsapp { background: #25D366; color: white; }
-        .btn-secondary { background: #f0f0f0; color: var(--dark); }
-
-        /* Loader */
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--light); z-index: 2000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-        .spinner {
-            width: 40px; height: 40px; border: 4px solid #ddd;
-            border-top-color: var(--gold); border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #ddd; border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } } @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div id="loader">
         <div class="spinner"></div>
-        <p style="margin-top: 15px; color: var(--gold); font-weight: 600;">Cargando Invitados...</p>
+        <p style="margin-top: 15px; color: var(--gold); font-weight: 600;">Cargando Base de Datos...</p>
     </div>
 
     <div class="header-bar">
@@ -296,193 +70,131 @@
 
     <div class="search-container">
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Buscar por nombre, grupo o mesa..." autocomplete="off">
+            <input type="text" id="searchInput" placeholder="Buscar..." autocomplete="off">
             <i class="fa-solid fa-magnifying-glass"></i>
         </div>
     </div>
 
-    <div class="guest-list" id="listContainer">
-        </div>
+    <div class="guest-list" id="listContainer"></div>
 
     <div class="modal-overlay" id="editModal">
         <div class="modal-content">
             <div class="modal-header">
-                <div>
-                    <div class="modal-title" id="mNombre">Nombre Invitado</div>
-                    <small style="color:var(--gray)" id="mGrupo">Familia</small>
-                </div>
+                <div><div class="modal-title" id="mNombre"></div><small style="color:var(--gray)" id="mGrupo"></small></div>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
-
             <div class="modal-body">
-                <input type="hidden" id="mId">
-                <input type="hidden" id="mRow">
-                <input type="hidden" id="mLink">
-
-                <div class="form-group">
-                    <label class="form-label">ESTADO DE ASISTENCIA</label>
-                    <select id="mRsvp" class="form-control">
-                        <option value="PENDIENTE">⏳ Pendiente</option>
-                        <option value="SI">✅ CONFIRMADO</option>
-                        <option value="NO">❌ NO ASISTIRÁ</option>
-                    </select>
-                </div>
-
-                <div style="display: flex; gap: 15px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label class="form-label">MESA</label>
-                        <input type="text" id="mMesa" class="form-control" placeholder="S/A">
-                    </div>
-                    <div class="form-group" style="flex: 1.5;">
-                        <label class="form-label">TELÉFONO</label>
-                        <input type="tel" id="mTel" class="form-control">
-                    </div>
-                </div>
-
-                <div class="action-row">
-                    <a href="#" id="btnWa" target="_blank" class="btn btn-whatsapp">
-                        <i class="fa-brands fa-whatsapp"></i> Chat
-                    </a>
-                    <button class="btn btn-secondary" onclick="copyLink()">
-                        <i class="fa-solid fa-link"></i> Link
-                    </button>
-                </div>
-                
-                <div class="action-row">
-                    <button class="btn btn-primary" id="btnSave" onclick="saveGuest()">
-                        GUARDAR CAMBIOS
-                    </button>
-                </div>
-
+                <input type="hidden" id="mId"><input type="hidden" id="mRow"><input type="hidden" id="mLink">
+                <div class="form-group"><label class="form-label">ESTADO</label><select id="mRsvp" class="form-control"><option value="PENDIENTE">⏳ Pendiente</option><option value="SI">✅ CONFIRMADO</option><option value="NO">❌ NO ASISTIRÁ</option></select></div>
+                <div style="display: flex; gap: 15px;"><div class="form-group" style="flex: 1;"><label class="form-label">MESA</label><input type="text" id="mMesa" class="form-control"></div><div class="form-group" style="flex: 1.5;"><label class="form-label">TELÉFONO</label><input type="tel" id="mTel" class="form-control"></div></div>
+                <div class="action-row"><a href="#" id="btnWa" target="_blank" class="btn btn-whatsapp"><i class="fa-brands fa-whatsapp"></i> Chat</a><button class="btn btn-secondary" onclick="copyLink()"><i class="fa-solid fa-link"></i> Link</button></div>
+                <div class="action-row"><button class="btn btn-primary" id="btnSave" onclick="saveGuest()">GUARDAR CAMBIOS</button></div>
             </div>
         </div>
     </div>
 
     <script>
+        // ==========================================
+        //  CONFIGURACIÓN OBLIGATORIA
+        // ==========================================
+        // PEGA AQUÍ TU URL DEL DEPLOY (WEB APP URL)
+        const SCRIPT_URL = "https://script.google.com/macros/s/TU_URL_AQUI/exec"; 
+        // ==========================================
+
         let allGuests = [];
-        
-        // --- INICIALIZAR ---
+        const modal = document.getElementById('editModal');
+
         window.onload = function() {
-            google.script.run
-                .withSuccessHandler(onSuccessLoad)
-                .withFailureHandler(err => alert("Error: " + err))
-                .getAdminDashboardData();
+            if(SCRIPT_URL.includes("TU_URL_AQUI")) { alert("Falta configurar la SCRIPT_URL en el código HTML"); return; }
+            fetchGuests();
         };
 
-        function onSuccessLoad(data) {
-            allGuests = data;
-            renderList(data);
-            document.getElementById('loader').style.display = 'none';
+        function fetchGuests() {
+            // Usamos fetch en lugar de google.script.run
+            fetch(SCRIPT_URL + "?action=getDashboard")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        allGuests = data.guests;
+                        renderList(allGuests);
+                        document.getElementById('loader').style.display = 'none';
+                    } else {
+                        alert("Error al cargar datos: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert("Error de conexión. Verifica la URL del Script.");
+                    console.error(error);
+                });
         }
 
-        // --- RENDERIZADO ---
         function renderList(guests) {
             const container = document.getElementById('listContainer');
             container.innerHTML = '';
-
-            // Stats Rápidas
-            const total = guests.length;
+            
             const confirmados = guests.filter(g => String(g.rsvp).toUpperCase().includes('SI')).length;
-            document.getElementById('statsDisplay').innerHTML = `${confirmados} / ${total} Confirmados`;
+            document.getElementById('statsDisplay').innerHTML = `${confirmados} / ${guests.length} Confirmados`;
 
-            // Límite de renderizado inicial (Lazy load fake)
             const limit = guests.length > 50 ? 50 : guests.length;
-
-            if (guests.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--gray)">No se encontraron invitados.</div>';
-                return;
-            }
+            
+            if (guests.length === 0) { container.innerHTML = '<div style="text-align:center;padding:20px;color:#999">No encontrado</div>'; return; }
 
             for(let i=0; i<limit; i++) {
                 const g = guests[i];
-                const statusClass = getStatusClass(g.rsvp);
-                const badgeClass = getBadgeClass(g.rsvp);
-                const badgeText = g.rsvp || 'PENDIENTE';
-
                 const card = document.createElement('div');
-                card.className = `guest-card ${statusClass}`;
+                card.className = `guest-card ${getStatusClass(g.rsvp)}`;
                 card.onclick = () => openModal(g.id);
-                
                 card.innerHTML = `
-                    <div class="card-top">
-                        <div class="guest-name">${g.nombre}</div>
-                        <span class="badge ${badgeClass}">${badgeText}</span>
-                    </div>
-                    <div class="guest-group">
-                        <i class="fa-solid fa-people-group"></i> ${g.grupo}
-                    </div>
-                    <div class="card-details">
-                        <span class="mesa-tag"><i class="fa-solid fa-utensils"></i> Mesa: ${g.mesa || 'S/A'}</span>
-                        <span style="color:var(--gray)">#${g.rowIndex}</span>
-                    </div>
+                    <div class="card-top"><div class="guest-name">${g.nombre}</div><span class="badge ${getBadgeClass(g.rsvp)}">${g.rsvp||'PEND'}</span></div>
+                    <div class="guest-group"><i class="fa-solid fa-people-group"></i> ${g.grupo}</div>
+                    <div class="card-details"><span class="mesa-tag"><i class="fa-solid fa-utensils"></i> Mesa: ${g.mesa||'S/A'}</span></div>
                 `;
                 container.appendChild(card);
             }
         }
 
-        // --- BÚSQUEDA ---
         const searchInput = document.getElementById('searchInput');
         searchInput.addEventListener('keyup', (e) => {
             const term = e.target.value.toLowerCase();
             const filtered = allGuests.filter(g => 
                 (g.nombre && g.nombre.toLowerCase().includes(term)) || 
-                (g.grupo && g.grupo.toLowerCase().includes(term)) ||
-                (g.mesa && String(g.mesa).includes(term))
+                (g.grupo && g.grupo.toLowerCase().includes(term))
             );
             renderList(filtered);
         });
 
-        // --- MODAL ---
-        const modal = document.getElementById('editModal');
-
         function openModal(id) {
             const g = allGuests.find(x => x.id === id);
             if(!g) return;
-
             document.getElementById('mId').value = g.id;
             document.getElementById('mRow').value = g.rowIndex;
             document.getElementById('mNombre').innerText = g.nombre;
-            document.getElementById('mGrupo').innerText = g.grupo + " (" + g.invitacion + ")";
+            document.getElementById('mGrupo').innerText = g.grupo;
             document.getElementById('mLink').value = g.link;
-
             document.getElementById('mRsvp').value = normalizeRsvp(g.rsvp);
             document.getElementById('mMesa').value = g.mesa;
             document.getElementById('mTel').value = g.telefonoVisual || g.telefono;
 
-            // WhatsApp Button logic
             const btnWa = document.getElementById('btnWa');
             if(g.whatsapp) {
-                const firstName = g.nombre.split(' ')[0];
-                const text = `Hola ${firstName}, te comparto tu invitación digital para nuestra boda: ${g.link}`;
+                const text = `Hola ${g.nombre.split(' ')[0]}, aquí está tu invitación: ${g.link}`;
                 btnWa.href = `https://wa.me/${g.whatsapp}?text=${encodeURIComponent(text)}`;
-                btnWa.style.opacity = 1;
-                btnWa.style.pointerEvents = 'auto';
+                btnWa.style.pointerEvents = 'auto'; btnWa.style.opacity = 1;
             } else {
-                btnWa.style.opacity = 0.5;
-                btnWa.style.pointerEvents = 'none';
-                btnWa.href = '#';
+                btnWa.href = '#'; btnWa.style.pointerEvents = 'none'; btnWa.style.opacity = 0.5;
             }
-
             modal.classList.add('active');
         }
 
-        function closeModal() {
-            modal.classList.remove('active');
-        }
+        function closeModal() { modal.classList.remove('active'); }
+        modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
 
-        // Cerrar al dar click fuera
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
-        // --- GUARDAR ---
         function saveGuest() {
             const btn = document.getElementById('btnSave');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Guardando...';
-            btn.style.opacity = 0.7;
-
+            btn.innerHTML = 'Guardando...'; btn.style.opacity = 0.7;
+            
             const payload = {
+                action: 'saveGuest', // IMPORTANTE PARA EL DOPOST
                 rowIndex: document.getElementById('mRow').value,
                 id: document.getElementById('mId').value,
                 rsvp: document.getElementById('mRsvp').value,
@@ -490,69 +202,41 @@
                 telefono: document.getElementById('mTel').value
             };
 
-            google.script.run
-                .withSuccessHandler(() => {
-                    // Actualizar dato local
+            // Fetch POST con 'no-cors' o normal dependiendo de la configuración
+            // Google Apps Script requiere que se envíe como texto stringificado
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    // Update Local
                     const local = allGuests.find(x => x.id === payload.id);
-                    if(local) {
-                        local.rsvp = payload.rsvp;
-                        local.mesa = payload.mesa;
-                        local.telefono = payload.telefono;
-                    }
+                    if(local) { local.rsvp = payload.rsvp; local.mesa = payload.mesa; local.telefono = payload.telefono; }
                     
-                    // UI Refresh
-                    btn.innerHTML = originalText;
-                    btn.style.opacity = 1;
+                    btn.innerHTML = 'GUARDAR CAMBIOS'; btn.style.opacity = 1;
                     closeModal();
-                    
-                    // Re-render con filtro actual
-                    const term = searchInput.value.toLowerCase();
-                    const filtered = allGuests.filter(g => 
-                        (g.nombre && g.nombre.toLowerCase().includes(term)) || 
-                        (g.grupo && g.grupo.toLowerCase().includes(term))
-                    );
-                    renderList(filtered);
-
-                })
-                .withFailureHandler(err => {
-                    alert('Error: ' + err);
-                    btn.innerHTML = originalText;
-                    btn.style.opacity = 1;
-                })
-                .saveGuestEdit(payload);
-        }
-
-        // --- UTILIDADES ---
-        function copyLink() {
-            const link = document.getElementById('mLink').value;
-            navigator.clipboard.writeText(link).then(() => {
-                const btn = document.querySelector('.btn-secondary');
-                const prev = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiado';
-                setTimeout(() => btn.innerHTML = prev, 1500);
+                    renderList(allGuests); // Refrescar lista visualmente
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(e => {
+                console.error(e);
+                alert("Error al guardar. Revisa la consola.");
+                btn.innerHTML = 'GUARDAR CAMBIOS';
             });
         }
 
-        function normalizeRsvp(val) {
-            const s = String(val).toUpperCase();
-            if(s.includes('SI')) return 'SI';
-            if(s.includes('NO')) return 'NO';
-            return 'PENDIENTE';
+        function copyLink() {
+            navigator.clipboard.writeText(document.getElementById('mLink').value);
+            alert("Link copiado");
         }
 
-        function getStatusClass(val) {
-            const s = String(val).toUpperCase();
-            if(s.includes('SI')) return 'status-si';
-            if(s.includes('NO')) return 'status-no';
-            return 'status-pendiente';
-        }
-
-        function getBadgeClass(val) {
-            const s = String(val).toUpperCase();
-            if(s.includes('SI')) return 'badge-si';
-            if(s.includes('NO')) return 'badge-no';
-            return 'badge-pend';
-        }
+        function normalizeRsvp(v) { return (v && v.toUpperCase().includes('SI')) ? 'SI' : (v && v.toUpperCase().includes('NO') ? 'NO' : 'PENDIENTE'); }
+        function getStatusClass(v) { return normalizeRsvp(v) === 'SI' ? 'status-si' : (normalizeRsvp(v) === 'NO' ? 'status-no' : 'status-pendiente'); }
+        function getBadgeClass(v) { return normalizeRsvp(v) === 'SI' ? 'badge-si' : (normalizeRsvp(v) === 'NO' ? 'badge-no' : 'badge-pend'); }
 
     </script>
 </body>
