@@ -64,6 +64,40 @@
 
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f4f9; z-index: 1000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+
+        /* Estilos para la lista de grupo en el modal */
+        .group-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .group-member-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .group-member-item:hover {
+            background: #fff;
+            border-color: var(--gold);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .gm-name { font-weight: 500; font-size: 0.9rem; color: #333; }
+        .gm-status { font-size: 0.75rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+
+        /* Colores mini para el status */
+        .gm-si { background: #e8f5e9; color: #2e7d32; }
+        .gm-no { background: #ffebee; color: #c62828; }
+        .gm-pend { background: #fff8e1; color: #f9a825; }
     </style>
 </head>
 <body>
@@ -163,7 +197,15 @@
                     </select>
                     <label class="form-label">Mensaje</label>
                     <textarea id="eMensaje" class="form-control"></textarea>
-                </div>
+
+                    <div id="groupSection" style="margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ccc;">
+                        <label class="form-label" style="color: var(--gold);">
+                            <i class="fa-solid fa-users"></i> Otros miembros del grupo
+                        </label>
+                        <div id="groupMembersList" class="group-list-container">
+                            </div>
+                    </div>
+                </div>            
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" id="btnSave" onclick="saveData()">Guardar Cambios</button>
@@ -195,6 +237,59 @@
                 }
             })
             .catch(e => { console.error(e); alert("Error cargando datos. Revisa consola."); });
+        }
+
+        function renderGroupMembersInModal(currentGuest) {
+            const container = document.getElementById('groupMembersList');
+            container.innerHTML = ''; // Limpiar lista anterior
+
+            // 1. Filtramos: mismo grupo, pero que NO sea el invitado actual
+            const family = allGuests.filter(g => 
+                g.grupo === currentGuest.grupo && // Mismo Nombre de Grupo
+                String(g.id) !== String(currentGuest.id) // Excluir al que ya tengo abierto
+            );
+
+            // 2. Si no hay nadie más, mostramos mensaje o ocultamos
+            if (family.length === 0) {
+                document.getElementById('groupSection').style.display = 'none';
+                return;
+            }
+            
+            // Mostramos la sección
+            document.getElementById('groupSection').style.display = 'block';
+
+            // 3. Generamos los botones
+            family.forEach(member => {
+                const item = document.createElement('div');
+                item.className = 'group-member-item';
+                
+                // Determinar clase de color según RSVP
+                let statusClass = 'gm-pend';
+                const rsvp = normalize(member.rsvp).toLowerCase();
+                if(rsvp === 'si') statusClass = 'gm-si';
+                if(rsvp === 'no') statusClass = 'gm-no';
+
+                // Usar nombre corto para la lista
+                const displayName = member.nombres || member.nombreCompleto || "Sin Nombre";
+
+                item.innerHTML = `
+                    <div class="gm-name">
+                        <i class="fa-solid fa-user" style="color:#ccc; margin-right:8px;"></i>
+                        ${displayName}
+                    </div>
+                    <div class="gm-status ${statusClass}">${member.rsvp || 'PEND'}</div>
+                `;
+
+                // AL HACER CLIC: Cambiamos al otro invitado
+                item.onclick = () => {
+                    // Opcional: Podrías preguntar si quiere guardar cambios antes de cambiar
+                    // if(confirm("¿Cambiar de invitado? Los cambios no guardados se perderán.")) {
+                        openEditModal(member.id); // ¡Recarga el modal con el nuevo ID!
+                    // }
+                };
+
+                container.appendChild(item);
+            });
         }
 
         function renderOrganizedList(guests) {
@@ -319,7 +414,8 @@
             } else {
                 btnWa.href = '#'; btnWa.style.opacity = 0.5; btnWa.style.pointerEvents = 'none';
             }
-            
+            renderGroupMembersInModal(g);
+
             document.getElementById('editModal').classList.add('active');
         }
 
