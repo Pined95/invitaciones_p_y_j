@@ -11,38 +11,57 @@
         :root { --gold: #C59D5F; --dark: #1a1a1a; --light: #f4f4f9; --white: #fff; --gray: #7f8c8d; }
         body { font-family: 'Montserrat', sans-serif; background: var(--light); margin: 0; padding-bottom: 100px; color: var(--dark); }
         
-        /* Header */
+        /* --- HEADER & SEARCH --- */
         .header-bar { background: var(--white); padding: 15px 20px; position: sticky; top: 0; z-index: 90; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
         .header-title { color: var(--gold); font-weight: 700; margin: 0; font-size: 1.2rem; }
-        
-        /* Search */
         .search-container { padding: 15px 20px; }
         .search-box { background: #fff; border-radius: 50px; display: flex; align-items: center; padding: 0 15px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .search-box input { border: none; padding: 12px; width: 100%; outline: none; font-family: inherit; }
+        .search-box input { border: none; padding: 12px; width: 100%; outline: none; font-family: inherit; font-size: 1rem; }
         
-        /* List & Sections */
-        .list-section-title { padding: 10px 20px; font-size: 0.8rem; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        /* --- LISTA --- */
+        .list-section-title { padding: 15px 20px 5px 20px; font-size: 0.8rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; margin-top: 10px; }
         .list-section-title::after { content: ''; flex: 1; height: 1px; background: #ddd; }
         
-        .guest-card { background: #fff; margin: 0 20px 10px 20px; padding: 15px; border-radius: 12px; border-left: 4px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.03); cursor: pointer; }
+        .guest-card { background: #fff; margin: 0 20px 10px 20px; padding: 15px; border-radius: 12px; border-left: 4px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.1s; }
+        .guest-card:active { transform: scale(0.98); }
         .st-si { border-left-color: #2ecc71; } .st-no { border-left-color: #e74c3c; } .st-pend { border-left-color: #f1c40f; }
-        .g-name { font-weight: 600; font-size: 1rem; }
-        .g-sub { font-size: 0.8rem; color: #888; margin-top: 4px; display: flex; justify-content: space-between; }
         
-        /* FAB Button (Add) */
+        .g-name { font-weight: 600; font-size: 1rem; display: flex; justify-content: space-between; }
+        .g-sub { font-size: 0.8rem; color: #888; margin-top: 4px; }
+        .g-badges { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
+        .badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; background: #eee; color: #555; font-weight: 600; }
+        .badge-mesa { background: #e3f2fd; color: #1565c0; }
+
+        /* --- FAB BUTTON --- */
         .fab { position: fixed; bottom: 30px; right: 25px; width: 60px; height: 60px; background: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 2rem; box-shadow: 0 4px 15px rgba(197, 157, 95, 0.4); cursor: pointer; z-index: 100; transition: transform 0.2s; }
         .fab:active { transform: scale(0.9); }
 
-        /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+        /* --- MODALS GENERAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
         .modal-overlay.active { display: flex; }
-        .modal-content { background: #fff; width: 100%; max-width: 500px; border-radius: 20px 20px 0 0; padding: 25px; animation: slideUp 0.3s; max-height: 90vh; overflow-y: auto; }
-        @media(min-width:600px){ .modal-overlay{align-items:center;} .modal-content{border-radius:20px;} }
+        .modal-content { background: #fff; width: 100%; max-width: 600px; border-radius: 20px 20px 0 0; padding: 0; animation: slideUp 0.3s; max-height: 95vh; display: flex; flex-direction: column; }
+        @media(min-width:600px){ .modal-overlay{align-items:center;} .modal-content{border-radius:20px; height:auto;} }
         
-        .form-label { font-size: 0.75rem; font-weight: 700; color: #999; margin-bottom: 5px; display: block; text-transform: uppercase; }
-        .form-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-family: inherit; box-sizing: border-box; }
-        .btn-primary { width: 100%; padding: 15px; background: var(--gold); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; }
-        
+        .modal-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-weight: 700; color: var(--gold); font-size: 1.1rem; margin: 0; }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+        .modal-footer { padding: 15px 20px; border-top: 1px solid #eee; background: #fff; }
+
+        /* --- FORMULARIOS --- */
+        .form-section { margin-bottom: 25px; }
+        .section-header { font-size: 0.75rem; text-transform: uppercase; color: #aaa; font-weight: 700; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .form-col { flex: 1; }
+        .form-label { font-size: 0.75rem; font-weight: 700; color: #888; margin-bottom: 5px; display: block; }
+        .form-control { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 0.95rem; box-sizing: border-box; }
+        .form-control:focus { border-color: var(--gold); outline: none; }
+        textarea.form-control { height: 70px; resize: none; }
+
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: white; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; }
+        .btn-primary { background: var(--gold); }
+        .btn-wa { background: #25D366; margin-bottom: 10px; }
+        .btn-sec { background: #f5f5f5; color: #333; margin-bottom: 10px; }
+
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         
         /* Loader */
@@ -53,7 +72,7 @@
 
     <div id="loader">
         <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--gold);"></i>
-        <p style="margin-top:10px; color: #888; font-size: 0.9rem;">Cargando lista...</p>
+        <p style="margin-top:10px; color: #888;">Cargando lista...</p>
     </div>
 
     <div class="header-bar">
@@ -72,40 +91,135 @@
 
     <div class="fab" onclick="openAddModal()">+</div>
 
+
     <div class="modal-overlay" id="addModal">
         <div class="modal-content">
-            <h3 style="margin-top:0; color:var(--gold)">Nuevo Invitado</h3>
-            
-            <label class="form-label">Lado de la Boda</label>
-            <select id="nLado" class="form-input">
-                <option value="NOVIA">Lado Novia (Paola)</option>
-                <option value="NOVIO">Lado Novio (Jorge)</option>
-            </select>
-
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1">
-                    <label class="form-label">Nombres</label>
-                    <input type="text" id="nNombres" class="form-input" placeholder="Ej. Juan Carlos">
-                </div>
-                <div style="flex:1">
-                    <label class="form-label">Apellido P.</label>
-                    <input type="text" id="nApeP" class="form-input" placeholder="Ej. Pérez">
-                </div>
+            <div class="modal-header">
+                <h3 class="modal-title">Nuevo Invitado</h3>
+                <div onclick="closeAddModal()" style="font-size:1.5rem; cursor:pointer">&times;</div>
             </div>
+            <div class="modal-body">
+                <label class="form-label">Lado de la Boda</label>
+                <select id="nLado" class="form-control" style="margin-bottom:15px;">
+                    <option value="NOVIA">Lado Novia (Paola)</option>
+                    <option value="NOVIO">Lado Novio (Jorge)</option>
+                </select>
 
-            <label class="form-label">Apellido Materno (Opcional)</label>
-            <input type="text" id="nApeM" class="form-input">
+                <div class="form-row">
+                    <div class="form-col">
+                        <label class="form-label">Nombres</label>
+                        <input type="text" id="nNombres" class="form-control" placeholder="Ej. Juan">
+                    </div>
+                    <div class="form-col">
+                        <label class="form-label">Apellido P.</label>
+                        <input type="text" id="nApeP" class="form-control" placeholder="Ej. Pérez">
+                    </div>
+                </div>
 
-            <label class="form-label">Teléfono</label>
-            <input type="tel" id="nTel" class="form-input" placeholder="10 dígitos">
+                <label class="form-label">Apellido Materno</label>
+                <input type="text" id="nApeM" class="form-control" style="margin-bottom:15px;">
 
-            <button class="btn-primary" onclick="submitNewGuest()" id="btnAddBtn">Crear Invitado</button>
-            <button style="background:transparent; color:#888; margin-top:10px; width:100%; border:none; padding:10px;" onclick="closeAddModal()">Cancelar</button>
+                <label class="form-label">Teléfono</label>
+                <input type="tel" id="nTel" class="form-control" placeholder="10 dígitos" style="margin-bottom:15px;">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="submitNewGuest()" id="btnAddBtn">Crear Invitado</button>
+            </div>
         </div>
     </div>
 
+
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Editar Invitado</div>
+                <div onclick="closeEditModal()" style="font-size:1.5rem; cursor:pointer">&times;</div>
+            </div>
+            
+            <div class="modal-body">
+                <input type="hidden" id="eRow"><input type="hidden" id="eId"><input type="hidden" id="eLink">
+
+                <div class="form-section">
+                    <div class="section-header">Identidad</div>
+                    <div class="form-row">
+                        <div class="form-col" style="flex:0.4">
+                            <label class="form-label">Título</label>
+                            <input type="text" id="eTitulo" class="form-control" placeholder="Sr.">
+                        </div>
+                        <div class="form-col">
+                            <label class="form-label">Nombres</label>
+                            <input type="text" id="eNombres" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label class="form-label">Apellido P.</label>
+                            <input type="text" id="eApeP" class="form-control">
+                        </div>
+                        <div class="form-col">
+                            <label class="form-label">Apellido M.</label>
+                            <input type="text" id="eApeM" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-header">Contacto</div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" id="eTel" class="form-control">
+                        </div>
+                        <div class="form-col">
+                            <label class="form-label">Correo</label>
+                            <input type="email" id="eCorreo" class="form-control">
+                        </div>
+                    </div>
+                    <a href="#" id="btnWa" target="_blank" class="btn btn-wa"><i class="fa-brands fa-whatsapp"></i> Chat WhatsApp</a>
+                    <button class="btn btn-sec" onclick="copyLink()"><i class="fa-solid fa-link"></i> Copiar Link Invitación</button>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-header">Boda & Logística</div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label class="form-label">RSVP</label>
+                            <select id="eRsvp" class="form-control">
+                                <option value="PENDIENTE">PENDIENTE</option>
+                                <option value="SI">CONFIRMADO</option>
+                                <option value="NO">CANCELADO</option>
+                            </select>
+                        </div>
+                        <div class="form-col">
+                            <label class="form-label">Mesa</label>
+                            <input type="text" id="eMesa" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label class="form-label">Alergias</label>
+                            <input type="text" id="eAlergias" class="form-control">
+                        </div>
+                    </div>
+                     <div class="form-row">
+                        <div class="form-col">
+                            <label class="form-label">Mensaje / Dedicatoria</label>
+                            <textarea id="eMensaje" class="form-control"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btnSave" onclick="saveData()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
-        // CONFIG
+        // === CONFIGURACIÓN ===
+        // ⚠️ PEGA AQUÍ TU URL DEL DEPLOY ⚠️
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ-D0whwVWJxiREY5-yFCq0wjs9KWCEjCzPUL4Fm0DTCA/exec"; 
 
         let allGuests = [];
@@ -113,47 +227,37 @@
         window.onload = loadData;
 
         function loadData() {
+            if(SCRIPT_URL.includes("TU_URL")) { alert("Falta configurar la URL en el HTML"); return; }
+            
             fetch(SCRIPT_URL + "?action=getDashboard")
             .then(r => r.json())
             .then(data => {
                 if(data.status === 'success') {
                     allGuests = data.guests;
-                    renderOrganizedList(allGuests); // Usamos la nueva función de orden
+                    renderOrganizedList(allGuests);
                     document.getElementById('loader').style.display = 'none';
                     document.getElementById('totalCount').innerText = allGuests.length;
                 }
-            });
+            })
+            .catch(e => { console.error(e); alert("Error cargando datos"); });
         }
 
-        // --- RENDERIZADO CON ORDEN LÓGICO ---
+        // --- RENDERIZADO POR SECCIONES ---
         function renderOrganizedList(guests) {
             const container = document.getElementById('listContainer');
             container.innerHTML = '';
 
-            // 1. Separar por lados (Usando la columna 'lado' que viene del backend o deduciendola si tienes esa data)
-            // Nota: Si en tu `getAdminDashboardData` no agregaste 'lado', agrégalo. 
-            // Si no lo tienes, podemos ordenarlos alfabéticamente por grupo.
-            
-            // Asumiendo que agregaste 'lado' al backend o usaremos un orden alfabético simple de Grupos
-            // Vamos a ordenar primero por RSVP (Pendientes primero para ver a quien cobrar)
-            
-            // LÓGICA DE ORDEN: 
-            // 1. Invitados de la Novia
-            // 2. Invitados del Novio
-            
-            // Filtros (asumiendo que tienes la data, si no, ordenamos alfabético)
-            // Como tu CSV tiene columna 'LADO', asegúrate de que 'getAdminDashboardData' la devuelva.
-            // Si no la devuelve aún, edita el .gs para incluir: lado: String(data[i][COLS.lado] || "")
-            
+            // Filtros por Lado (Insensible a mayúsculas)
             const novio = guests.filter(g => (g.lado || "").toUpperCase().includes("NOVIO"));
             const novia = guests.filter(g => (g.lado || "").toUpperCase().includes("NOVIA"));
+            // Los que no tienen lado asignado van a "Otros"
             const otros = guests.filter(g => !(g.lado || "").toUpperCase().includes("NOVIO") && !(g.lado || "").toUpperCase().includes("NOVIA"));
 
-            if(novia.length > 0) renderSection("👰 Lado Novia", novia, container);
-            if(novio.length > 0) renderSection("🤵 Lado Novio", novio, container);
-            if(otros.length > 0) renderSection("👥 Otros / Sin Asignar", otros, container);
+            if(novia.length > 0) renderSection("👰 Familia de Paola (Novia)", novia, container);
+            if(novio.length > 0) renderSection("🤵 Familia de Jorge (Novio)", novio, container);
+            if(otros.length > 0) renderSection("👥 Sin Asignar / Otros", otros, container);
 
-            if(guests.length === 0) container.innerHTML = '<div style="text-align:center; padding:20px; color:#999">No hay resultados</div>';
+            if(guests.length === 0) container.innerHTML = '<div style="text-align:center; padding:30px; color:#999">No hay invitados.</div>';
         }
 
         function renderSection(title, list, container) {
@@ -166,23 +270,29 @@
             container.appendChild(header);
 
             list.forEach(g => {
+                const rsvpNorm = normalize(g.rsvp).toLowerCase();
                 const el = document.createElement('div');
-                el.className = `guest-card st-${normalize(g.rsvp).toLowerCase().substring(0,4)}`;
-                // Al hacer click podrías abrir el modal de edición (código anterior)
-                el.onclick = () => alert("Aquí abrirías el editor para: " + g.nombre); 
+                el.className = `guest-card st-${rsvpNorm === 'si' ? 'si' : (rsvpNorm === 'no' ? 'no' : 'pend')}`;
+                
+                // AQUÍ CONECTAMOS EL EDITOR
+                el.onclick = () => openEditModal(g.id); 
                 
                 el.innerHTML = `
-                    <div class="g-name">${g.nombre}</div>
-                    <div class="g-sub">
-                        <span>${g.grupo}</span>
-                        <span>${g.rsvp || 'PEND'}</span>
+                    <div class="g-name">
+                        <span>${g.nombreCompleto}</span>
+                    </div>
+                    <div class="g-sub">${g.grupo}</div>
+                    <div class="g-badges">
+                        <span class="badge">${g.rsvp || 'PEND'}</span>
+                        ${g.mesa ? `<span class="badge badge-mesa">Mesa ${g.mesa}</span>` : ''}
+                        ${(g.civil === 'SI' || g.civil === 'true') ? '<span class="badge" style="background:#f3e5f5; color:#7b1fa2">Civil</span>' : ''}
                     </div>
                 `;
                 container.appendChild(el);
             });
         }
 
-        // --- AGREGAR INVITADO ---
+        // --- MODAL AGREGAR ---
         function openAddModal() { document.getElementById('addModal').classList.add('active'); }
         function closeAddModal() { document.getElementById('addModal').classList.remove('active'); }
 
@@ -191,7 +301,7 @@
             btn.innerText = "Creando..."; btn.disabled = true;
 
             const payload = {
-                action: 'addNewGuest', // IMPORTANTE
+                action: 'addNewGuest',
                 lado: document.getElementById('nLado').value,
                 nombres: document.getElementById('nNombres').value,
                 apeP: document.getElementById('nApeP').value,
@@ -203,9 +313,13 @@
             .then(r => r.json())
             .then(res => {
                 if(res.status === 'success') {
-                    alert("Invitado creado. Recargando...");
+                    alert("Invitado creado con éxito.");
                     closeAddModal();
-                    loadData(); // Recargar lista
+                    // Limpiar campos
+                    document.getElementById('nNombres').value = "";
+                    document.getElementById('nApeP').value = "";
+                    document.getElementById('nTel').value = "";
+                    loadData(); // Recargar todo
                 } else {
                     alert("Error: " + res.message);
                 }
@@ -213,14 +327,111 @@
             .catch(e => alert("Error de conexión"))
             .finally(() => { btn.innerText = "Crear Invitado"; btn.disabled = false; });
         }
+
+        // --- MODAL EDITAR ---
+        const editModal = document.getElementById('editModal');
+        function closeEditModal() { editModal.classList.remove('active'); }
         
+        function openEditModal(id) {
+            const g = allGuests.find(x => x.id === id);
+            if(!g) return;
+
+            // Llenar datos
+            document.getElementById('eRow').value = g.rowIndex;
+            document.getElementById('eId').value = g.id;
+            document.getElementById('eLink').value = g.link;
+            
+            document.getElementById('eTitulo').value = g.titulo;
+            document.getElementById('eNombres').value = g.nombres;
+            document.getElementById('eApeP').value = g.apeP;
+            document.getElementById('eApeM').value = g.apeM;
+            
+            document.getElementById('eTel').value = g.telefono;
+            document.getElementById('eCorreo').value = g.correo;
+            
+            document.getElementById('eRsvp').value = normalize(g.rsvp);
+            document.getElementById('eMesa').value = g.mesa;
+            document.getElementById('eAlergias').value = g.alergias;
+            document.getElementById('eMensaje').value = g.mensaje;
+
+            // Botón WhatsApp
+            const btnWa = document.getElementById('btnWa');
+            if(g.whatsapp) {
+                const txt = `Hola ${g.nombres}, aquí tienes tu invitación: ${g.link}`;
+                btnWa.href = `https://wa.me/${g.whatsapp}?text=${encodeURIComponent(txt)}`;
+                btnWa.style.opacity = 1; btnWa.style.pointerEvents = 'auto';
+            } else {
+                btnWa.href = '#'; btnWa.style.opacity = 0.5; btnWa.style.pointerEvents = 'none';
+            }
+
+            editModal.classList.add('active');
+        }
+
+        function saveData() {
+            const btn = document.getElementById('btnSave');
+            btn.innerText = "Guardando..."; btn.disabled = true;
+
+            const payload = {
+                action: 'saveGuest',
+                rowIndex: document.getElementById('eRow').value,
+                id: document.getElementById('eId').value,
+                
+                nombres: document.getElementById('eNombres').value,
+                apeP: document.getElementById('eApeP').value,
+                apeM: document.getElementById('eApeM').value,
+                titulo: document.getElementById('eTitulo').value,
+                
+                telefono: document.getElementById('eTel').value,
+                correo: document.getElementById('eCorreo').value,
+                
+                rsvp: document.getElementById('eRsvp').value,
+                mesa: document.getElementById('eMesa').value,
+                alergias: document.getElementById('eAlergias').value,
+                mensaje: document.getElementById('eMensaje').value,
+                cancion: "", // Opcional, puedes agregar campo si quieres
+                civil: "NO" // Opcional, agregar select si quieres editar esto
+            };
+
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+            .then(r => r.json())
+            .then(res => {
+                if(res.status === 'success') {
+                    // Actualizar localmente para sentirlo rápido
+                    const g = allGuests.find(x => x.id === payload.id);
+                    if(g) {
+                        g.nombres = payload.nombres;
+                        g.nombreCompleto = payload.nombres + " " + payload.apeP + " " + payload.apeM;
+                        g.rsvp = payload.rsvp;
+                        g.mesa = payload.mesa;
+                    }
+                    renderOrganizedList(allGuests);
+                    closeEditModal();
+                } else {
+                    alert("Error al guardar: " + res.message);
+                }
+            })
+            .catch(e => alert("Error de red"))
+            .finally(() => { btn.innerText = "Guardar Cambios"; btn.disabled = false; });
+        }
+
         // Helpers
-        function normalize(v) { return (v && v.includes('SI')) ? 'SI' : (v && v.includes('NO') ? 'NO' : 'PEND'); }
+        function copyLink() {
+            navigator.clipboard.writeText(document.getElementById('eLink').value);
+            alert("Enlace copiado al portapapeles");
+        }
         
-        // Búsqueda simple
+        function normalize(v) { 
+            if(!v) return 'PENDIENTE';
+            v = v.toUpperCase();
+            if(v.includes('SI')) return 'SI';
+            if(v.includes('NO')) return 'NO';
+            return 'PENDIENTE';
+        }
+
+        // Búsqueda
         document.getElementById('searchInput').addEventListener('keyup', (e) => {
             const q = e.target.value.toLowerCase();
-            const filtered = allGuests.filter(g => g.nombre.toLowerCase().includes(q) || g.grupo.toLowerCase().includes(q));
+            const filtered = allGuests.filter(g => g.nombreCompleto.toLowerCase().includes(q) || g.grupo.toLowerCase().includes(q));
             renderOrganizedList(filtered);
         });
 
