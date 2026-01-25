@@ -261,8 +261,8 @@
         }
 
         function renderSection(title, list, container) {
-            // Ordenar alfabéticamente dentro de la sección
-            list.sort((a,b) => a.grupo.localeCompare(b.grupo));
+            // Ordenar alfabéticamente
+            list.sort((a,b) => (a.grupo || "").localeCompare(b.grupo || ""));
 
             const header = document.createElement('div');
             header.className = 'list-section-title';
@@ -270,22 +270,32 @@
             container.appendChild(header);
 
             list.forEach(g => {
+                // --- BLINDAJE DE DATOS ---
+                // Si nombreCompleto falla, intenta armarlo con las partes, o pone "Sin Nombre"
+                let nombreMostrar = g.nombreCompleto;
+                if(!nombreMostrar || nombreMostrar === "undefined") {
+                    nombreMostrar = [g.nombres, g.apeP, g.apeM].filter(Boolean).join(" ") || "Sin Nombre";
+                }
+                
+                let grupoMostrar = g.grupo || "Sin Grupo";
+                
+                // Normalizar RSVP
                 const rsvpNorm = normalize(g.rsvp).toLowerCase();
+                
+                // Crear Tarjeta
                 const el = document.createElement('div');
                 el.className = `guest-card st-${rsvpNorm === 'si' ? 'si' : (rsvpNorm === 'no' ? 'no' : 'pend')}`;
-                
-                // AQUÍ CONECTAMOS EL EDITOR
                 el.onclick = () => openEditModal(g.id); 
                 
                 el.innerHTML = `
                     <div class="g-name">
-                        <span>${g.nombreCompleto}</span>
+                        <span>${nombreMostrar}</span>
                     </div>
-                    <div class="g-sub">${g.grupo}</div>
+                    <div class="g-sub">${grupoMostrar}</div>
                     <div class="g-badges">
                         <span class="badge">${g.rsvp || 'PEND'}</span>
                         ${g.mesa ? `<span class="badge badge-mesa">Mesa ${g.mesa}</span>` : ''}
-                        ${(g.civil === 'SI' || g.civil === 'true') ? '<span class="badge" style="background:#f3e5f5; color:#7b1fa2">Civil</span>' : ''}
+                        ${(String(g.civil).toUpperCase() === 'SI' || String(g.civil).toUpperCase() === 'TRUE') ? '<span class="badge" style="background:#f3e5f5; color:#7b1fa2">Civil</span>' : ''}
                     </div>
                 `;
                 container.appendChild(el);
