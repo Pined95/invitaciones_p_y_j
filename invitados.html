@@ -241,35 +241,35 @@
 
         function renderGroupMembersInModal(currentGuest) {
             const container = document.getElementById('groupMembersList');
-            container.innerHTML = ''; // Limpiar lista anterior
+            container.innerHTML = ''; 
 
-            // 1. Filtramos: mismo grupo, pero que NO sea el invitado actual
+            // --- CORRECCIÓN CLAVE ---
+            // Ahora filtramos por 'groupId' (Ej: 5U38) en lugar del nombre del grupo.
             const family = allGuests.filter(g => 
-                g.grupo === currentGuest.grupo && // Mismo Nombre de Grupo
-                String(g.id) !== String(currentGuest.id) // Excluir al que ya tengo abierto
+                g.groupId && // Que tenga ID de grupo
+                String(g.groupId) === String(currentGuest.groupId) && // Que sea IGUAL al del invitado actual
+                String(g.id) !== String(currentGuest.id) // Que no sea él mismo
             );
 
-            // 2. Si no hay nadie más, mostramos mensaje o ocultamos
+            // DEBUG: Para que veas en la consola si funciona
+            console.log(`Buscando familia para ID Grupo: ${currentGuest.groupId}. Encontrados: ${family.length}`);
+
             if (family.length === 0) {
                 document.getElementById('groupSection').style.display = 'none';
                 return;
             }
             
-            // Mostramos la sección
             document.getElementById('groupSection').style.display = 'block';
 
-            // 3. Generamos los botones
             family.forEach(member => {
                 const item = document.createElement('div');
                 item.className = 'group-member-item';
                 
-                // Determinar clase de color según RSVP
                 let statusClass = 'gm-pend';
                 const rsvp = normalize(member.rsvp).toLowerCase();
                 if(rsvp === 'si') statusClass = 'gm-si';
                 if(rsvp === 'no') statusClass = 'gm-no';
 
-                // Usar nombre corto para la lista
                 const displayName = member.nombres || member.nombreCompleto || "Sin Nombre";
 
                 item.innerHTML = `
@@ -280,12 +280,13 @@
                     <div class="gm-status ${statusClass}">${member.rsvp || 'PEND'}</div>
                 `;
 
-                // AL HACER CLIC: Cambiamos al otro invitado
                 item.onclick = () => {
-                    // Opcional: Podrías preguntar si quiere guardar cambios antes de cambiar
-                    // if(confirm("¿Cambiar de invitado? Los cambios no guardados se perderán.")) {
-                        openEditModal(member.id); // ¡Recarga el modal con el nuevo ID!
-                    // }
+                    // Pequeño efecto visual para saber que cambió
+                    document.querySelector('.modal-content').animate([
+                        { opacity: 0.5 }, { opacity: 1 }
+                    ], { duration: 300 });
+                    
+                    openEditModal(member.id);
                 };
 
                 container.appendChild(item);
