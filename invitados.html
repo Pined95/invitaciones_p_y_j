@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>Gestor de Invitados</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <style>
+    :root {
+      --bg-body: #0a0a0a;
+      --bg-card: #141414;
+      --text-main: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --accent: #cfcfcf; /* Plateado */
+      --border: #333;
+      --highlight: #2c2c2c;
+    }
+
+    body { background-color: var(--bg-body); color: var(--text-main); font-family: sans-serif; padding-bottom: 80px; }
+    
+    /* Navbar fl otante estilo App */
+    .app-header {
+      background-color: rgba(20, 20, 20, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      padding: 15px;
+    }
+
+    /* Buscador */
+    .search-wrapper {
+      background: var(--highlight);
+      border-radius: 12px;
+      padding: 5px 15px;
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--border);
+    }
+    .search-input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      width: 100%;
+      padding: 8px;
+      outline: none;
+    }
+
+    /* Tarjetas de Invitados */
+    .guest-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      padding: 15px;
+      transition: all 0.2s;
+    }
+    .guest-card:active { transform: scale(0.98); background-color: var(--highlight); }
+    
+    .guest-name { font-weight: 600; font-size: 1.1rem; color: #fff; }
+    .guest-group { font-size: 0.85rem; color: var(--text-muted); }
+    
+    /* Badges de Estado */
+    .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+    .st-si { background-color: #4caf50; box-shadow: 0 0 5px #4caf50; }
+    .st-no { background-color: #f44336; }
+    .st-pend { background-color: #ff9800; }
+
+    /* Modal Oscuro */
+    .modal-content { background-color: #1a1a1a; border: 1px solid #444; color: #fff; }
+    .modal-header { border-bottom: 1px solid #333; }
+    .modal-footer { border-top: 1px solid #333; }
+    .form-control, .form-select { 
+      background-color: #2a2a2a; border: 1px solid #444; color: #fff; 
+    }
+    .form-control:focus, .form-select:focus {
+      background-color: #333; color: #fff; border-color: var(--accent); box-shadow: none;
+    }
+
+    /* Botones Acción */
+    .btn-action {
+      flex: 1; margin: 0 5px; display: flex; align-items: center; justify-content: center;
+      padding: 12px; border-radius: 8px; font-weight: 500; font-size: 0.9rem;
+    }
+    .btn-wa { background-color: #128c7e; color: white; border: none; }
+    .btn-link { background-color: #444; color: white; border: none; text-decoration: none; }
+
+    /* Loader */
+    #loader {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #000; z-index: 2000;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loader">
+    <div class="spinner-border text-light" role="status"></div>
+    <div class="mt-3 text-secondary small">Cargando Base de Datos...</div>
+  </div>
+
+  <div class="app-header">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 class="m-0 fw-bold text-white">LISTA DE INVITADOS</h5>
+      <span class="badge bg-secondary" id="totalCount">0</span>
+    </div>
+    
+    <div class="search-wrapper">
+      <i class="bi bi-search text-muted"></i>
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar nombre, grupo o mesa..." autocomplete="off">
+      <i class="bi bi-x-lg text-muted" onclick="clearSearch()" style="cursor:pointer"></i>
+    </div>
+  </div>
+
+  <div class="container mt-3" id="guestListContainer">
+    </div>
+
+  <div class="modal fade" id="guestModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title" id="mName">Nombre Invitado</h5>
+            <small class="text-muted" id="mGroup">Familia</small>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="mId">
+          <input type="hidden" id="mRow">
+          <input type="hidden" id="mLink">
+
+          <div class="mb-3">
+            <label class="form-label text-secondary small">ESTADO DE ASISTENCIA</label>
+            <select class="form-select" id="mRsvp">
+              <option value="PENDIENTE">⏳ Pendiente</option>
+              <option value="SI">✅ CONFIRMADO</option>
+              <option value="NO">❌ Cancelado</option>
+            </select>
+          </div>
+
+          <div class="row g-2 mb-4">
+            <div class="col-5">
+              <label class="form-label text-secondary small">MESA</label>
+              <input type="text" class="form-control text-center" id="mMesa" placeholder="S/A">
+            </div>
+            <div class="col-7">
+              <label class="form-label text-secondary small">TELÉFONO</label>
+              <input type="tel" class="form-control" id="mTel">
+            </div>
+          </div>
+
+          <label class="form-label text-secondary small mb-2">ACCIONES RÁPIDAS</label>
+          <div class="d-flex">
+            <a href="#" id="btnWhatsapp" target="_blank" class="btn btn-wa btn-action">
+              <i class="bi bi-whatsapp me-2"></i> Enviar
+            </a>
+            <button onclick="copyLink()" class="btn btn-link btn-action">
+              <i class="bi bi-link-45deg me-2"></i> Copiar Link
+            </button>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-dark w-100 py-2" onclick="saveGuest()">GUARDAR CAMBIOS</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
+    <div id="liveToast" class="toast align-items-center text-bg-dark border-secondary" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body text-center w-100" id="toastMsg">
+          Guardado
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let allGuests = [];
+    const modalEl = new bootstrap.Modal(document.getElementById('guestModal'));
+    const toastEl = new bootstrap.Toast(document.getElementById('liveToast'));
+
+    // --- INICIALIZACIÓN ---
+    document.addEventListener('DOMContentLoaded', () => {
+      google.script.run
+        .withSuccessHandler(data => {
+          allGuests = data;
+          renderList(allGuests);
+          document.getElementById('loader').style.display = 'none';
+        })
+        .withFailureHandler(err => alert('Error: ' + err))
+        .getAdminDashboardData(); // Usamos la misma función que creamos antes
+    });
+
+    // --- RENDERIZADO ---
+    function renderList(data) {
+      const container = document.getElementById('guestListContainer');
+      document.getElementById('totalCount').textContent = data.length;
+      container.innerHTML = '';
+
+      // Limitamos a 50 al inicio para velocidad, o todo si es búsqueda
+      const limit = data.length > 50 ? 50 : data.length;
+
+      data.slice(0, limit).forEach(g => {
+        const statusClass = getStatusClass(g.rsvp);
+        const card = document.createElement('div');
+        card.className = 'guest-card';
+        card.onclick = () => openEdit(g.id);
+        
+        card.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="guest-name">${g.nombre}</div>
+              <div class="guest-group">${g.grupo}</div>
+            </div>
+            <div class="text-end">
+              <div class="mb-1"><span class="status-dot ${statusClass}"></span><span class="small text-muted">${g.rsvp || 'PEND'}</span></div>
+              ${g.mesa ? `<span class="badge bg-dark border border-secondary text-secondary">Mesa ${g.mesa}</span>` : ''}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // --- BÚSQUEDA ---
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keyup', (e) => {
+      const term = e.target.value.toLowerCase();
+      const filtered = allGuests.filter(g => 
+        (g.nombre && g.nombre.toLowerCase().includes(term)) || 
+        (g.grupo && g.grupo.toLowerCase().includes(term)) ||
+        (g.mesa && String(g.mesa).includes(term))
+      );
+      renderList(filtered);
+    });
+
+    function clearSearch() {
+      searchInput.value = '';
+      renderList(allGuests);
+    }
+
+    // --- EDICIÓN Y MODAL ---
+    function openEdit(id) {
+      const g = allGuests.find(x => x.id === id);
+      if(!g) return;
+
+      document.getElementById('mId').value = g.id;
+      document.getElementById('mRow').value = g.rowIndex;
+      document.getElementById('mName').textContent = g.nombre;
+      document.getElementById('mGroup').textContent = g.grupo + " (" + g.invitacion + ")";
+      document.getElementById('mLink').value = g.link;
+      
+      // Valores Formulario
+      document.getElementById('mRsvp').value = normalizeRsvp(g.rsvp);
+      document.getElementById('mMesa').value = g.mesa;
+      document.getElementById('mTel').value = g.telefonoVisual || g.telefono;
+
+      // Botón WhatsApp Lógica
+      const btnWa = document.getElementById('btnWhatsapp');
+      if (g.whatsapp) {
+        const txt = `Hola ${g.nombre.split(' ')[0]}! Te comparto tu invitación digital: ${g.link}`;
+        btnWa.href = `https://wa.me/${g.whatsapp}?text=${encodeURIComponent(txt)}`;
+        btnWa.classList.remove('disabled');
+        btnWa.style.opacity = "1";
+      } else {
+        btnWa.href = "#";
+        btnWa.classList.add('disabled');
+        btnWa.style.opacity = "0.5";
+      }
+
+      modalEl.show();
+    }
+
+    function saveGuest() {
+      const btn = document.querySelector('.modal-footer button');
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Guardando...';
+      btn.disabled = true;
+
+      const payload = {
+        rowIndex: document.getElementById('mRow').value,
+        id: document.getElementById('mId').value,
+        rsvp: document.getElementById('mRsvp').value,
+        mesa: document.getElementById('mMesa').value,
+        telefono: document.getElementById('mTel').value
+      };
+
+      google.script.run
+        .withSuccessHandler(() => {
+          // Actualizar Local
+          const local = allGuests.find(x => x.id === payload.id);
+          if(local) {
+            local.rsvp = payload.rsvp;
+            local.mesa = payload.mesa;
+            local.telefono = payload.telefono;
+          }
+          
+          btn.innerHTML = 'GUARDAR CAMBIOS';
+          btn.disabled = false;
+          modalEl.hide();
+          renderList(searchInput.value ? allGuests.filter(g=>g.nombre.toLowerCase().includes(searchInput.value.toLowerCase())) : allGuests);
+          
+          document.getElementById('toastMsg').textContent = "✅ Cambios guardados";
+          toastEl.show();
+        })
+        .withFailureHandler(err => {
+          alert('Error: ' + err);
+          btn.disabled = false;
+        })
+        .saveGuestEdit(payload);
+    }
+
+    // --- UTILIDADES ---
+    function normalizeRsvp(val) {
+      const s = String(val).toUpperCase();
+      if(s.includes('SI')) return 'SI';
+      if(s.includes('NO')) return 'NO';
+      return 'PENDIENTE';
+    }
+
+    function getStatusClass(val) {
+      const s = String(val).toUpperCase();
+      if(s.includes('SI')) return 'st-si';
+      if(s.includes('NO')) return 'st-no';
+      return 'st-pend';
+    }
+
+    function copyLink() {
+      const link = document.getElementById('mLink').value;
+      navigator.clipboard.writeText(link).then(() => {
+         document.getElementById('toastMsg').textContent = "📋 Link copiado";
+         toastEl.show();
+      });
+    }
+  </script>
+</body>
+</html>
