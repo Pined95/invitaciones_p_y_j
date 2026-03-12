@@ -134,6 +134,7 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
         const sortedGuests = sortGuestsByGroupAndTable(guests);
 
         sortedGuests.forEach(g => {
+            // Se mantiene la lógica del estado por si requieres usarla después
             let rsvp = (g.rsvp || "").toUpperCase().trim();
             let badgeClass = 'bg-pend';
             let badgeText = 'PENDIENTE';
@@ -148,12 +149,12 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
             let nombreDelGrupo = g.nombreGrupo || '-';
 
             const tr = document.createElement('tr');
+            // AQUÍ SE REORDENAN LAS CELDAS PARA COINCIDIR CON TU THEAD
             tr.innerHTML = `
-                <td><strong>${g.mesa || 'Sin Asignar'}</strong></td>
                 <td>${g.nombre}</td>
                 <td>${idGrupo}</td>
                 <td>${nombreDelGrupo}</td>
-                <td><span class="status-badge ${badgeClass}">${badgeText}</span></td>
+                <td><strong>${g.mesa || 'Sin Asignar'}</strong></td>
                 <td>${g.lado || '?'}</td>
             `;
             tbody.appendChild(tr);
@@ -163,11 +164,12 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
     function exportCSV() {
         if(globalGuests.length === 0) return;
 
-        // Se agregó "Nombre Grupo" al encabezado del CSV
-        let csvContent = "\uFEFFMesa,Nombre,ID Grupo,Nombre Grupo,Estado,Lado\n";
+        // AQUÍ SE REORDENAN LOS ENCABEZADOS DEL CSV
+        let csvContent = "\uFEFFNombre,Grupo,Nombre Grupo,Mesa,Lado\n";
         const sortedGuests = sortGuestsByGroupAndTable(globalGuests);
 
         sortedGuests.forEach(g => {
+            // Se mantiene la lógica por si decides reincorporar el estado al CSV después
             let rsvp = (g.rsvp || "PENDIENTE").toUpperCase().trim();
             let estado = "PENDIENTE";
             if (rsvp.includes('SI') || rsvp.includes('SÍ') || rsvp.includes('CONFIRMADO')) estado = 'CONFIRMADO';
@@ -179,8 +181,8 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
             let nombreDelGrupo = g.nombreGrupo ? String(g.nombreGrupo).replace(/"/g, '""') : "";
             let lado = g.lado ? String(g.lado).replace(/"/g, '""') : "";
             
-            // Se agregó la variable del nombre de grupo a la fila
-            csvContent += `"${mesa}","${nombre}","${idGrupo}","${nombreDelGrupo}","${estado}","${lado}"\n`;
+            // AQUÍ SE REORDENAN LAS COLUMNAS EN LA FILA EXPORTADA
+            csvContent += `"${nombre}","${idGrupo}","${nombreDelGrupo}","${mesa}","${lado}"\n`;
         });
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
