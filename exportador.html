@@ -108,12 +108,18 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
         }
     }
 
+    // --- NUEVA FUNCIÓN: Atrapa el grupo sin importar cómo venga escrito desde la base de datos ---
+    function getGroup(g) {
+        let grupoCrudo = g.ID_GRUPO || g.id_grupo || g.grupo || g.Grupo || "Sin Grupo";
+        return String(grupoCrudo).trim();
+    }
+
     // --- FUNCIÓN CENTRALIZADA PARA ORDENAR ---
     function sortGuestsByGroupAndTable(guests) {
         return guests.sort((a, b) => {
-            // 1. Leer el grupo (priorizando ID_GRUPO)
-            let grupoA = String(a.ID_GRUPO || a.grupo || "Sin Grupo").trim();
-            let grupoB = String(b.ID_GRUPO || b.grupo || "Sin Grupo").trim();
+            // 1. Leer el grupo usando la función cazadora
+            let grupoA = getGroup(a);
+            let grupoB = getGroup(b);
             
             // 2. Ordenar primero por grupo alfanuméricamente
             let comparacionGrupo = grupoA.localeCompare(grupoB, undefined, {numeric: true});
@@ -143,8 +149,8 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
                 badgeClass = 'bg-no'; badgeText = 'CANCELADO';
             }
 
-            // Capturar el grupo correctamente
-            let nombreGrupo = g.ID_GRUPO || g.grupo || '-';
+            // Capturar el grupo correctamente usando la función
+            let nombreGrupo = getGroup(g);
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -172,8 +178,8 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
 
             let mesa = g.mesa ? String(g.mesa).replace(/"/g, '""') : "Sin Asignar";
             let nombre = g.nombre ? String(g.nombre).replace(/"/g, '""') : "";
-            // Capturar y limpiar el grupo para el CSV
-            let grupo = String(g.ID_GRUPO || g.grupo || "").replace(/"/g, '""');
+            // Capturar y limpiar el grupo para el CSV usando la función
+            let grupo = getGroup(g).replace(/"/g, '""');
             let lado = g.lado ? String(g.lado).replace(/"/g, '""') : "";
             
             csvContent += `"${mesa}","${nombre}","${grupo}","${estado}","${lado}"\n`;
@@ -190,6 +196,5 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
         document.body.removeChild(link);
     }
 </script>
-
 </body>
 </html>
