@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exportador de Mesas P&J</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root { --gold: #C59D5F; --dark: #1a1a1a; --light: #f4f4f9; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--light); margin: 0; padding: 20px; color: var(--dark); }
+        
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: var(--gold); margin: 0; }
+        
+        .controls { display: flex; justify-content: center; margin-bottom: 20px; gap: 15px; }
+        .btn { 
+            background: white; border: 2px solid var(--gold); color: var(--gold); 
+            padding: 10px 20px; border-radius: 25px; font-weight: 600; font-size: 0.9rem; 
+            cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .btn:hover { background: var(--gold); color: white; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .btn.export { border-color: #2196f3; color: #2196f3; }
+        .btn.export:hover { background: #2196f3; color: white; }
+
+        .table-container { 
+            background: white; border-radius: 10px; padding: 20px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow-x: auto;
+            max-width: 1000px; margin: 0 auto;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f9f9f9; font-weight: 700; color: var(--dark); }
+        tr:hover { background-color: #f5f5f5; }
+
+        .status-badge { padding: 4px 10px; border-radius: 15px; font-size: 0.7rem; font-weight: bold; color: white; display: inline-block; text-align: center; }
+        .bg-si { background-color: #4caf50; }
+        .bg-no { background-color: #f44336; }
+        .bg-pend { background-color: #ff9800; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1><i class="fa-solid fa-chair"></i> Exportador de Mesas</h1>
+        <p id="status-text" style="font-size:0.8rem; color:#999;">Cargando base de datos...</p>
+    </div>
+
+    <div class="controls">
+        <button onclick="loadData()" class="btn"><i class="fa-solid fa-rotate-right"></i> Actualizar</button>
+        <button onclick="exportCSV()" class="btn export" id="exportBtn" disabled><i class="fa-solid fa-file-csv"></i> Descargar Excel / CSV</button>
+    </div>
+
+    <div class="table-container">
+        <table id="guestsTable">
+            <thead>
+                <tr>
+                    <th>Mesa</th>
+                    <th>Nombre</th>
+                    <th>Grupo</th>
+                    <th>Estado</th>
+                    <th>Lado</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="5" style="text-align:center;">Esperando datos...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ-D0whwVWJxiREY5-yFCq0wjs9KWCEjCzPUL4Fm0DTCA/exec"; 
+    let globalGuests = [];
+
+    window.onload = () => {
+        const pass = prompt("🔐 Contraseña de Administrador:");
+        if(pass !== "PYJ310524") { 
+            document.body.innerHTML = "<div style='display:flex;height:100vh;justify-content:center;align-items:center;flex-direction:column;'><h1>🔒 Acceso Restringido</h1></div>";
+            return; 
+        }
+        loadData();
+    };
+
+    async function loadData() {
+        const statusEl = document.getElementById('status-text');
+        statusEl.innerText = "Descargando información del servidor...";
+        document.getElementById('exportBtn').disabled = true;
+
+        try {
+            const res = await fetch(`${API_URL}?action=getAdminData`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            
+            const text = await res.text();
+            const data = JSON.parse(text);
+            
+            if(data.status === 'success') {
+                globalGuests = data.guests;
+                renderTable(globalGuests);
+                statusEl.innerText = `Datos listos (${globalGuests.length} invitados).`;
+                document.getElementById('exportBtn').disabled = false;
+            }
+        } catch(e) { 
+            console.error(e);
+            statusEl.innerText = "Error de conexión. Intenta nuevamente.";
+            alert("Error al cargar los datos.");
+        }
+    }
+
+    function renderTable(guests) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = ''; 
+
+        // Ordenar alfanuméricamente por Mesa
+        const sortedGuests = guests.sort((a, b) => {
+            let mesaA = a.mesa ? String(a.mesa).trim() : "Sin Asignar";
+            let mesaB = b.mesa ? String(b.mesa).trim() : "Sin Asignar";
+            return mesaA.localeCompare(mesaB, undefined, {numeric: true});
+        });
+
+        sortedGuests.forEach(g => {
+            let rsvp = (g.rsvp || "").toUpperCase().trim();
+            let badgeClass = 'bg-pend';
+            let badgeText = 'PENDIENTE';
+
+            if (rsvp.includes('SI') || rsvp.includes('SÍ') || rsvp.includes('CONFIRMADO')) {
+                badgeClass = 'bg-si'; badgeText = 'CONFIRMADO';
+            } else if (rsvp.includes('NO') || rsvp.includes('CANCELADO')) {
+                badgeClass = 'bg-no'; badgeText = 'CANCELADO';
+            }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${g.mesa || 'Sin Asignar'}</strong></td>
+                <td>${g.nombre}</td>
+                <td>${g.grupo || '-'}</td>
+                <td><span class="status-badge ${badgeClass}">${badgeText}</span></td>
+                <td>${g.lado || '?'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function exportCSV() {
+        if(globalGuests.length === 0) return;
+
+        let csvContent = "\uFEFFMesa,Nombre,Grupo,Estado,Lado\n";
+
+        const sortedGuests = globalGuests.sort((a, b) => {
+            let mesaA = a.mesa ? String(a.mesa).trim() : "Sin Asignar";
+            let mesaB = b.mesa ? String(b.mesa).trim() : "Sin Asignar";
+            return mesaA.localeCompare(mesaB, undefined, {numeric: true});
+        });
+
+        sortedGuests.forEach(g => {
+            let rsvp = (g.rsvp || "PENDIENTE").toUpperCase().trim();
+            let estado = "PENDIENTE";
+            if (rsvp.includes('SI') || rsvp.includes('SÍ') || rsvp.includes('CONFIRMADO')) estado = 'CONFIRMADO';
+            else if (rsvp.includes('NO') || rsvp.includes('CANCELADO')) estado = 'CANCELADO';
+
+            let mesa = g.mesa ? String(g.mesa).replace(/"/g, '""') : "Sin Asignar";
+            let nombre = g.nombre ? String(g.nombre).replace(/"/g, '""') : "";
+            let grupo = g.grupo ? String(g.grupo).replace(/"/g, '""') : "";
+            let lado = g.lado ? String(g.lado).replace(/"/g, '""') : "";
+            
+            csvContent += `"${mesa}","${nombre}","${grupo}","${estado}","${lado}"\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Distribucion_Mesas.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>
