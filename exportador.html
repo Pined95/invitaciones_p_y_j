@@ -57,10 +57,10 @@
         <table id="guestsTable">
             <thead>
                 <tr>
-                    <th>Mesa</th>
                     <th>Nombre</th>
                     <th>Grupo</th>
-                    <th>Estado</th>
+                    <th>Nombre Grupo</th>
+                    <th>Mesa</th>
                     <th>Lado</th>
                 </tr>
             </thead>
@@ -108,7 +108,6 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
         }
     }
 
-    // --- FUNCIÓN CORREGIDA: Busca exactamente 'groupId' como lo manda tu code.gs ---
     function getGroup(g) {
         let grupoCrudo = g.groupId || "Sin Grupo";
         return String(grupoCrudo).trim();
@@ -145,13 +144,15 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
                 badgeClass = 'bg-no'; badgeText = 'CANCELADO';
             }
 
-            let nombreGrupo = getGroup(g);
+            let idGrupo = getGroup(g);
+            let nombreDelGrupo = g.nombreGrupo || '-';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${g.mesa || 'Sin Asignar'}</strong></td>
                 <td>${g.nombre}</td>
-                <td>${nombreGrupo}</td>
+                <td>${idGrupo}</td>
+                <td>${nombreDelGrupo}</td>
                 <td><span class="status-badge ${badgeClass}">${badgeText}</span></td>
                 <td>${g.lado || '?'}</td>
             `;
@@ -162,7 +163,8 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
     function exportCSV() {
         if(globalGuests.length === 0) return;
 
-        let csvContent = "\uFEFFMesa,Nombre,Grupo,Estado,Lado\n";
+        // Se agregó "Nombre Grupo" al encabezado del CSV
+        let csvContent = "\uFEFFMesa,Nombre,ID Grupo,Nombre Grupo,Estado,Lado\n";
         const sortedGuests = sortGuestsByGroupAndTable(globalGuests);
 
         sortedGuests.forEach(g => {
@@ -173,10 +175,12 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
 
             let mesa = g.mesa ? String(g.mesa).replace(/"/g, '""') : "Sin Asignar";
             let nombre = g.nombre ? String(g.nombre).replace(/"/g, '""') : "";
-            let grupo = getGroup(g).replace(/"/g, '""');
+            let idGrupo = getGroup(g).replace(/"/g, '""');
+            let nombreDelGrupo = g.nombreGrupo ? String(g.nombreGrupo).replace(/"/g, '""') : "";
             let lado = g.lado ? String(g.lado).replace(/"/g, '""') : "";
             
-            csvContent += `"${mesa}","${nombre}","${grupo}","${estado}","${lado}"\n`;
+            // Se agregó la variable del nombre de grupo a la fila
+            csvContent += `"${mesa}","${nombre}","${idGrupo}","${nombreDelGrupo}","${estado}","${lado}"\n`;
         });
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
