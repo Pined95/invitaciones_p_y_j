@@ -1116,7 +1116,8 @@
 
     function isWeddingDay() {
         const today = new Date();
-        const weddingDate = new Date('2026-03-14');
+        // Usamos (Año, Mes, Día). Nota: En JavaScript los meses empiezan en 0, por eso Marzo es el 2.
+        const weddingDate = new Date(2026, 2, 14); 
         return today.getDate() === weddingDate.getDate() &&
                today.getMonth() === weddingDate.getMonth() &&
                today.getFullYear() === weddingDate.getFullYear();
