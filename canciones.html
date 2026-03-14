@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exportador de Canciones P&J</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root { --gold: #C59D5F; --dark: #1a1a1a; --light: #f4f4f9; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--light); margin: 0; padding: 20px; color: var(--dark); }
+        
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: var(--gold); margin: 0; }
+        
+        .controls { display: flex; justify-content: center; margin-bottom: 20px; gap: 15px; }
+        .btn { 
+            background: white; border: 2px solid var(--gold); color: var(--gold); 
+            padding: 10px 20px; border-radius: 25px; font-weight: 600; font-size: 0.9rem; 
+            cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .btn:hover { background: var(--gold); color: white; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .btn.export { border-color: #9c27b0; color: #9c27b0; }
+        .btn.export:hover { background: #9c27b0; color: white; border-color: #9c27b0; }
+
+        .table-container { 
+            background: white; border-radius: 10px; padding: 20px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow-x: auto;
+            max-width: 900px; margin: 0 auto;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f9f9f9; font-weight: 700; color: var(--dark); }
+        tr:hover { background-color: #f5f5f5; }
+        
+        .music-icon { color: #9c27b0; margin-right: 8px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1><i class="fa-solid fa-music"></i> Peticiones Musicales</h1>
+        <p id="status-text" style="font-size:0.8rem; color:#999;">Cargando base de datos...</p>
+    </div>
+
+    <div class="controls">
+        <button onclick="loadData()" class="btn"><i class="fa-solid fa-rotate-right"></i> Actualizar</button>
+        <button onclick="exportCSV()" class="btn export" id="exportBtn" disabled><i class="fa-solid fa-file-csv"></i> Descargar Excel / CSV</button>
+    </div>
+
+    <div class="table-container">
+        <table id="songsTable">
+            <thead>
+                <tr>
+                    <th>Nombre del Invitado</th>
+                    <th>Grupo / Familia</th>
+                    <th>Canción Sugerida</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="3" style="text-align:center;">Esperando datos...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ-D0whwVWJxiREY5-yFCq0wjs9KWCEjCzPUL4Fm0DTCA/exec"; 
+    let globalSongs = [];
+
+    window.onload = () => {
+        const pass = prompt("🔐 Contraseña de Administrador:");
+        if(pass !== "PYJ310524") { 
+            document.body.innerHTML = "<div style='display:flex;height:100vh;justify-content:center;align-items:center;flex-direction:column;'><h1>🔒 Acceso Restringido</h1></div>";
+            return; 
+        }
+        loadData();
+    };
+
+    async function loadData() {
+        const statusEl = document.getElementById('status-text');
+        statusEl.innerText = "Descargando información fresca del servidor...";
+        document.getElementById('exportBtn').disabled = true;
+
+        try {
+            // Truco anti-caché para traer los datos más recientes
+            const antiCacheId = new Date().getTime();
+            const res = await fetch(`${API_URL}?action=getAdminData&id=${antiCacheId}`);
+            
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            
+            const text = await res.text();
+            const data = JSON.parse(text);
+            
+            if(data.status === 'success') {
+                // Filtramos SOLO a los que tienen algo escrito en "cancion"
+                globalSongs = data.guests.filter(g => g.cancion && g.cancion.trim().length > 1);
+                
+                renderTable(globalSongs);
+                statusEl.innerText = `Datos listos (${globalSongs.length} canciones sugeridas).`;
+                document.getElementById('exportBtn').disabled = false;
+            }
+        } catch(e) { 
+            console.error(e);
+            statusEl.innerText = "Error de conexión. Intenta nuevamente.";
+            alert("Error al cargar los datos.");
+        }
+    }
+
+    // Cazador del Nombre del Grupo (reutilizado del exportador de mesas)
+    function getGroupName(g) {
+        let nombre = g.nombreGrupo || g.grupo || g.nombresInvitacion || "-";
+        return String(nombre).trim() === "" ? "-" : String(nombre).trim();
+    }
+
+    function renderTable(guestsWithSongs) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = ''; 
+
+        if(guestsWithSongs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">Nadie ha sugerido canciones aún.</td></tr>';
+            return;
+        }
+
+        guestsWithSongs.forEach(g => {
+            let nombreInvitado = g.nombre || g.nombreCompleto || "-"; 
+            let nombreDelGrupo = getGroupName(g);
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${nombreInvitado}</td>
+                <td><small style="color:#666;">${nombreDelGrupo}</small></td>
+                <td><i class="fa-solid fa-music music-icon"></i> <strong>${g.cancion}</strong></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function exportCSV() {
+        if(globalSongs.length === 0) return;
+
+        let csvContent = "\uFEFFNombre del Invitado,Grupo / Familia,Cancion Sugerida\n";
+
+        globalSongs.forEach(g => {
+            let nombreInvitado = (g.nombre || g.nombreCompleto || "").replace(/"/g, '""');
+            let nombreDelGrupo = getGroupName(g).replace(/"/g, '""');
+            let cancion = String(g.cancion).replace(/"/g, '""');
+            
+            csvContent += `"${nombreInvitado}","${nombreDelGrupo}","${cancion}"\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Canciones_Sugeridas_Boda.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>
