@@ -29,18 +29,6 @@ let audioContext = null;
 // Inicializar
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- CÓDIGO DE SEGURIDAD (PIN) ---
-    const pin = localStorage.getItem('security_pin');
-    if(pin !== '2026') { 
-        const userPin = prompt("🔐 Ingresa el PIN de seguridad para escanear:");
-        if(userPin !== '2026') {
-            document.body.innerHTML = '<div style="display:flex; height:100vh; align-items:center; justify-content:center; flex-direction:column;"><h1>⛔ Acceso Denegado</h1><p>No tienes permiso para estar aquí.</p></div>';
-            return; 
-        }
-        localStorage.setItem('security_pin', userPin); 
-    }
-    // ----------------------------------------
-
     renderHistory();
     updateSyncButton();
 

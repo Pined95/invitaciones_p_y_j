@@ -63,18 +63,13 @@
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ-D0whwVWJxiREY5-yFCq0wjs9KWCEjCzPUL4Fm0DTCA/exec"; 
     
-    // Guardamos las canciones tocadas localmente para que no se destachen al recargar
+    // Guardamos las canciones tocadas localmente
     let playedSongs = JSON.parse(localStorage.getItem('pj_played_songs') || '[]');
 
     window.onload = () => {
-        // Le ponemos una contraseña más sencilla o la misma, tú decides. Dejé la misma.
-        const pass = prompt("🎧 Contraseña de Acceso DJ:");
-        if(pass !== "PYJ310524") { 
-            document.body.innerHTML = "<div style='display:flex;height:100vh;justify-content:center;align-items:center;flex-direction:column;color:white;'><h1>🔒 Acceso Denegado</h1></div>";
-            return; 
-        }
+        // Contraseña eliminada para acceso directo
         loadData();
-        // Configurar auto-actualización cada 60 segundos (60000 ms)
+        // Configurar auto-actualización cada 60 segundos
         setInterval(() => loadData(false), 60000);
     };
 
@@ -116,8 +111,13 @@
         } else {
             playedSongs = playedSongs.filter(id => id !== songId);
         }
-        // Guardar en el navegador del DJ para que no se borren si recarga la página
         localStorage.setItem('pj_played_songs', JSON.stringify(playedSongs));
+    }
+
+    // --- NUEVA FUNCIÓN: Extrae el nombre del grupo ---
+    function getGroupName(g) {
+        let nombre = g.nombreGrupo || g.grupo || g.nombresInvitacion || "Familia / Grupo";
+        return String(nombre).trim() === "" ? "Familia / Grupo" : String(nombre).trim();
     }
 
     function renderSongs(guestsWithSongs) {
@@ -129,23 +129,21 @@
             return;
         }
 
-        // Invertimos la lista para que las peticiones más nuevas (al final del excel) salgan primero
         guestsWithSongs.reverse().forEach(g => {
-            let nombreInvitado = g.nombre || g.nombreCompleto || "-"; 
+            // Utilizamos el nombre del grupo en lugar del nombre individual
+            let nombreDelGrupo = getGroupName(g);
             let cancion = g.cancion;
-            // Usamos el ID del invitado como identificador único de la petición
             let uniqueId = g.id; 
             
             let isPlayed = playedSongs.includes(uniqueId) ? 'played' : '';
 
             const card = document.createElement('div');
             card.className = `song-card ${isPlayed}`;
-            // Al hacer clic, se tacha
             card.onclick = () => togglePlayed(uniqueId, card);
             
             card.innerHTML = `
                 <p class="song-title"><i class="fa-solid fa-music"></i> ${cancion}</p>
-                <p class="song-requester">Pedido por: <strong>${nombreInvitado}</strong></p>
+                <p class="song-requester">Pedido por: <strong>${nombreDelGrupo}</strong></p>
             `;
             container.appendChild(card);
         });
