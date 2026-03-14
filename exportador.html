@@ -85,11 +85,14 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
 
     async function loadData() {
         const statusEl = document.getElementById('status-text');
-        statusEl.innerText = "Descargando información del servidor...";
+        statusEl.innerText = "Descargando información fresca del servidor...";
         document.getElementById('exportBtn').disabled = true;
 
         try {
-            const res = await fetch(`${API_URL}?action=getAdminData`);
+            // TRUCO DE CACHÉ: Le enviamos un ID con la hora exacta para obligar a Google a saltarse los 25 minutos de espera.
+            const antiCacheId = new Date().getTime();
+            const res = await fetch(`${API_URL}?action=getAdminData&id=${antiCacheId}`);
+            
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             
             const text = await res.text();
@@ -109,8 +112,13 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
     }
 
     function getGroup(g) {
-        let grupoCrudo = g.groupId || "Sin Grupo";
+        let grupoCrudo = g.groupId || g.ID_GRUPO || "Sin Grupo";
         return String(grupoCrudo).trim();
+    }
+
+    function getGroupName(g) {
+        let nombre = g.nombreGrupo || g.grupo || g.nombresInvitacion || "-";
+        return String(nombre).trim() === "" ? "-" : String(nombre).trim();
     }
 
     function sortGuestsByGroupAndTable(guests) {
@@ -134,24 +142,13 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
         const sortedGuests = sortGuestsByGroupAndTable(guests);
 
         sortedGuests.forEach(g => {
-            // Se mantiene la lógica del estado por si requieres usarla después
-            let rsvp = (g.rsvp || "").toUpperCase().trim();
-            let badgeClass = 'bg-pend';
-            let badgeText = 'PENDIENTE';
-
-            if (rsvp.includes('SI') || rsvp.includes('SÍ') || rsvp.includes('CONFIRMADO')) {
-                badgeClass = 'bg-si'; badgeText = 'CONFIRMADO';
-            } else if (rsvp.includes('NO') || rsvp.includes('CANCELADO')) {
-                badgeClass = 'bg-no'; badgeText = 'CANCELADO';
-            }
-
             let idGrupo = getGroup(g);
-            let nombreDelGrupo = g.nombreGrupo || '-';
+            let nombreDelGrupo = getGroupName(g);
+            let nombreInvitado = g.nombre || g.nombreCompleto || "-"; 
 
             const tr = document.createElement('tr');
-            // AQUÍ SE REORDENAN LAS CELDAS PARA COINCIDIR CON TU THEAD
             tr.innerHTML = `
-                <td>${g.nombre}</td>
+                <td>${nombreInvitado}</td>
                 <td>${idGrupo}</td>
                 <td>${nombreDelGrupo}</td>
                 <td><strong>${g.mesa || 'Sin Asignar'}</strong></td>
@@ -164,25 +161,17 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxj8mTpblVwa2_pqKR5WpIQ
     function exportCSV() {
         if(globalGuests.length === 0) return;
 
-        // AQUÍ SE REORDENAN LOS ENCABEZADOS DEL CSV
         let csvContent = "\uFEFFNombre,Grupo,Nombre Grupo,Mesa,Lado\n";
         const sortedGuests = sortGuestsByGroupAndTable(globalGuests);
 
         sortedGuests.forEach(g => {
-            // Se mantiene la lógica por si decides reincorporar el estado al CSV después
-            let rsvp = (g.rsvp || "PENDIENTE").toUpperCase().trim();
-            let estado = "PENDIENTE";
-            if (rsvp.includes('SI') || rsvp.includes('SÍ') || rsvp.includes('CONFIRMADO')) estado = 'CONFIRMADO';
-            else if (rsvp.includes('NO') || rsvp.includes('CANCELADO')) estado = 'CANCELADO';
-
             let mesa = g.mesa ? String(g.mesa).replace(/"/g, '""') : "Sin Asignar";
-            let nombre = g.nombre ? String(g.nombre).replace(/"/g, '""') : "";
+            let nombreInvitado = (g.nombre || g.nombreCompleto || "").replace(/"/g, '""');
             let idGrupo = getGroup(g).replace(/"/g, '""');
-            let nombreDelGrupo = g.nombreGrupo ? String(g.nombreGrupo).replace(/"/g, '""') : "";
+            let nombreDelGrupo = getGroupName(g).replace(/"/g, '""');
             let lado = g.lado ? String(g.lado).replace(/"/g, '""') : "";
             
-            // AQUÍ SE REORDENAN LAS COLUMNAS EN LA FILA EXPORTADA
-            csvContent += `"${nombre}","${idGrupo}","${nombreDelGrupo}","${mesa}","${lado}"\n`;
+            csvContent += `"${nombreInvitado}","${idGrupo}","${nombreDelGrupo}","${mesa}","${lado}"\n`;
         });
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
